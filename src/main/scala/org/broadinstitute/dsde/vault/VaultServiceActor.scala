@@ -21,7 +21,7 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   }
 
   // this actor runs all routes
-  def receive = runRoute(helloWorld.helloRoute ~ swaggerService.routes ~
+  def receive = runRoute(helloWorld.routes ~ swaggerService.routes ~
     get {
       pathPrefix("swagger") {
         pathEndOrSingleSlash { getFromResource("swagger/index.html") }

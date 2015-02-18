@@ -9,8 +9,10 @@ import spray.routing._
 @Api(value = "/hello", description = "Hello World Service", produces = "application/json", position = 0)
 trait HelloWorldService extends HttpService {
 
+  val routes = helloRoute
+
   @ApiOperation(value = "Says Hello World", nickname = "hello", httpMethod = "GET", produces = "application/json, application/xml")
-  val helloRoute =
+  def helloRoute =
     path("hello") {
       get {
         respondWithMediaType(`application/json`) {
