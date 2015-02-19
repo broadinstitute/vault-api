@@ -31,12 +31,20 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   val swaggerService = new SwaggerHttpService {
     // All documented API services must be added to these API types
     override def apiTypes = Seq(typeOf[HelloWorldService])
-    override def apiVersion = "2.0"
-    override def baseUrl = "/"
-    // let swagger-ui determine the host and port
-    override def docsPath = "api-docs"
+
+    override def apiVersion = VaultConfig.SwaggerConfig.apiVersion
+    override def baseUrl = VaultConfig.SwaggerConfig.baseUrl
+    override def docsPath = VaultConfig.SwaggerConfig.apiDocs
     override def actorRefFactory = context
-    override def apiInfo = Some(new ApiInfo("Vault API", "Vault API services using spray and spray-swagger.", "http://www.github.com/broadinstitute/vault-api", "vault@broadinstitute.org", "Apache V2", "http://www.apache.org/licenses/LICENSE-2.0"))
+    override def apiInfo = Some(
+      new ApiInfo(
+        VaultConfig.SwaggerConfig.info,
+        VaultConfig.SwaggerConfig.description,
+        VaultConfig.SwaggerConfig.termsOfServiceUrl,
+        VaultConfig.SwaggerConfig.contact,
+        VaultConfig.SwaggerConfig.license,
+        VaultConfig.SwaggerConfig.licenseUrl)
+    )
   }
 
 }

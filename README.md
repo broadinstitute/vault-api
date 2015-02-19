@@ -9,8 +9,11 @@ Vault Orchestration Service
 ## Plugins
 * spray-routing
 * spray-json
+* sbt-assembly
 * sbt-revolver
 * spray-swagger
 
-## TODO
-* Decouple config (application.conf) from so it can be deployed via chef
+## Development Notes
+* Configuration is excluded from the build package:
+    - When running via sbt, start sbt with the config file ```sbt -Dconfig.file=application.conf``` and the run command will pick up your local configuration.
+    - When running via sbt/revolver (i.e. using the re-start command), you can just run in sbt normally - the config is preset for you in build.sbt.
