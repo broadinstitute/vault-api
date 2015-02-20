@@ -9,7 +9,7 @@ class HelloWorldServiceSpec extends VaultFreeSpec with HelloWorldService {
 
   "HelloWorldService" - {
     "when calling GET to the /hello path" - {
-      "should return a greeting" - {
+      "should return a greeting" in {
         Get("/hello") ~> helloRoute ~> check {
           status should equal(OK)
           entity.toString should include("Hello World")
@@ -18,7 +18,7 @@ class HelloWorldServiceSpec extends VaultFreeSpec with HelloWorldService {
     }
 
     "when calling GET to the /kermit path" - {
-      "should return not found" - {
+      "should return not found" in {
         Get("/kermit") ~> helloRoute ~> check {
           handled should equal(false)
         }
@@ -26,7 +26,7 @@ class HelloWorldServiceSpec extends VaultFreeSpec with HelloWorldService {
     }
 
     "when calling PUT to the /hello path" - {
-      "should return a MethodNotAllowed error" - {
+      "should return a MethodNotAllowed error" in {
         Put("/hello") ~> sealRoute(helloRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
