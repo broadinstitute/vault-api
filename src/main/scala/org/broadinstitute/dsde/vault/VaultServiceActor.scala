@@ -3,11 +3,10 @@ package org.broadinstitute.dsde.vault
 import akka.actor.ActorLogging
 import com.gettyimages.spray.swagger.SwaggerHttpService
 import com.wordnik.swagger.model.ApiInfo
-import org.broadinstitute.dsde.vault.services.HelloWorldService
+import org.broadinstitute.dsde.vault.services._
 import spray.routing.HttpServiceActor
 
 import scala.reflect.runtime.universe._
-
 
 //the actor which will accept request and distribute to other actors/objects
 class VaultServiceActor extends HttpServiceActor with ActorLogging {
@@ -16,12 +15,17 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   // connects the services environment to the enclosing actor or test
   override def actorRefFactory = context
 
-  val helloWorld = new HelloWorldService {
+  trait ActorRefFactoryContext {
     def actorRefFactory = context
   }
 
+  val ingest = new uBAM.IngestService with ActorRefFactoryContext
+  val describe = new uBAM.DescribeService with ActorRefFactoryContext
+  val redirect = new uBAM.RedirectService with ActorRefFactoryContext
+  val files = new uBAM.FilesService with ActorRefFactoryContext
+
   // this actor runs all routes
-  def receive = runRoute(helloWorld.routes ~ swaggerService.routes ~
+  def receive = runRoute(ingest.routes ~ describe.routes ~ redirect.routes ~ files.routes ~ swaggerService.routes ~
     get {
       pathPrefix("swagger") {
         pathEndOrSingleSlash { getFromResource("swagger/index.html") }
@@ -30,7 +34,11 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
 
   val swaggerService = new SwaggerHttpService {
     // All documented API services must be added to these API types
-    override def apiTypes = Seq(typeOf[HelloWorldService])
+    override def apiTypes = Seq(
+      typeOf[uBAM.IngestService],
+      typeOf[uBAM.DescribeService],
+      typeOf[uBAM.RedirectService],
+      typeOf[uBAM.FilesService])
 
     override def apiVersion = VaultConfig.SwaggerConfig.apiVersion
     override def baseUrl = VaultConfig.SwaggerConfig.baseUrl
