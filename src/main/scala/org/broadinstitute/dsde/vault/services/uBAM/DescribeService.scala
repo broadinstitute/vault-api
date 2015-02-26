@@ -24,7 +24,7 @@ object DescribeJsonProtocol extends DefaultJsonProtocol {
 }
 import DescribeJsonProtocol._
 
-@Api(value = "/ubam_describe", description = "uBAM Describe Service", produces = "application/json", position = 0)
+@Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait DescribeService extends HttpService {
 
   val routes = describeRoute
@@ -39,7 +39,7 @@ trait DescribeService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def describeRoute =
-    path("ubam_describe" / Segment) {
+    path("ubams" / Segment) {
       id =>
         get {
           respondWithMediaType(`application/json`) {

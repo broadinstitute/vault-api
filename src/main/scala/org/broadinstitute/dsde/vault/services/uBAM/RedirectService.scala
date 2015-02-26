@@ -4,7 +4,7 @@ import com.wordnik.swagger.annotations._
 import spray.http.StatusCodes
 import spray.routing._
 
-@Api(value = "/ubam_redirect", description = "uBAM Redirection Service", position = 0)
+@Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait RedirectService extends HttpService {
 
   val baseURI = "http://example.com/"
@@ -22,7 +22,7 @@ trait RedirectService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def redirectRoute =
-    path("ubam_redirect" / Segment / Segment) {
+    path("ubams" / Segment / Segment) {
       (id, filetype) =>
         // ignore values in stub
         redirect(baseURI, StatusCodes.TemporaryRedirect)

@@ -11,7 +11,7 @@ object IngestJsonProtocol extends DefaultJsonProtocol {
 }
 import IngestJsonProtocol._
 
-@Api(value = "/ubam_ingest", description = "uBAM Ingest Service", produces = "application/json", position = 0)
+@Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait IngestService extends HttpService {
 
   val routes = ingestRoute
@@ -23,7 +23,7 @@ trait IngestService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def ingestRoute =
-    path("ubam_ingest") {
+    path("ubams") {
       post {
         respondWithMediaType(`application/json`) {
           complete {

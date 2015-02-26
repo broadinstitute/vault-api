@@ -6,7 +6,7 @@ import spray.http.StatusCodes._
 class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
 
   def actorRefFactory = system
-  val path = "/ubam_describe"
+  val path = "/ubams"
 
   "DescribeuBAMService" - {
     "when calling GET to the " + path + " path with a Vault ID" - {
@@ -14,14 +14,6 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
         Get(path + "/arbitrary_id") ~> describeRoute ~> check {
           status should equal(OK)
           entity.toString should include("arbitrary_id")
-        }
-      }
-    }
-
-    "when calling GET to the " + path + " path with no Vault ID" - {
-      "should return not found" in {
-        Get(path) ~> describeRoute ~> check {
-          handled should equal(false)
         }
       }
     }
