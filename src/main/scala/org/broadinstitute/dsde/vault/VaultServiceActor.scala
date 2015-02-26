@@ -22,10 +22,9 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   val ingest = new uBAM.IngestService with ActorRefFactoryContext
   val describe = new uBAM.DescribeService with ActorRefFactoryContext
   val redirect = new uBAM.RedirectService with ActorRefFactoryContext
-  val files = new uBAM.FilesService with ActorRefFactoryContext
 
   // this actor runs all routes
-  def receive = runRoute(ingest.routes ~ describe.routes ~ redirect.routes ~ files.routes ~ swaggerService.routes ~
+  def receive = runRoute(ingest.routes ~ describe.routes ~ redirect.routes ~ swaggerService.routes ~
     get {
       pathPrefix("swagger") {
         pathEndOrSingleSlash { getFromResource("swagger/index.html") }
@@ -37,8 +36,7 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
     override def apiTypes = Seq(
       typeOf[uBAM.IngestService],
       typeOf[uBAM.DescribeService],
-      typeOf[uBAM.RedirectService],
-      typeOf[uBAM.FilesService])
+      typeOf[uBAM.RedirectService])
 
     override def apiVersion = VaultConfig.SwaggerConfig.apiVersion
     override def baseUrl = VaultConfig.SwaggerConfig.baseUrl
