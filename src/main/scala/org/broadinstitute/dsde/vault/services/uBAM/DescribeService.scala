@@ -35,7 +35,8 @@ trait DescribeService extends HttpService {
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Successful Request"),
-    new ApiResponse(code = 404, message = "Vault ID not found")
+    new ApiResponse(code = 404, message = "Vault ID Not Found"),
+    new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def describeRoute =
     path("ubam_describe" / Segment) {

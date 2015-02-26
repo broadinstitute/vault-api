@@ -18,7 +18,9 @@ trait IngestService extends HttpService {
 
   @ApiOperation(value = "Ingests uBAM Files", nickname = "ubam_ingest", httpMethod = "POST", produces = "application/json")
   @ApiResponses(Array(
-    new ApiResponse(code = 200, message = "Successful Ingest")
+    new ApiResponse(code = 200, message = "Successful Ingest"),
+    new ApiResponse(code = 400, message = "Malformed Ingest Command"),
+    new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def ingestRoute =
     path("ubam_ingest") {
