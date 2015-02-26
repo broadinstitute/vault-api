@@ -29,7 +29,7 @@ trait DescribeService extends HttpService {
 
   val routes = describeRoute
 
-  @ApiOperation(value = "Returns uBAM Metadata", nickname = "ubam_describe", httpMethod = "GET", produces = "application/json")
+  @ApiOperation(value = "Returns uBAM Metadata.  Does not generate presigned URLs.", nickname = "ubam_describe", httpMethod = "GET", produces = "application/json")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "uBAM Vault ID")
   ))
