@@ -9,7 +9,7 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
   val path = "/ubam_describe"
 
   "DescribeuBAMService" - {
-    "when calling GET to the " + path + " path with a DM ID" - {
+    "when calling GET to the " + path + " path with a Vault ID" - {
       "should return that ID" in {
         Get(path + "/arbitrary_id") ~> describeRoute ~> check {
           status should equal(OK)
@@ -18,7 +18,7 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
       }
     }
 
-    "when calling GET to the " + path + " path with no DM ID" - {
+    "when calling GET to the " + path + " path with no Vault ID" - {
       "should return not found" in {
         Get(path) ~> describeRoute ~> check {
           handled should equal(false)
@@ -26,7 +26,7 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
       }
     }
 
-    "when calling PUT to the " + path + " path with a DM ID" - {
+    "when calling PUT to the " + path + " path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
         Put(path + "/arbitrary_id") ~> sealRoute(describeRoute) ~> check {
           status should equal(MethodNotAllowed)
@@ -35,7 +35,7 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
       }
     }
 
-    "when calling POST to the " + path + " path with a DM ID" - {
+    "when calling POST to the " + path + " path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
         Post(path + "/arbitrary_id") ~> sealRoute(describeRoute) ~> check {
           status should equal(MethodNotAllowed)

@@ -5,7 +5,7 @@ import spray.http.MediaTypes._
 import spray.json._
 import spray.routing._
 
-case class IngestResponse(dm_id: String, bamBossURL: String, baiBossURL: String)
+case class IngestResponse(id: String, bamBossURL: String, baiBossURL: String)
 object IngestJsonProtocol extends DefaultJsonProtocol {
   implicit val json = jsonFormat3(IngestResponse)
 }

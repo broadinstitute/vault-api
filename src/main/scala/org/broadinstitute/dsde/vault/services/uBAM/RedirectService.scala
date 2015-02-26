@@ -12,16 +12,16 @@ trait RedirectService extends HttpService {
 
   @ApiOperation(value = "Redirects to uBAM Files", nickname = "ubam_redirect", httpMethod = "GET")
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "dm_id", required = true, dataType = "string", paramType = "path", value = "uBAM DM ID"),
+    new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "uBAM Vault ID"),
     new ApiImplicitParam(name = "filetype", required = true, dataType = "string", paramType = "path", value = "File Type (BAM or BAI)")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 301, message = "Redirected"),
-    new ApiResponse(code = 404, message = "DM ID not found")
+    new ApiResponse(code = 404, message = "Vault ID not found")
   ))
   def redirectRoute =
     path("ubam_redirect" / Segment / Segment) {
-      (dm_id, filetype) =>
+      (id, filetype) =>
         // ignore values in stub
         redirect(baseURI, StatusCodes.MovedPermanently)
     }

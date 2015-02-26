@@ -5,7 +5,7 @@ import spray.http.MediaTypes._
 import spray.json._
 import spray.routing._
 
-case class DescribeResponse(dm_id: String,
+case class DescribeResponse(id: String,
                             ownerId: String,
                             bam: String,
                             bai: String,
@@ -31,20 +31,20 @@ trait DescribeService extends HttpService {
 
   @ApiOperation(value = "Returns uBAM Metadata", nickname = "ubam_describe", httpMethod = "GET", produces = "application/json")
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "dm_id", required = true, dataType = "string", paramType = "path", value = "uBAM DM ID")
+    new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "uBAM Vault ID")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Successful Request"),
-    new ApiResponse(code = 404, message = "DM ID not found")
+    new ApiResponse(code = 404, message = "Vault ID not found")
   ))
   def describeRoute =
     path("ubam_describe" / Segment) {
-      dm_id =>
+      id =>
         get {
           respondWithMediaType(`application/json`) {
             complete {
               DescribeResponse(
-                dm_id,
+                id,
                 "dummy ownerId",
                 "dummy bam",
                 "dummy bai",
