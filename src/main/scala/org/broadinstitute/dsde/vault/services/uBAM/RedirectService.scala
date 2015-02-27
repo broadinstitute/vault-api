@@ -10,7 +10,7 @@ trait RedirectService extends HttpService {
   val baseURI = "http://example.com/"
   val routes = redirectRoute
 
-  @ApiOperation(value = "Redirects to uBAM Files", nickname = "ubam_redirect", httpMethod = "GET",
+  @ApiOperation(value = "Redirects to presigned GET URLs for uBAM files", nickname = "ubam_redirect", httpMethod = "GET",
     notes = "Returns an HTTP 307 redirect to a presigned GET URL for the specified uBAM file. If the caller would like presigned URLs to all files within an object, " +
       "it is the caller's responsibility to make multiple requests to this API - one for each file.")
   @ApiImplicitParams(Array(

@@ -6,7 +6,6 @@ import spray.json._
 import spray.routing._
 import org.broadinstitute.dsde.vault.model._
 
-case class IngestResponse(id: String, bamBossURL: String, baiBossURL: String)
 object IngestJsonProtocol extends DefaultJsonProtocol {
   implicit val json = jsonFormat2(uBAMIngestResponse)
 }
