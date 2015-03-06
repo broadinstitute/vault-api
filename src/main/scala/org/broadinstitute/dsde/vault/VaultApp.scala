@@ -4,11 +4,12 @@ import akka.actor.{ActorSystem, Props}
 import akka.io.IO
 import akka.pattern.ask
 import akka.util.Timeout
+import com.typesafe.scalalogging.slf4j.LazyLogging
 import spray.can.Http
 
 import scala.concurrent.duration._
 
-object VaultApp extends App {
+object VaultApp extends LazyLogging {
 
   // we need an ActorSystem to host our application in
   implicit val system = ActorSystem("vault-api")
@@ -18,7 +19,14 @@ object VaultApp extends App {
 
   implicit val timeout = Timeout(5.seconds)
 
-  // start a new HTTP server on configuration port with our service actor as the handler
-  IO(Http) ? Http.Bind(service, VaultConfig.HttpConfig.interface, VaultConfig.HttpConfig.port)
+  def main(args: Array[String]) {
+    logger.info("Vault instance starting.")
+    start()
+  }
+
+  def start(): Unit = {
+    // start a new HTTP server on configuration port with our service actor as the handler
+    IO(Http) ? Http.Bind(service, VaultConfig.HttpConfig.interface, VaultConfig.HttpConfig.port)
+  }
 
 }
