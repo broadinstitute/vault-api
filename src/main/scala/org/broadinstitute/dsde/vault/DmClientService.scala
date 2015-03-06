@@ -4,6 +4,7 @@ import akka.actor.Actor
 import akka.event.Logging
 import org.broadinstitute.dsde.vault.model.uBAM
 import spray.client.pipelining._
+import spray.http.HttpHeaders.Cookie
 import spray.json._
 import spray.routing.RequestContext
 
@@ -31,7 +32,7 @@ class DmClientService(requestContext: RequestContext) extends Actor {
 
   def queryForUBam(ubamId: String): Unit = {
     log.info("Querying the DM API for a uBAM id: " + ubamId)
-    val pipeline = sendReceive ~> unmarshal[uBAM]
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[uBAM]
     val responseFuture = pipeline {
       Get(VaultConfig.DataManagement.ubamsUrl + ubamId)
     }
