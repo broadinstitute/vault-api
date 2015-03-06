@@ -3,7 +3,7 @@ package org.broadinstitute.dsde.vault.services.uBAM
 import org.broadinstitute.dsde.vault.VaultFreeSpec
 import spray.http.StatusCodes._
 
-class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
+case class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
 
   def actorRefFactory = system
   val path = "/ubams"

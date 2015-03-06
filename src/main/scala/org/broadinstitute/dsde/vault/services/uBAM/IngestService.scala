@@ -1,15 +1,13 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
 import com.wordnik.swagger.annotations._
+import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.http.MediaTypes._
-import spray.json._
 import spray.routing._
 import org.broadinstitute.dsde.vault.model._
 
-object IngestJsonProtocol extends DefaultJsonProtocol {
-  implicit val json = jsonFormat2(uBAMIngestResponse)
-}
-import IngestJsonProtocol._
+import spray.httpx.SprayJsonSupport._
+import uBAMJsonProtocol._
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait IngestService extends HttpService {
@@ -30,13 +28,19 @@ trait IngestService extends HttpService {
   ))
   def ingestRoute =
     path("ubams") {
-      post {
-        respondWithMediaType(`application/json`) {
-          complete {
-            uBAMIngestResponse("dummy ID", Map("bam"->"http://example.com/bam", "bai"->"http://example.com/bai", "..."->"moreFiles")).toJson.prettyPrint
-          }
+      respondWithMediaType(`application/json`) {
+        entity(as[uBAMIngest]) {
+          ingest =>
+            requestContext =>
+              val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+              val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+              val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossService, dmService))
+              ingestActor ! IngestServiceHandler.IngestMessage(ingest)
         }
       }
     }
-
 }
+
+
+
+

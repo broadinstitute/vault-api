@@ -29,6 +29,18 @@ object VaultConfig {
   object DataManagement {
     private val dm = config.getConfig("dm")
     lazy val ubamsUrl = dm.getString("ubamsUrl")
+    def uBamResolveUrl(id: String) = ubamsUrl + "/" + id
+    def uBamRedirectUrl(id: String, fileType: String) = ubamsUrl + "/" + id + "/" + fileType
+  }
+
+  object BOSS {
+    private val boss = config.getConfig("boss")
+    lazy val objectsUrl = boss.getString("objectsUrl")
+    lazy val objectResolvePath = boss.getString("objectResolvePath")
+    def objectResolveUrl(id: String) = objectsUrl + id + objectResolvePath
+    lazy val defaultUser = boss.getString("defaultUser")
+    lazy val defaultStoragePlatform = boss.getString("defaultStoragePlatform")
+    lazy val defaultValidityPeriodSeconds = boss.getInt("defaultValidityPeriodSeconds")
   }
 
 }

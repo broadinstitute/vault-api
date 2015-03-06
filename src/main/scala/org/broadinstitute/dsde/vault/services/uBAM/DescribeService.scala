@@ -2,15 +2,10 @@ package org.broadinstitute.dsde.vault.services.uBAM
 
 import akka.actor.Props
 import com.wordnik.swagger.annotations._
+import spray.http.MediaTypes._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model._
-import spray.json._
 import spray.routing._
-
-object DescribeJsonProtocol extends DefaultJsonProtocol {
-  implicit val metadata = jsonFormat12(Metadata)
-  implicit val json = jsonFormat3(uBAM)
-}
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait DescribeService extends HttpService {
@@ -21,8 +16,7 @@ trait DescribeService extends HttpService {
     nickname = "ubam_describe",
     httpMethod = "GET",
     produces = "application/json",
-    response = classOf[uBAM],
-    notes = "Supports arbitrary metadata keys, but this is not represented well in Swagger (see the 'additionalMetadata' note below)"
+    response = classOf[uBAM]
   )
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "uBAM Vault ID")
@@ -35,10 +29,13 @@ trait DescribeService extends HttpService {
   def describeRoute = {
     path("ubams" / Segment) {
       id =>
-        requestContext => {
-          val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-          dmService ! DmClientService.QueryUBam(id)
-        }
+        respondWithMediaType(`application/json`) {
+          requestContext => {
+            val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
+            val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, dmService))
+            describeActor ! DescribeServiceHandler.DescribeMessage(id)
+          }
+      }
     }
   }
 

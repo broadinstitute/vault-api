@@ -1,13 +1,12 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
 import com.wordnik.swagger.annotations._
-import spray.http.StatusCodes
+import org.broadinstitute.dsde.vault.{DmClientService, BossClientService}
 import spray.routing._
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait RedirectService extends HttpService {
 
-  val baseURI = "http://example.com/"
   val routes = redirectRoute
 
   @ApiOperation(value = "Redirects to presigned GET URLs for uBAM files", nickname = "ubam_redirect", httpMethod = "GET",
@@ -26,8 +25,11 @@ trait RedirectService extends HttpService {
   def redirectRoute =
     path("ubams" / Segment / Segment) {
       (id, filetype) =>
-        // ignore values in stub
-        redirect(baseURI, StatusCodes.TemporaryRedirect)
+        requestContext =>
+          val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+          val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+          val redirectActor = actorRefFactory.actorOf(RedirectServiceHandler.props(requestContext, bossService, dmService))
+          redirectActor ! RedirectServiceHandler.RedirectMessage(id, filetype)
     }
 
 }
