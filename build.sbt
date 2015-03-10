@@ -10,9 +10,10 @@ libraryDependencies ++= {
   val akkaV = "2.3.6"
   val sprayV = "1.3.2"
   Seq(
-    "io.spray"            %%  "spray-can"     % sprayV
+    "io.spray"             %%  "spray-can"     % sprayV
     ,"io.spray"            %%  "spray-routing" % sprayV
     ,"io.spray"            %%  "spray-json"    % "1.3.1"
+    ,"io.spray"            %%  "spray-client"  % sprayV
     ,"io.spray"            %%  "spray-testkit" % sprayV  % "test"
     ,"com.typesafe.akka"   %%  "akka-actor"    % akkaV
     ,"org.scalatest"       %%  "scalatest"     % "2.2.1" % "test"

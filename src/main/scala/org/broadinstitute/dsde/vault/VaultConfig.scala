@@ -26,4 +26,9 @@ object VaultConfig {
     lazy val apiDocs = swagger.getString("apiDocs")
   }
 
+  object DataManagement {
+    private val dm = config.getConfig("dm")
+    lazy val ubamsUrl = dm.getString("ubamsUrl")
+  }
+
 }
