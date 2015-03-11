@@ -2,6 +2,7 @@ package org.broadinstitute.dsde.vault.services.uBAM
 
 import akka.actor.{Props, Actor, ActorRef}
 import akka.event.Logging
+import akka.util.Timeout
 import org.broadinstitute.dsde.vault.BossClientService.BossObjectResolved
 import org.broadinstitute.dsde.vault.DmClientService.DMUBamResolved
 import org.broadinstitute.dsde.vault.model._
@@ -19,6 +20,8 @@ object RedirectServiceHandler {
 
 case class RedirectServiceHandler(requestContext: RequestContext, bossService: ActorRef, dmService: ActorRef) extends Actor {
 
+  import scala.concurrent.duration._
+  implicit val timeout = Timeout(5.seconds)
   implicit val system = context.system
   val log = Logging(system, getClass)
 
@@ -26,29 +29,29 @@ case class RedirectServiceHandler(requestContext: RequestContext, bossService: A
 
   def receive = {
     case RedirectMessage(dmId: String, fileType: String) =>
-      log.info("Received uBAM redirect message")
+      log.debug("Received uBAM redirect message")
       this.fileType = fileType
       dmService ! DmClientService.DMResolveUBam(dmId)
 
     case DMUBamResolved(resolvedUBam: uBAM) =>
-      log.info("Resolved uBAM with DM ID " + resolvedUBam.id)
+      log.debug("Resolved uBAM with DM ID " + resolvedUBam.id)
       resolvedUBam.files get fileType match {
         case Some(bossId) =>
-          log.info("Resolved file with Boss ID " + bossId)
+          log.debug("Resolved file with Boss ID " + bossId)
           bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("GET"), bossId, fileType)
 
         case None =>
-          log.info("File type not found: " + fileType)
-          requestContext.reject()
+          log.error("File type not found: " + fileType)
+          requestContext.complete(StatusCodes.BadRequest)
           context.stop(self)
       }
 
     case BossObjectResolved(bossObject: BossResolutionResponse, fileType: String) =>
-      log.info("Resolved Boss object, redirecting to " + bossObject.objectUrl)
+      log.debug("Resolved Boss object, redirecting to " + bossObject.objectUrl)
       requestContext.redirect(bossObject.objectUrl, StatusCodes.TemporaryRedirect)
 
     case ClientFailure(message: String) =>
-      log.info("Client failure: " + message)
+      log.error("Client failure: " + message)
       requestContext.reject()
       context.stop(self)
   }

@@ -1,18 +1,18 @@
 package org.broadinstitute.dsde.vault
 
-import akka.actor.{Props, ActorRef, Actor}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
-import org.broadinstitute.dsde.vault.model.{BossCreationRequest, BossResolutionRequest, BossResolutionResponse, BossCreationObject}
+import org.broadinstitute.dsde.vault.model.{BossCreationObject, BossResolutionRequest, BossResolutionResponse}
 import org.broadinstitute.dsde.vault.services.uBAM.ClientFailure
-import spray.client.pipelining
 import spray.client.pipelining._
-import spray.http.HttpHeaders.{RawHeader, Cookie}
+import spray.http.BasicHttpCredentials
+import spray.http.HttpHeaders.Cookie
 import spray.routing.RequestContext
 
 import scala.util.{Failure, Success}
 
 object BossClientService {
-  case class BossCreateObject(obj: BossCreationRequest, creationKey: String)
+  case class BossCreateObject(obj: BossCreationObject, creationKey: String)
   case class BossObjectCreated(bossObject: BossCreationObject, creationKey: String)
   case class BossResolveObject(obj: BossResolutionRequest, id: String, creationKey: String)
   case class BossObjectResolved(bossObject: BossResolutionResponse, creationKey: String)
@@ -29,6 +29,7 @@ case class BossClientService(requestContext: RequestContext) extends Actor {
   implicit val system = context.system
   import system.dispatcher
   val log = Logging(system, getClass)
+  val bossCredentials = BasicHttpCredentials(VaultConfig.BOSS.bossUser, VaultConfig.BOSS.bossUserPassword)
 
   override def receive: Receive = {
     case BossCreateObject(obj, creationKey) =>
@@ -38,22 +39,15 @@ case class BossClientService(requestContext: RequestContext) extends Actor {
       resolve(sender(), obj, id, creationKey)
   }
 
-  def initHeaders: pipelining.RequestTransformer = {
-    addHeaders(
-      Cookie(requestContext.request.cookies),
-      RawHeader("REMOTE_USER", VaultConfig.BOSS.defaultUser)  // TODO: extract from cookie?
-    )
-  }
-
-  def create(senderRef: ActorRef, obj: BossCreationRequest, creationKey: String): Unit = {
-    log.info("Creating an object in the BOSS API")
-    val pipeline = initHeaders ~> sendReceive ~> unmarshal[BossCreationObject]
+  def create(senderRef: ActorRef, obj: BossCreationObject, creationKey: String): Unit = {
+    log.debug("Creating an object in the BOSS API")
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[BossCreationObject]
     val responseFuture = pipeline {
-      Post(VaultConfig.BOSS.objectsUrl, obj)
+      Post(VaultConfig.BOSS.objectsUrl, obj) ~> addCredentials(bossCredentials)
     }
     responseFuture onComplete {
       case Success(createdObject) =>
-        log.info("BOSS object created with id: " + createdObject.objectId)
+        log.debug("BOSS object created with id: " + createdObject.objectId.get)
         senderRef ! BossObjectCreated(createdObject, creationKey)
 
       case Failure(error) =>
@@ -63,14 +57,14 @@ case class BossClientService(requestContext: RequestContext) extends Actor {
   }
 
   def resolve(senderRef: ActorRef, obj: BossResolutionRequest, id: String, creationKey: String): Unit = {
-    log.info("Resolving an object in the BOSS API with id: " + id)
-    val pipeline = initHeaders ~> sendReceive ~> unmarshal[BossResolutionResponse]
+    log.debug("Resolving an object in the BOSS API with id: " + id)
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[BossResolutionResponse]
     val responseFuture = pipeline {
-      Post(VaultConfig.BOSS.objectResolveUrl(id), obj)
+      Post(VaultConfig.BOSS.objectResolveUrl(id), obj) ~> addCredentials(bossCredentials)
     }
     responseFuture onComplete {
       case Success(resolvedObject) =>
-        log.info("BOSS object resolved with presigned URL: " + resolvedObject.objectUrl)
+        log.debug("BOSS object resolved with presigned URL: " + resolvedObject.objectUrl)
         senderRef ! BossObjectResolved(resolvedObject, creationKey)
 
       case Failure(error) =>
@@ -78,4 +72,5 @@ case class BossClientService(requestContext: RequestContext) extends Actor {
         senderRef ! ClientFailure(error.getMessage)
     }
   }
+
 }

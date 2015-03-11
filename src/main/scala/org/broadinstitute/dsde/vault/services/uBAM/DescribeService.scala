@@ -29,13 +29,15 @@ trait DescribeService extends HttpService {
   def describeRoute = {
     path("ubams" / Segment) {
       id =>
-        respondWithMediaType(`application/json`) {
-          requestContext => {
-            val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-            val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, dmService))
-            describeActor ! DescribeServiceHandler.DescribeMessage(id)
+        get {
+          respondWithMediaType(`application/json`) {
+            requestContext => {
+              val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
+              val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, dmService))
+              describeActor ! DescribeServiceHandler.DescribeMessage(id)
+            }
           }
-      }
+        }
     }
   }
 

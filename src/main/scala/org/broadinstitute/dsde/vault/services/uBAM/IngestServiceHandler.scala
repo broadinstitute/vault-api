@@ -49,7 +49,7 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
 
   def receive = {
     case IngestMessage(ingest: uBAMIngest) =>
-      log.info("Received uBAM ingest message")
+      log.debug("Received uBAM ingest message")
       fileCount = ingest.files.size
       metadata = ingest.metadata
       ingest.files.foreach {
@@ -58,10 +58,10 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
       }
 
     case BossObjectCreated(bossObject: BossCreationObject, creationKey: String) =>
-      bossObjects += creationKey -> bossObject.objectId
-      bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId, creationKey)
+      bossObjects += creationKey -> bossObject.objectId.get
+      bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
       if (fileCount == bossObjects.size)
-        dmService ! DmClientService.DMCreateUBam(new uBAM("Dummy DM ID", bossObjects, metadata))
+        dmService ! DmClientService.DMCreateUBam(new uBAMIngest(bossObjects, metadata))
 
     case BossObjectResolved(bossObject: BossResolutionResponse, creationKey: String) =>
       bossURLs += creationKey -> bossObject.objectUrl
@@ -72,7 +72,7 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
       completeIfDone
 
     case ClientFailure(message: String) =>
-      log.info("Client failure: " + message)
+      log.error("Client failure: " + message)
       requestContext.reject()
       context.stop(self)
   }
@@ -81,7 +81,7 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
     dmId match {
       case Some(id) =>
         if (fileCount == bossURLs.size) {
-          log.info("uBAM ingest complete")
+          log.debug("uBAM ingest complete")
           requestContext.complete(uBAMIngestResponse(id, bossURLs).toJson.prettyPrint)
           context.stop(self)
         }

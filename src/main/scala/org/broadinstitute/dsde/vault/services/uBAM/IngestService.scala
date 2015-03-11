@@ -28,14 +28,16 @@ trait IngestService extends HttpService {
   ))
   def ingestRoute =
     path("ubams") {
-      respondWithMediaType(`application/json`) {
-        entity(as[uBAMIngest]) {
-          ingest =>
-            requestContext =>
-              val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
-              val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-              val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossService, dmService))
-              ingestActor ! IngestServiceHandler.IngestMessage(ingest)
+      post {
+        respondWithMediaType(`application/json`) {
+          entity(as[uBAMIngest]) {
+            ingest =>
+              requestContext =>
+                val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+                val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+                val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossService, dmService))
+                ingestActor ! IngestServiceHandler.IngestMessage(ingest)
+          }
         }
       }
     }

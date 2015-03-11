@@ -4,35 +4,21 @@ import org.broadinstitute.dsde.vault.VaultConfig
 import spray.json.DefaultJsonProtocol
 
 object BossJsonProtocol extends DefaultJsonProtocol {
-  implicit val creationRequest = jsonFormat7(BossCreationRequest)
-  implicit val creation = jsonFormat8(BossCreationObject)
+  implicit val creation = jsonFormat7(BossCreationObject)
   implicit val resolutionRequest = jsonFormat4(BossResolutionRequest)
   implicit val resolution = jsonFormat4(BossResolutionResponse)
 }
 
-// TODO? use ObjectResource in the BOSS repo directly
-case class BossCreationRequest(
-  objectName: String,
-  storagePlatform: String,
-  directoryPath: Option[String] = None,
-  sizeEstimateBytes: Int,
-  ownerId: String,
-  readers: List[String],
-  writers: List[String]
-)
-
 case class BossCreationObject(
-  objectId: String,
   objectName: String,
   storagePlatform: String,
-  directoryPath: Option[String] = None,
   sizeEstimateBytes: Int,
   ownerId: String,
   readers: List[String],
-  writers: List[String]
+  writers: List[String],
+  objectId: Option[String] = None
 )
 
-// TODO? use ResolutionRequest / ResolutionResource in the BOSS repo directly
 case class BossResolutionRequest(
   validityPeriodSeconds: Int,
   httpMethod: String,
@@ -47,14 +33,14 @@ case class BossResolutionResponse(
 )
 
 object BossDefaults {
-  val ownerId = VaultConfig.BOSS.defaultUser
+  val ownerId = VaultConfig.BOSS.bossUser
   val readers = List(ownerId)
   val writers = List(ownerId)
   val storagePlatform = VaultConfig.BOSS.defaultStoragePlatform
   val validityPeriodSeconds = VaultConfig.BOSS.defaultValidityPeriodSeconds
 
-  def getCreationRequest(name: String): BossCreationRequest =
-    new BossCreationRequest(name, storagePlatform, None, 0, ownerId, readers, writers)
+  def getCreationRequest(objectName: String): BossCreationObject =
+    new BossCreationObject(objectName, storagePlatform, 0, ownerId, readers, writers)
 
   def getResolutionRequest(httpMethod: String): BossResolutionRequest =
     new BossResolutionRequest(validityPeriodSeconds, httpMethod, None, None)

@@ -25,7 +25,7 @@ case class DescribeServiceHandler(requestContext: RequestContext, dmService: Act
 
   def receive = {
     case DescribeMessage(dmId) =>
-      log.info("Received uBAM describe message")
+      log.debug("Received uBAM describe message")
       dmService ! DmClientService.DMResolveUBam(dmId)
 
     case DMUBamResolved(resolvedUBam: uBAM) =>
@@ -36,7 +36,7 @@ case class DescribeServiceHandler(requestContext: RequestContext, dmService: Act
       context.stop(self)
 
     case ClientFailure(message: String) =>
-      log.info("Client failure: " + message)
+      log.error("Client failure: " + message)
       requestContext.reject()
       context.stop(self)
   }
