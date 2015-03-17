@@ -37,7 +37,7 @@ Replace the integration components of application.conf to reflect correct values
 See DevOps or any Vault team member for details. Make sure sbt is run with the config file option.
 
     vault {
-      ubamsRedirectUrl="https://vault-ci.vault.broadinstitute.org/api/ubams/%s/%s"
+      ubamsRedirectUrl="https://api-ci.vault.broadinstitute.org/api/ubams/%s/%s"
     }
     dm {
       ubamsUrl="https://dm-ci.vault.broadinstitute.org/api/ubams"
