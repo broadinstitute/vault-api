@@ -34,10 +34,14 @@ java -Dconfig.file=application.conf -jar Vault-Orchestration-assembly-0.1.jar
 ## Testing
 
 Replace the integration components of application.conf to reflect correct values.
-See DevOps or any Vault team member for details.
+See DevOps or any Vault team member for details. Make sure sbt is run with the config file option.
 
+    vault {
+      ubamsRedirectUrl="https://vault-ci.vault.broadinstitute.org/api/ubams/%s/%s"
+    }
     dm {
-      ubamsUrl=" ... point to dm instance ... "
+      ubamsUrl="https://dm-ci.vault.broadinstitute.org/api/ubams"
+      ubamsResolveUrl="https://dm-ci.vault.broadinstitute.org/api/ubams/%s"
     }
     boss {
       objectsUrl="... point to boss instance ..."

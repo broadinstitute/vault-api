@@ -1,7 +1,10 @@
 package org.broadinstitute.dsde.vault
 
+import java.util.concurrent.TimeUnit
+
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
+import akka.util.Timeout
 import org.broadinstitute.dsde.vault.model.{uBAMIngest, uBAM}
 import org.broadinstitute.dsde.vault.services.uBAM.ClientFailure
 import spray.client.pipelining._
@@ -24,11 +27,10 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
   import org.broadinstitute.dsde.vault.DmClientService._
   import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
   import spray.httpx.SprayJsonSupport._
-
-  implicit val system = context.system
-
   import system.dispatcher
 
+  implicit val timeout = Timeout(5, TimeUnit.SECONDS)
+  implicit val system = context.system
   val log = Logging(system, getClass)
 
   override def receive: Receive = {
