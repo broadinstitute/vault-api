@@ -1,15 +1,17 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
 import com.wordnik.swagger.annotations._
+import org.broadinstitute.dsde.vault.model._
 import spray.http.MediaTypes._
 import spray.json._
 import spray.routing._
-import org.broadinstitute.dsde.vault.model._
 
 object IngestJsonProtocol extends DefaultJsonProtocol {
-  implicit val json = jsonFormat1(AnalysisIngestResponse)
+  implicit val impAnalysisIngestResponse = jsonFormat1(AnalysisIngestResponse)
+  implicit val impAnalysisIngest = jsonFormat2(AnalysisIngest)
 }
-import IngestJsonProtocol._
+
+import org.broadinstitute.dsde.vault.services.analysis.IngestJsonProtocol._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait IngestService extends HttpService {
