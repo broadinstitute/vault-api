@@ -1,9 +1,12 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
+import org.broadinstitute.dsde.vault.model.{uBAM, uBAMJsonProtocol}
 import spray.http.HttpCookie
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
+import spray.httpx.unmarshalling._
+import spray.httpx.SprayJsonSupport._
 
 /**
  * This is an integration test. It requires an existing uBam ID in dm-ci to function.
@@ -21,6 +24,8 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
         Get(path + "/" + testingId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> describeRoute ~> check {
           status should equal(OK)
           entity.toString should include(testingId)
+          import uBAMJsonProtocol._
+          entity.as[uBAM].isRight shouldBe true
         }
       }
     }

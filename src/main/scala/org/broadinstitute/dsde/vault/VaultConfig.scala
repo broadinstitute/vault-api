@@ -26,11 +26,15 @@ object VaultConfig {
     lazy val apiDocs = swagger.getString("apiDocs")
   }
 
+  object Vault {
+    private val vault = config.getConfig("vault")
+    def uBamRedirectUrl(id: String, fileType: String) = vault.getString("ubamsRedirectUrl").format(id, fileType)
+  }
+
   object DataManagement {
     private val dm = config.getConfig("dm")
     lazy val ubamsUrl = dm.getString("ubamsUrl")
     def uBamResolveUrl(id: String) = dm.getString("ubamsResolveUrl").format(id)
-    def uBamRedirectUrl(id: String, fileType: String) = dm.getString("ubamsRedirectUrl").format(id, fileType)
   }
 
   object BOSS {
