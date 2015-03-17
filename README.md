@@ -30,3 +30,24 @@ Execute the jar with the path to the jar and path fo the config file:
 ```
 java -Dconfig.file=application.conf -jar Vault-Orchestration-assembly-0.1.jar
 ```
+
+## Testing
+
+Replace the integration components of application.conf to reflect correct values.
+See DevOps or any Vault team member for details.
+
+    dm {
+      ubamsUrl=" ... point to dm instance ... "
+    }
+    boss {
+      objectsUrl="... point to boss instance ..."
+      ...
+      bossUser="... real vault system user name for boss ..."
+      bossUserPassword="... real vault user password for boss ..."
+    }
+    openam {
+      testUser="... real openam testing user name ..."
+      testUserPassword="... openam testing user password ..."
+      tokenUrl="... point to open am instance ..."
+    }
+
