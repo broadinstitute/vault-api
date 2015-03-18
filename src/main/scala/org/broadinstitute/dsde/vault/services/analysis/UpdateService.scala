@@ -30,6 +30,7 @@ trait UpdateService extends HttpService {
   @ApiResponses(Array(
     new ApiResponse(code = 202, message = "Accepted"),
     new ApiResponse(code = 400, message = "Malformed Input"),
+    new ApiResponse(code = 404, message = "Vault ID Not Found"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def updateRoute =

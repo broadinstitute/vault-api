@@ -47,6 +47,17 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
       }
     }
 
+    // TODO: this test will fail until the service is properly implemented
+    "DescribeAnalysisService" - {
+      "when calling GET to the " + path + " path with an invalid Vault ID" - {
+        "should return a Not Found error" ignore {
+          Get(path + "/" + "unknown-not-found-id") ~> describeRoute ~> check {
+            status should equal(StatusCodes.NotFound)
+          }
+        }
+      }
+    }
+
     "when calling PUT to the " + path + " path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
         Put(path + "/" + testId) ~> sealRoute(describeRoute) ~> check {

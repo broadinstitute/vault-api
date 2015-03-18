@@ -31,7 +31,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with UpdateService {
     // TODO: this test will fail until the service is properly implemented
     "AnalysisUpdateService" - {
       "when calling POST to the " + path + " path with an invalid Vault ID and valid body" - {
-        "should return that ID" ignore {
+        "should return a Not Found error" ignore {
           val analysisUpdate = new AnalysisUpdate(
             files = Map("vcf" -> "vcfValue", "bam" -> "bamValue")
           )
