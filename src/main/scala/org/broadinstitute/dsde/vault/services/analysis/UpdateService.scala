@@ -20,8 +20,12 @@ trait UpdateService extends HttpService {
   val routes = updateRoute
 
   @Path("/{ID}/outputs")
-  @ApiOperation(value = "Updates Analysis objects with output files", nickname = "analysis_update", httpMethod = "POST",
-    produces = "application/json", consumes = "application/json",
+  @ApiOperation(
+    value = "Updates Analysis objects with output files",
+    nickname = "analysis_update",
+    httpMethod = "POST",
+    produces = "application/json",
+    consumes = "application/json",
     notes = "Accepts a json packet as POST. Updates the Vault analysis object with the supplied output files.")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "Analysis Vault ID"),

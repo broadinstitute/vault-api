@@ -19,16 +19,16 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
     def actorRefFactory = context
   }
 
-  val ingest = new uBAM.IngestService with ActorRefFactoryContext
-  val describe = new uBAM.DescribeService with ActorRefFactoryContext
-  val redirect = new uBAM.RedirectService with ActorRefFactoryContext
+  val uBAMIngest = new uBAM.IngestService with ActorRefFactoryContext
+  val uBAMDescribe = new uBAM.DescribeService with ActorRefFactoryContext
+  val uBAMRedirect = new uBAM.RedirectService with ActorRefFactoryContext
 
   val analysisIngest = new analysis.IngestService with ActorRefFactoryContext
   val analysisDescribe = new analysis.DescribeService with ActorRefFactoryContext
   val analysisUpdate = new analysis.UpdateService with ActorRefFactoryContext
 
   // this actor runs all routes
-  def receive = runRoute(ingest.routes ~ describe.routes ~ redirect.routes ~
+  def receive = runRoute(uBAMIngest.routes ~ uBAMDescribe.routes ~ uBAMRedirect.routes ~
     analysisIngest.routes ~ analysisDescribe.routes ~ analysisUpdate.routes ~
     swaggerService.routes ~
     get {

@@ -17,13 +17,13 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with UpdateService {
   "AnalysisUpdateService" - {
     "when calling POST to the " + path + " path with a valid Vault ID and valid body" - {
       "should return as Accepted" in {
-        // TODO: figure out how to pick a valid id
+        // TODO: figure out how to pick a valid id. Currently, all IDs will pass this stub test, which is incorrect.
         val validId = "123-456-789"
         val analysisUpdate = new AnalysisUpdate(
           files = Map("vcf" -> "vcfValue", "bam" -> "bamValue")
         )
         Post(path.format(validId), analysisUpdate) ~> updateRoute ~> check {
-          status should equal(StatusCodes.Accepted)
+          status should equal(Accepted)
         }
       }
     }
@@ -36,7 +36,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with UpdateService {
             files = Map("vcf" -> "vcfValue", "bam" -> "bamValue")
           )
           Post(path.format("unknown-not-found-id"), analysisUpdate) ~> updateRoute ~> check {
-            status should equal(StatusCodes.NotFound)
+            status should equal(NotFound)
           }
         }
       }

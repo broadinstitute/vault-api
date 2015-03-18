@@ -18,8 +18,13 @@ trait IngestService extends HttpService {
 
   val routes = ingestRoute
 
-  @ApiOperation(value = "Creates Analysis objects", nickname = "analysis_ingest", httpMethod = "POST",
-    produces = "application/json", consumes = "application/json", response = classOf[AnalysisIngestResponse],
+  @ApiOperation(
+    value = "Creates Analysis objects",
+    nickname = "analysis_ingest",
+    httpMethod = "POST",
+    produces = "application/json",
+    consumes = "application/json",
+    response = classOf[AnalysisIngestResponse],
     notes = "Accepts a json packet as POST. Creates a Vault object with the supplied metadata and creates relationships for each input id. " +
       " Returns the Vault ID of the created object.")
   @ApiImplicitParams(Array(

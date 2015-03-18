@@ -52,7 +52,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
       "when calling GET to the " + path + " path with an invalid Vault ID" - {
         "should return a Not Found error" ignore {
           Get(path + "/" + "unknown-not-found-id") ~> describeRoute ~> check {
-            status should equal(StatusCodes.NotFound)
+            status should equal(NotFound)
           }
         }
       }

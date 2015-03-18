@@ -20,7 +20,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestService {
   implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(60, TimeUnit.SECONDS))
   val openAmResponse = getOpenAmToken.get
 
-  "DescribeAnalysisService" - {
+  "AnalysisIngestService" - {
     "when calling POST to the " + path + " path" - {
       "should return an ID" in {
         val analysisIngest = new AnalysisIngest(
