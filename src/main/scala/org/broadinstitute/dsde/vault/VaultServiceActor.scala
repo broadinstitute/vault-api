@@ -67,7 +67,6 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
           // dynamically calculate the context path, which may be different in various environments
           val path = p.request.uri.path.toString
           val dynamicContext = path.substring(0, path.indexOf("swagger"))
-          println(path + " ===> " + dynamicContext)
           p.redirect("/swagger/index.html?url=" + dynamicContext + "api-docs", TemporaryRedirect)
         } ~
           pathPrefix("swagger/index.html") {
