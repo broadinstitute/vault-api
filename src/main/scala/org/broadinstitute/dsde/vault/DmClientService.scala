@@ -6,7 +6,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import akka.util.Timeout
 import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, uBAMIngest, uBAM}
-import org.broadinstitute.dsde.vault.services.uBAM.ClientFailure
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
 import spray.routing.RequestContext

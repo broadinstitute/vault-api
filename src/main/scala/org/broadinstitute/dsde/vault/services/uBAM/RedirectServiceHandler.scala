@@ -6,6 +6,7 @@ import akka.util.Timeout
 import org.broadinstitute.dsde.vault.BossClientService.BossObjectResolved
 import org.broadinstitute.dsde.vault.DmClientService.DMUBamResolved
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.services.uBAM.RedirectServiceHandler.RedirectMessage
 import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.http.StatusCodes

@@ -7,7 +7,7 @@ import akka.pattern.ask
 import akka.testkit.{TestActorRef, TestKit}
 import akka.util.Timeout
 import org.broadinstitute.dsde.vault.OpenAmClientService.{OpenAmAuthRequest, OpenAmResponse}
-import org.broadinstitute.dsde.vault.services.uBAM.ClientFailure
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.{OpenAmClientService, VaultConfig}
 import org.scalatest.{Matchers, WordSpecLike}
 
