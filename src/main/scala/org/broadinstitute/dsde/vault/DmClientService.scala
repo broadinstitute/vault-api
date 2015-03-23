@@ -11,6 +11,7 @@ import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
 import spray.routing.RequestContext
 
+import scala.concurrent.Future
 import scala.util.{Failure, Success}
 
 object DmClientService {
@@ -39,13 +40,16 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
   override def receive: Receive = {
     case DMCreateUBam(ubam) =>
-      createUBam(sender(), ubam)
+      val requestor = sender()
+      createUBam(requestor, ubam)
 
     case DMResolveUBam(ubamId) =>
-      resolveUBam(sender(), ubamId)
+      val requestor = sender()
+      resolveUBam(requestor, ubamId)
 
     case DMResolveAnalysis(analysisId) =>
-      resolveAnalysis(sender(), analysisId)
+      val requestor = sender()
+      resolveAnalysis(requestor, analysisId)
   }
 
   def createUBam(senderRef: ActorRef, ubam: uBAMIngest): Unit = {
