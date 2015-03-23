@@ -1,24 +1,31 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
+import java.util.concurrent.TimeUnit
+
 import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.Analysis
 import org.broadinstitute.dsde.vault.services.analysis.DescribeJsonProtocol._
+import spray.http.HttpCookie
+import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.unmarshalling._
+
+import scala.concurrent.duration.FiniteDuration
 
 class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
 
   def actorRefFactory = system
 
   val path = "/analyses"
-  val testId = "arbitrary_id"
+  implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(10, TimeUnit.SECONDS))
+  val openAmResponse = getOpenAmToken.get
+  val testId = "f222066b-a822-4d67-b946-3f486fc620ba"
 
   "DescribeAnalysisService" - {
     "when calling GET to the " + path + " path with a Vault ID" - {
       "should return that ID" in {
-
-        Get(path + "/" + testId) ~> describeRoute ~> check {
+        Get(path + "/" + testId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> describeRoute ~> check {
           status should equal(OK)
           // test response as raw string
           entity.toString should include(testId)
@@ -27,31 +34,17 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
           // test the unmarshaled object's contents
           val respAnalysis = responseAs[Analysis]
           respAnalysis.id should equal(testId)
-          // TODO: once the service is implemented, figure out how to test these for real
-          respAnalysis.input should equal(List("123", "456", "789"))
-          respAnalysis.files should equal(Map(
-            "vcf" -> "http://vault/redirect/url/to/get/file",
-            "bam" -> "http://vault/redirect/url/to/get/file",
-            "bai" -> "http://vault/redirect/url/to/get/file",
-            "adapter_metrics" -> "http://vault/redirect/url/to/get/file"
-          ))
-          respAnalysis.metadata should equal(Map(
-            "analysisId" -> "CES_id",
-            "key1" -> "value1",
-            "key2" -> "value2",
-            "key3" -> "value3",
-            "key4" -> "value4",
-            "key5" -> "value5"
-          ))
+          respAnalysis.input shouldBe empty
+          respAnalysis.files shouldBe empty
+          respAnalysis.metadata should equal(Map("ownerId" -> "testUser"))
         }
       }
     }
 
-    // TODO: this test will fail until the service is properly implemented
     "DescribeAnalysisService" - {
       "when calling GET to the " + path + " path with an invalid Vault ID" - {
-        "should return a Not Found error" ignore {
-          Get(path + "/" + "unknown-not-found-id") ~> describeRoute ~> check {
+        "should return a Not Found error" in {
+          Get(path + "/" + "unknown-not-found-id") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(describeRoute) ~> check {
             status should equal(NotFound)
           }
         }

@@ -35,6 +35,8 @@ object VaultConfig {
     private val dm = config.getConfig("dm")
     lazy val ubamsUrl = dm.getString("ubamsUrl")
     def uBamResolveUrl(id: String) = dm.getString("ubamsResolveUrl").format(id)
+    lazy val analysesUrl = dm.getString("analysesUrl")
+    def analysesResolveUrl(id: String) = dm.getString("analysesResolveUrl").format(id)
   }
 
   object BOSS {

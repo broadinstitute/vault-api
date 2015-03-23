@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import akka.util.Timeout
-import org.broadinstitute.dsde.vault.model.{uBAMIngest, uBAM}
+import org.broadinstitute.dsde.vault.model.{Analysis, uBAM, uBAMIngest}
 import org.broadinstitute.dsde.vault.services.uBAM.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
@@ -19,6 +19,9 @@ object DmClientService {
   case class DMResolveUBam(ubamId: String)
   case class DMUBamResolved(dmObject: uBAM)
 
+  case class DMResolveAnalysis(analysisId: String)
+  case class DMAnalysisResolved(analysis: Analysis)
+
   def props(requestContext: RequestContext): Props = Props(new DmClientService(requestContext))
 }
 
@@ -26,6 +29,7 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
   import org.broadinstitute.dsde.vault.DmClientService._
   import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
+  import org.broadinstitute.dsde.vault.services.analysis.DescribeJsonProtocol._
   import spray.httpx.SprayJsonSupport._
   import system.dispatcher
 
@@ -39,6 +43,9 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
     case DMResolveUBam(ubamId) =>
       resolveUBam(sender(), ubamId)
+
+    case DMResolveAnalysis(analysisId) =>
+      resolveAnalysis(sender(), analysisId)
   }
 
   def createUBam(senderRef: ActorRef, ubam: uBAMIngest): Unit = {
@@ -71,6 +78,23 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
       case Failure(error) =>
         log.error(error, "Couldn't find uBAM with id: " + ubamId)
+        senderRef ! ClientFailure(error.getMessage)
+    }
+  }
+
+  def resolveAnalysis(senderRef: ActorRef, analysisId: String): Unit = {
+    log.debug("Querying the DM API for an Analysis id: " + analysisId)
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[Analysis]
+    val responseFuture = pipeline {
+      Get(VaultConfig.DataManagement.analysesResolveUrl(analysisId))
+    }
+    responseFuture onComplete {
+      case Success(analysis) =>
+        log.debug("Analysis found: " + analysis.id)
+        senderRef ! DMAnalysisResolved(analysis)
+
+      case Failure(error) =>
+        log.error(error, "Couldn't find Analysis with id: " + analysisId)
         senderRef ! ClientFailure(error.getMessage)
     }
   }
