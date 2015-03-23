@@ -1,16 +1,11 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
-import akka.actor.{Props, Actor, ActorRef}
+import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
-import org.broadinstitute.dsde.vault.DmClientService.DMUBamResolved
-import org.broadinstitute.dsde.vault.model._
-import org.broadinstitute.dsde.vault.services.uBAM.ClientFailure
-import org.broadinstitute.dsde.vault.services.uBAM.DescribeServiceHandler.DescribeMessage
-import org.broadinstitute.dsde.vault.{VaultConfig, DmClientService}
+import org.broadinstitute.dsde.vault.DmClientService
+import org.broadinstitute.dsde.vault.DmClientService.DMAnalysisResolved
+import org.broadinstitute.dsde.vault.services.analysis.DescribeServiceHandler.DescribeMessage
 import spray.routing.RequestContext
-
-import spray.json._
-import uBAMJsonProtocol._
 
 object DescribeServiceHandler {
   case class DescribeMessage(dmId: String)
@@ -21,6 +16,8 @@ object DescribeServiceHandler {
 
 case class DescribeServiceHandler(requestContext: RequestContext, dmService: ActorRef) extends Actor {
 
+  import org.broadinstitute.dsde.vault.services.analysis.DescribeJsonProtocol._
+  import spray.httpx.SprayJsonSupport._
   implicit val system = context.system
   val log = Logging(system, getClass)
 
@@ -29,16 +26,14 @@ case class DescribeServiceHandler(requestContext: RequestContext, dmService: Act
       log.debug("Received Analysis describe message")
       dmService ! DmClientService.DMResolveAnalysis(dmId)
 
-    case DMUBamResolved(resolvedUBam: uBAM) =>
-      val redirects = resolvedUBam.files.map {
-        case (fileType, _) => (fileType, VaultConfig.Vault.uBamRedirectUrl(resolvedUBam.id, fileType))
-      }
-      requestContext.complete(uBAM(resolvedUBam.id, redirects, resolvedUBam.metadata).toJson.prettyPrint)
+    case DMAnalysisResolved(analysis) =>
+      requestContext.complete(analysis)
       context.stop(self)
 
-    case ClientFailure(message: String) =>
-      log.error("Client failure: " + message)
+    case unknown =>
+      log.error("Client failure: " + unknown)
       requestContext.reject()
       context.stop(self)
   }
+
 }
