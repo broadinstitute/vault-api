@@ -4,6 +4,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.DmClientService.DMAnalysisResolved
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.services.analysis.DescribeServiceHandler.DescribeMessage
 import spray.routing.RequestContext
 
@@ -30,10 +31,11 @@ case class DescribeServiceHandler(requestContext: RequestContext, dmService: Act
       requestContext.complete(analysis)
       context.stop(self)
 
-    case unknown =>
-      log.error("Client failure: " + unknown)
+    case ClientFailure(message: String) =>
+      log.error("Client failure: " + message)
       requestContext.reject()
       context.stop(self)
+
   }
 
 }

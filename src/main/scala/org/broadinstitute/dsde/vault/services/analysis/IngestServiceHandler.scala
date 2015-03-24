@@ -5,6 +5,7 @@ import akka.event.Logging
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.DmClientService.DMAnalysisCreated
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.services.analysis.IngestServiceHandler.IngestMessage
 import spray.routing.RequestContext
 
@@ -34,8 +35,8 @@ case class IngestServiceHandler(requestContext: RequestContext, dmService: Actor
       requestContext.complete(analysis)
       context.stop(self)
 
-    case unknown =>
-      log.error("Client failure: " + unknown)
+    case ClientFailure(message: String) =>
+      log.error("Client failure: " + message)
       requestContext.reject()
       context.stop(self)
 
