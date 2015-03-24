@@ -1,7 +1,6 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
 import akka.actor.Props
-import akka.actor.Props
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model._
