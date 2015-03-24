@@ -1,8 +1,17 @@
 package org.broadinstitute.dsde.vault.model
 
 import com.wordnik.swagger.annotations._
+import spray.json.DefaultJsonProtocol
 
 import scala.annotation.meta.field
+
+object AnalysisJsonProtocol extends DefaultJsonProtocol {
+  implicit val impAnalysisIngestResponse = jsonFormat1(AnalysisIngestResponse)
+  implicit val impAnalysisIngest = jsonFormat2(AnalysisIngest)
+  implicit val impAnalysis = jsonFormat4(Analysis)
+  implicit val impAnalysisResponse = jsonFormat1(AnalysisIngestResponse)
+  implicit val impAnalysisUpdate = jsonFormat1(AnalysisUpdate)
+}
 
 @ApiModel(value = "An Analysis")
 case class Analysis(
@@ -13,7 +22,7 @@ case class Analysis(
   @(ApiModelProperty@field)(required = true, value = "The metadata key-value pairs associated with this Analysis.")
   metadata: Map[String, String],
   @(ApiModelProperty@field)(required = true, value = "The output files associated with this Analysis, each with a unique user-supplied string key.")
-  files: Map[String, String])
+  files: Option[Map[String, String]] = None)
 
 case class AnalysisIngest(
   @(ApiModelProperty@field)(required = true, value = "The Vault IDs of the input uBAMs used by this Analysis")

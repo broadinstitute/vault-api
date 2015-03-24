@@ -35,7 +35,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
           val respAnalysis = responseAs[Analysis]
           respAnalysis.id should equal(testId)
           respAnalysis.input shouldBe empty
-          respAnalysis.files shouldBe empty
+          respAnalysis.files.get shouldBe empty
           respAnalysis.metadata should equal(Map("ownerId" -> "testUser"))
         }
       }
