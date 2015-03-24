@@ -3,7 +3,7 @@ package org.broadinstitute.dsde.vault
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import org.broadinstitute.dsde.vault.model.{BossCreationObject, BossResolutionRequest, BossResolutionResponse}
-import org.broadinstitute.dsde.vault.services.uBAM.ClientFailure
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.BasicHttpCredentials
 import spray.http.HttpHeaders.Cookie

@@ -4,6 +4,7 @@ import akka.actor.{Props, Actor, ActorRef}
 import akka.event.Logging
 import org.broadinstitute.dsde.vault.BossClientService.{BossObjectResolved, BossObjectCreated}
 import org.broadinstitute.dsde.vault.DmClientService.DMUBamCreated
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.{DmClientService, BossClientService}
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.uBAM.IngestServiceHandler._

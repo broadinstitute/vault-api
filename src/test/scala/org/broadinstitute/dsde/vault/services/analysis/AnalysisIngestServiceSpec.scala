@@ -18,7 +18,6 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestService {
   def actorRefFactory = system
 
   val path = "/analyses"
-  implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(10, TimeUnit.SECONDS))
   val openAmResponse = getOpenAmToken.get
 
   "AnalysisIngestService" - {

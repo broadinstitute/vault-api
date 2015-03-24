@@ -4,6 +4,7 @@ import akka.actor.{Props, Actor, ActorRef}
 import akka.event.Logging
 import org.broadinstitute.dsde.vault.DmClientService.DMUBamResolved
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.services.uBAM.DescribeServiceHandler.DescribeMessage
 import org.broadinstitute.dsde.vault.{VaultConfig, DmClientService}
 import spray.routing.RequestContext

@@ -14,12 +14,11 @@ class IngestServiceSpec extends VaultFreeSpec with IngestService {
 
   def actorRefFactory = system
   val path = "/ubams"
-  implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(60, TimeUnit.SECONDS))
   val openAmResponse = getOpenAmToken.get
 
   "IngestServiceSpec" - {
 
-    "when calling POST to the " + path + " path with a uBAMInjest object" - {
+    "when calling POST to the " + path + " path with a uBAMIngest object" - {
       "should return a valid response" in {
         // As designed, the API returns an object that only contains an id and files, but not the supplied metadata
         val ubamIngest = new uBAMIngest(
@@ -56,7 +55,7 @@ class IngestServiceSpec extends VaultFreeSpec with IngestService {
       }
     }
 
-    "when calling POST to the " + path + " path with a malformed uBAMInjest object" - {
+    "when calling POST to the " + path + " path with a malformed uBAMIngest object" - {
       "should return an invalid response" in {
         val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
         Post(path, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(ingestRoute) ~> check {

@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import akka.actor.Actor
 import akka.event.Logging
 import org.broadinstitute.dsde.vault.OpenAmClientService.{OpenAmAuthRequest, OpenAmResponse}
-import org.broadinstitute.dsde.vault.services.uBAM.ClientFailure
+import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.{HttpEntity, MediaTypes}
 import spray.json._

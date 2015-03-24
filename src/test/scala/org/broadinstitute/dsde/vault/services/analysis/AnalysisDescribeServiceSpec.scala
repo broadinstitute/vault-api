@@ -18,7 +18,6 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
   def actorRefFactory = system
 
   val path = "/analyses"
-  implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(10, TimeUnit.SECONDS))
   val openAmResponse = getOpenAmToken.get
   val testId = "f222066b-a822-4d67-b946-3f486fc620ba"
 
