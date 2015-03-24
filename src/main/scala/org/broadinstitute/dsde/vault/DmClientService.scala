@@ -92,6 +92,7 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
   }
 
   def createAnalysis(senderRef: ActorRef, analysisIngest: AnalysisIngest): Unit = {
+    log.debug("Creating an Analysis object in the DM")
     val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[Analysis]
     val responseFuture = pipeline {
       Post(VaultConfig.DataManagement.analysesUrl, analysisIngest)
