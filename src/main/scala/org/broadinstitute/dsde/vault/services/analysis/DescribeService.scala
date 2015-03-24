@@ -1,6 +1,8 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
+import akka.actor.Props
 import com.wordnik.swagger.annotations._
+import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model._
 import spray.http.MediaTypes._
 import spray.json._
@@ -9,8 +11,6 @@ import spray.routing._
 object DescribeJsonProtocol extends DefaultJsonProtocol {
   implicit val impAnalysis = jsonFormat4(Analysis)
 }
-
-import org.broadinstitute.dsde.vault.services.analysis.DescribeJsonProtocol._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait DescribeService extends HttpService {
@@ -37,26 +37,10 @@ trait DescribeService extends HttpService {
       id => {
         get {
           respondWithMediaType(`application/json`) {
-            complete {
-              Analysis(
-                id,
-                List("123", "456", "789"),
-                Map(
-                  "vcf" -> "http://vault/redirect/url/to/get/file",
-                  "bam" -> "http://vault/redirect/url/to/get/file",
-                  "bai" -> "http://vault/redirect/url/to/get/file",
-                  "adapter_metrics" -> "http://vault/redirect/url/to/get/file"
-                ),
-                Map(
-                  "analysisId" -> "CES_id",
-                  "key1" -> "value1",
-                  "key2" -> "value2",
-                  "key3" -> "value3",
-                  "key4" -> "value4",
-                  "key5" -> "value5"
-                )
-              ).toJson.prettyPrint
-
+            requestContext => {
+              val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
+              val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, dmService))
+              describeActor ! DescribeServiceHandler.DescribeMessage(id)
             }
           }
         }
