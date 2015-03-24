@@ -37,6 +37,7 @@ object VaultConfig {
     def uBamResolveUrl(id: String) = dm.getString("ubamsResolveUrl").format(id)
     lazy val analysesUrl = dm.getString("analysesUrl")
     def analysesResolveUrl(id: String) = dm.getString("analysesResolveUrl").format(id)
+    def queryLookupUrl(entityType: String, attributeName: String, attributeValue: String) = dm.getString("queryLookupUrl").format(entityType, attributeName, attributeValue)
   }
 
   object BOSS {
