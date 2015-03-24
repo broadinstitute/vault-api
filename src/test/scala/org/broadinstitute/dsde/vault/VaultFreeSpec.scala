@@ -16,6 +16,7 @@ abstract class VaultFreeSpec extends FreeSpec with Matchers with OptionValues wi
 
   implicit val timeout = Timeout(5, TimeUnit.SECONDS)
   val duration: Duration = new FiniteDuration(5, TimeUnit.SECONDS)
+  implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(10, TimeUnit.SECONDS))
 
   def getOpenAmToken: Option[OpenAmResponse] = {
     val actor = TestActorRef[OpenAmClientService]
