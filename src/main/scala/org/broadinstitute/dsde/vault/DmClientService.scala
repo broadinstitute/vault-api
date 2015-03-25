@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import akka.util.Timeout
-import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, UBamIngest, UBam}
+import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, EntitySearchResult, UBamIngest, UBam}
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
@@ -24,6 +24,9 @@ object DmClientService {
   case class DMResolveAnalysis(analysisId: String)
   case class DMAnalysisResolved(analysis: Analysis)
 
+  case class DMLookupEntity(entityType: String, attributeName: String, attributeValue: String)
+  case class DMLookupResolved(result: EntitySearchResult)
+
   def props(requestContext: RequestContext): Props = Props(new DmClientService(requestContext))
 }
 
@@ -31,6 +34,7 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
   import org.broadinstitute.dsde.vault.DmClientService._
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
+  import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
   import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
   import spray.httpx.SprayJsonSupport._
   import system.dispatcher
@@ -55,6 +59,10 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
     case DMResolveAnalysis(analysisId) =>
       val requestor = sender()
       resolveAnalysis(requestor, analysisId)
+
+    case DMLookupEntity(entityType, attributeName, attributeValue) =>
+      val requestor = sender()
+      lookup(requestor, entityType, attributeName, attributeValue)
   }
 
   def createUBam(senderRef: ActorRef, ubam: UBamIngest): Unit = {
@@ -125,4 +133,20 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
     }
   }
 
+  def lookup(senderRef: ActorRef, entityType: String, attributeName: String, attributeValue: String): Unit = {
+    log.debug("Querying the DM API for a lookup on %s/%s/%s. ".format(entityType, attributeName, attributeValue))
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[EntitySearchResult]
+    val responseFuture = pipeline {
+      Get(VaultConfig.DataManagement.queryLookupUrl(entityType, attributeName, attributeValue))
+    }
+    responseFuture onComplete {
+      case Success(queryResult) =>
+        log.debug("Found entity matching %s/%s/%s: ID %s".format(entityType, attributeName, attributeValue, queryResult.guid))
+        senderRef ! DMLookupResolved(queryResult)
+
+      case Failure(error) =>
+        log.error(error, "Couldn't find entity matching %s/%s/%s".format(entityType, attributeName, attributeValue))
+        senderRef ! ClientFailure(error.getMessage)
+    }
+  }
 }
