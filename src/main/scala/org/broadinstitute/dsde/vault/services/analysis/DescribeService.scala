@@ -4,9 +4,7 @@ import akka.actor.Props
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model._
-import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import spray.http.MediaTypes._
-import spray.json._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")

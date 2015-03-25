@@ -1,7 +1,5 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
-import java.util.concurrent.TimeUnit
-
 import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.Analysis
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
@@ -10,8 +8,6 @@ import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.unmarshalling._
-
-import scala.concurrent.duration.FiniteDuration
 
 class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
 
