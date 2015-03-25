@@ -1,21 +1,36 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
+import org.broadinstitute.dsde.vault.model.{UBamIngestResponse, UBamIngest}
+import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import spray.http.HttpCookie
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
+import spray.httpx.SprayJsonSupport._
 
-/**
- * This is an integration test. It requires an existing Boss ID to function.
- */
-class RedirectServiceSpec extends VaultFreeSpec with RedirectService {
+class RedirectServiceSpec extends VaultFreeSpec with RedirectService with IngestService {
+
+  override val routes = redirectRoute
 
   def actorRefFactory = system
   val path = "/ubams"
   val openAmResponse = getOpenAmToken.get
-  val testingId = "414b992a-f638-4ad8-86be-03a037db6fb7"
+  var testingId = "invalid_UUID"
 
   "RedirectuBAMService" - {
+    "while preparing the ubam test data" - {
+      "should successfully store the data" in {
+        val path = "/ubams"
+        val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
+        val metadata = Map("ownerId" -> "user")
+        val ubamIngest = new UBamIngest(files, metadata)
+        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+          status should equal(OK)
+          testingId = responseAs[UBamIngestResponse].id
+        }
+      }
+    }
+
     "when calling GET to the " + path + " path with a valid Vault ID and a valid file type" - {
       "should return a redirect url to the file" in {
         Get(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> redirectRoute ~> check {

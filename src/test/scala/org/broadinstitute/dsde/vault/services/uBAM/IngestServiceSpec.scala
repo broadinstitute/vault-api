@@ -1,14 +1,10 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
-import java.util.concurrent.TimeUnit
-
 import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.UBamIngest
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
-
-import scala.concurrent.duration.FiniteDuration
 
 class IngestServiceSpec extends VaultFreeSpec with IngestService {
 
