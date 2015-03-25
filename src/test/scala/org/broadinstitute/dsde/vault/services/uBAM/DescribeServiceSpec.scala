@@ -1,24 +1,37 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
-import org.broadinstitute.dsde.vault.model.{UBam, uBAMJsonProtocol}
+import org.broadinstitute.dsde.vault.model.{UBamIngestResponse, UBamIngest, UBam, uBAMJsonProtocol}
+import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import spray.http.HttpCookie
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.unmarshalling._
 import spray.httpx.SprayJsonSupport._
 
-/**
- * This is an integration test. It requires an existing uBam ID in dm-ci to function.
- */
-class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
+class DescribeServiceSpec extends VaultFreeSpec with DescribeService with IngestService {
+
+  override val routes = describeRoute
 
   def actorRefFactory = system
   val path = "/ubams"
   val openAmResponse = getOpenAmToken.get
-  val testingId = "a31f604e-a5f8-46ae-bdca-5efddc608fb2"
+  var testingId = "invalid_UUID"
 
   "DescribeuBAMService" - {
+    "while preparing the ubam test data" - {
+      "should successfully store the data" in {
+        val path = "/ubams"
+        val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
+        val metadata = Map("ownerId" -> "user")
+        val ubamIngest = new UBamIngest(files, metadata)
+        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+          status should equal(OK)
+          testingId = responseAs[UBamIngestResponse].id
+        }
+      }
+    }
+
     "when calling GET to the " + path + " path with a Vault ID" - {
       "should return that ID" in {
         Get(path + "/" + testingId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> describeRoute ~> check {
