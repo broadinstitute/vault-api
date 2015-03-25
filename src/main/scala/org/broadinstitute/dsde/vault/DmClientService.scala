@@ -45,24 +45,19 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
   override def receive: Receive = {
     case DMCreateUBam(ubam) =>
-      val requestor = sender()
-      createUBam(requestor, ubam)
+      createUBam(sender(), ubam)
 
     case DMResolveUBam(ubamId) =>
-      val requestor = sender()
-      resolveUBam(requestor, ubamId)
+      resolveUBam(sender(), ubamId)
 
     case DMCreateAnalysis(analysisIngest) =>
-      val requestor = sender()
-      createAnalysis(requestor, analysisIngest)
+      createAnalysis(sender(), analysisIngest)
 
     case DMResolveAnalysis(analysisId) =>
-      val requestor = sender()
-      resolveAnalysis(requestor, analysisId)
+      resolveAnalysis(sender(), analysisId)
 
     case DMLookupEntity(entityType, attributeName, attributeValue) =>
-      val requestor = sender()
-      lookup(requestor, entityType, attributeName, attributeValue)
+      lookup(sender(), entityType, attributeName, attributeValue)
   }
 
   def createUBam(senderRef: ActorRef, ubam: UBamIngest): Unit = {
