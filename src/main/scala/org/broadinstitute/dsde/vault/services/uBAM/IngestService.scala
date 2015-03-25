@@ -15,11 +15,11 @@ trait IngestService extends HttpService {
   val routes = ingestRoute
 
   @ApiOperation(value = "Creates uBAM objects", nickname = "ubam_ingest", httpMethod = "POST",
-    produces = "application/json", consumes = "application/json", response = classOf[uBAMIngestResponse],
+    produces = "application/json", consumes = "application/json", response = classOf[UBamIngestResponse],
     notes = "Accepts a json packet as POST. Creates a Vault object with the supplied metadata and allocates BOSS objects for each supplied file key; ignores the values for each file. " +
       " Returns the Vault ID of the object as well as presigned PUT urls - one for each key in the 'files' subobject.")
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.uBAMIngest", paramType = "body", value = "uBAM to create")
+    new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.UBamIngest", paramType = "body", value = "uBAM to create")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Successful"),
@@ -30,7 +30,7 @@ trait IngestService extends HttpService {
     path("ubams") {
       post {
         respondWithMediaType(`application/json`) {
-          entity(as[uBAMIngest]) {
+          entity(as[UBamIngest]) {
             ingest =>
               requestContext =>
                 val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))

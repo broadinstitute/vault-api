@@ -16,7 +16,7 @@ trait DescribeService extends HttpService {
     nickname = "ubam_describe",
     httpMethod = "GET",
     produces = "application/json",
-    response = classOf[uBAM]
+    response = classOf[UBam]
   )
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "uBAM Vault ID")

@@ -3,7 +3,7 @@ package org.broadinstitute.dsde.vault.services.uBAM
 import java.util.concurrent.TimeUnit
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
-import org.broadinstitute.dsde.vault.model.uBAMIngest
+import org.broadinstitute.dsde.vault.model.UBamIngest
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
@@ -18,10 +18,10 @@ class IngestServiceSpec extends VaultFreeSpec with IngestService {
 
   "IngestServiceSpec" - {
 
-    "when calling POST to the " + path + " path with a uBAMIngest object" - {
+    "when calling POST to the " + path + " path with a UBamIngest object" - {
       "should return a valid response" in {
         // As designed, the API returns an object that only contains an id and files, but not the supplied metadata
-        val ubamIngest = new uBAMIngest(
+        val ubamIngest = new UBamIngest(
           files = Map(("bam", "/path/to/ingest/bam"),("bai", "/path/to/ingest/bai")),
           metadata = Map(("ownerId", "testUser"),("randomData", "7"))
         )
@@ -55,7 +55,7 @@ class IngestServiceSpec extends VaultFreeSpec with IngestService {
       }
     }
 
-    "when calling POST to the " + path + " path with a malformed uBAMIngest object" - {
+    "when calling POST to the " + path + " path with a malformed UBamIngest object" - {
       "should return an invalid response" in {
         val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
         Post(path, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(ingestRoute) ~> check {

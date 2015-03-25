@@ -34,7 +34,7 @@ case class RedirectServiceHandler(requestContext: RequestContext, bossService: A
       this.fileType = fileType
       dmService ! DmClientService.DMResolveUBam(dmId)
 
-    case DMUBamResolved(resolvedUBam: uBAM) =>
+    case DMUBamResolved(resolvedUBam: UBam) =>
       log.debug("Resolved uBAM with DM ID " + resolvedUBam.id)
       resolvedUBam.files get fileType match {
         case Some(bossId) =>

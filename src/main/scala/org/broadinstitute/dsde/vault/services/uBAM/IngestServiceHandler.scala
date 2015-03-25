@@ -14,7 +14,7 @@ import spray.json._
 import uBAMJsonProtocol._
 
 object IngestServiceHandler {
-  case class IngestMessage(ingest: uBAMIngest)
+  case class IngestMessage(ingest: UBamIngest)
 
   def props(requestContext: RequestContext, bossService: ActorRef, dmService: ActorRef): Props =
     Props(new IngestServiceHandler(requestContext, bossService, dmService))
@@ -40,16 +40,16 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
 
   // a map from file types to Presigned Boss PUT URLs
   // added by BossObjectResolved messages (1 per message)
-  // consumed by uBAMIngestResponse after [fileCount] have been added and the DM ID has been set
+  // consumed by UBamIngestResponse after [fileCount] have been added and the DM ID has been set
   var bossURLs: Map[String, String] = Map.empty
 
   // the DM ID for this uBAM
   // set by DMUBamCreated
-  // consumed by uBAMIngestResponse after this has been set and [fileCount] bossURLs have been added
+  // consumed by UBamIngestResponse after this has been set and [fileCount] bossURLs have been added
   var dmId: Option[String] = None
 
   def receive = {
-    case IngestMessage(ingest: uBAMIngest) =>
+    case IngestMessage(ingest: UBamIngest) =>
       log.debug("Received uBAM ingest message")
       fileCount = ingest.files.size
       metadata = ingest.metadata
@@ -62,13 +62,13 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
       bossObjects += creationKey -> bossObject.objectId.get
       bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
       if (fileCount == bossObjects.size)
-        dmService ! DmClientService.DMCreateUBam(new uBAMIngest(bossObjects, metadata))
+        dmService ! DmClientService.DMCreateUBam(new UBamIngest(bossObjects, metadata))
 
     case BossObjectResolved(bossObject: BossResolutionResponse, creationKey: String) =>
       bossURLs += creationKey -> bossObject.objectUrl
       completeIfDone
 
-    case DMUBamCreated(createdUBam: uBAM) =>
+    case DMUBamCreated(createdUBam: UBam) =>
       this.dmId = Option(createdUBam.id)
       completeIfDone
 
@@ -83,7 +83,7 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
       case Some(id) =>
         if (fileCount == bossURLs.size) {
           log.debug("uBAM ingest complete")
-          requestContext.complete(uBAMIngestResponse(id, bossURLs).toJson.prettyPrint)
+          requestContext.complete(UBamIngestResponse(id, bossURLs).toJson.prettyPrint)
           context.stop(self)
         }
       case _ => None
