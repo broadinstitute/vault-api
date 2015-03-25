@@ -2,7 +2,7 @@ package org.broadinstitute.dsde.vault.services.analysis
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.AnalysisUpdate
-import org.broadinstitute.dsde.vault.services.analysis.UpdateJsonProtocol._
+import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpEntity, MediaTypes, StatusCodes}
 import spray.httpx.SprayJsonSupport._

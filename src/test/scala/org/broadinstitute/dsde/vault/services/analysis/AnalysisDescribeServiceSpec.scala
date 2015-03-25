@@ -4,7 +4,7 @@ import java.util.concurrent.TimeUnit
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.Analysis
-import org.broadinstitute.dsde.vault.services.analysis.DescribeJsonProtocol._
+import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import spray.http.HttpCookie
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._

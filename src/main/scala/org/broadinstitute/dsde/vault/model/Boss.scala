@@ -4,9 +4,9 @@ import org.broadinstitute.dsde.vault.VaultConfig
 import spray.json.DefaultJsonProtocol
 
 object BossJsonProtocol extends DefaultJsonProtocol {
-  implicit val creation = jsonFormat7(BossCreationObject)
-  implicit val resolutionRequest = jsonFormat4(BossResolutionRequest)
-  implicit val resolution = jsonFormat4(BossResolutionResponse)
+  implicit val impBossCreationObject = jsonFormat7(BossCreationObject)
+  implicit val impBossResolutionRequest = jsonFormat4(BossResolutionRequest)
+  implicit val impBossResolutionResponse = jsonFormat4(BossResolutionResponse)
 }
 
 case class BossCreationObject(

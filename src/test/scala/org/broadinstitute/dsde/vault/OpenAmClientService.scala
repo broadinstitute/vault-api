@@ -19,7 +19,7 @@ object OpenAmClientService {
 }
 
 object OpenAmResponseJsonProtocol extends DefaultJsonProtocol {
-  implicit val json = jsonFormat2(OpenAmResponse)
+  implicit val impOpenAmResponse = jsonFormat2(OpenAmResponse)
 }
 
 class OpenAmClientService extends Actor {

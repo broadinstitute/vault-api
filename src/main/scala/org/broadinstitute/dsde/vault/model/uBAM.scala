@@ -5,9 +5,9 @@ import spray.json.DefaultJsonProtocol
 import scala.annotation.meta.field
 
 object uBAMJsonProtocol extends DefaultJsonProtocol {
-  implicit val uBam = jsonFormat3(uBAM)
-  implicit val ingest = jsonFormat2(uBAMIngest)
-  implicit val response = jsonFormat2(uBAMIngestResponse)
+  implicit val impuBAM = jsonFormat3(uBAM)
+  implicit val impuBAMIngest = jsonFormat2(uBAMIngest)
+  implicit val impuBAMIngestResponse = jsonFormat2(uBAMIngestResponse)
 }
 
 @ApiModel(value = "An unmapped BAM")
