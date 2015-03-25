@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import akka.util.Timeout
-import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, uBAMIngest, uBAM}
+import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, UBamIngest, UBam}
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
@@ -14,10 +14,10 @@ import spray.routing.RequestContext
 import scala.util.{Failure, Success}
 
 object DmClientService {
-  case class DMCreateUBam(ubam: uBAMIngest)
-  case class DMUBamCreated(createdUBam: uBAM)
+  case class DMCreateUBam(ubam: UBamIngest)
+  case class DMUBamCreated(createdUBam: UBam)
   case class DMResolveUBam(ubamId: String)
-  case class DMUBamResolved(dmObject: uBAM)
+  case class DMUBamResolved(dmObject: UBam)
 
   case class DMCreateAnalysis(analysisIngest: AnalysisIngest)
   case class DMAnalysisCreated(analysis: Analysis)
@@ -57,9 +57,9 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
       resolveAnalysis(requestor, analysisId)
   }
 
-  def createUBam(senderRef: ActorRef, ubam: uBAMIngest): Unit = {
+  def createUBam(senderRef: ActorRef, ubam: UBamIngest): Unit = {
     log.debug("Creating a uBAM object in the DM")
-    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[uBAM]
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[UBam]
     val responseFuture = pipeline {
       Post(VaultConfig.DataManagement.ubamsUrl, ubam)
     }
@@ -76,7 +76,7 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
   def resolveUBam(senderRef: ActorRef, ubamId: String): Unit = {
     log.debug("Querying the DM API for a uBAM id: " + ubamId)
-    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[uBAM]
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[UBam]
     val responseFuture = pipeline {
       Get(VaultConfig.DataManagement.uBamResolveUrl(ubamId))
     }

@@ -1,7 +1,7 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
-import org.broadinstitute.dsde.vault.model.{uBAM, uBAMJsonProtocol}
+import org.broadinstitute.dsde.vault.model.{UBam, uBAMJsonProtocol}
 import spray.http.HttpCookie
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
@@ -25,7 +25,7 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService {
           status should equal(OK)
           entity.toString should include(testingId)
           import uBAMJsonProtocol._
-          entity.as[uBAM].isRight shouldBe true
+          entity.as[UBam].isRight shouldBe true
         }
       }
     }

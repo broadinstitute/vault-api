@@ -29,11 +29,11 @@ case class DescribeServiceHandler(requestContext: RequestContext, dmService: Act
       log.debug("Received uBAM describe message")
       dmService ! DmClientService.DMResolveUBam(dmId)
 
-    case DMUBamResolved(resolvedUBam: uBAM) =>
+    case DMUBamResolved(resolvedUBam: UBam) =>
       val redirects = resolvedUBam.files.map {
         case (fileType, _) => (fileType, VaultConfig.Vault.uBamRedirectUrl(resolvedUBam.id, fileType))
       }
-      requestContext.complete(uBAM(resolvedUBam.id, redirects, resolvedUBam.metadata).toJson.prettyPrint)
+      requestContext.complete(UBam(resolvedUBam.id, redirects, resolvedUBam.metadata).toJson.prettyPrint)
       context.stop(self)
 
     case ClientFailure(message: String) =>
