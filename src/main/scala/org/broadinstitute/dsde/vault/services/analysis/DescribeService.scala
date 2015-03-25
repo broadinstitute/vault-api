@@ -5,12 +5,7 @@ import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model._
 import spray.http.MediaTypes._
-import spray.json._
 import spray.routing._
-
-object DescribeJsonProtocol extends DefaultJsonProtocol {
-  implicit val impAnalysis = jsonFormat4(Analysis)
-}
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait DescribeService extends HttpService {

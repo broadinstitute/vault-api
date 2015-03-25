@@ -17,7 +17,7 @@ object DescribeServiceHandler {
 
 case class DescribeServiceHandler(requestContext: RequestContext, dmService: ActorRef) extends Actor {
 
-  import org.broadinstitute.dsde.vault.services.analysis.DescribeJsonProtocol._
+  import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
   import spray.httpx.SprayJsonSupport._
   implicit val system = context.system
   val log = Logging(system, getClass)

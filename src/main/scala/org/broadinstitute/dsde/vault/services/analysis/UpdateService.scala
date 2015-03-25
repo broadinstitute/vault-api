@@ -3,16 +3,9 @@ package org.broadinstitute.dsde.vault.services.analysis
 import javax.ws.rs.Path
 
 import com.wordnik.swagger.annotations._
-import org.broadinstitute.dsde.vault.model._
 import spray.http.MediaTypes._
 import spray.http.{HttpResponse, StatusCodes}
-import spray.json._
 import spray.routing._
-
-object UpdateJsonProtocol extends DefaultJsonProtocol {
-  implicit val impAnalysisUpdate = jsonFormat1(AnalysisUpdate)
-}
-
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 1)
 trait UpdateService extends HttpService {
