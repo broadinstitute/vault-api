@@ -7,7 +7,7 @@ import spray.http.MediaTypes._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
-trait IngestService extends HttpService {
+trait IngestAnalysisService extends HttpService {
 
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
   import spray.httpx.SprayJsonSupport._

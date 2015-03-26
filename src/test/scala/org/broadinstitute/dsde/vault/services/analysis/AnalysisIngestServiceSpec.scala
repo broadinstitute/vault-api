@@ -6,7 +6,7 @@ import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
 
-class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestService {
+class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestAnalysisService {
 
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.impAnalysisIngest
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.impAnalysisIngestResponse
