@@ -16,7 +16,7 @@ trait UpdateService extends HttpService {
 
   val routes = updateRoute
 
-  @Path("/{ID}/outputs")
+  @Path("/{id}/outputs")
   @ApiOperation(
     value = "Updates Analysis objects with output files",
     nickname = "analysis_update",
