@@ -42,7 +42,7 @@ object BossDefaults {
   val validityPeriodSeconds = VaultConfig.BOSS.defaultValidityPeriodSeconds
 
   def getCreationRequest(fpath: String, forceLocation: Option[String]): BossCreationObject = forceLocation match {
-    case Some(forceLocation) if forceLocation.equalsIgnoreCase("true") =>
+    case Some(forceLocation) if forceLocation.toBoolean =>
       new BossCreationObject(fpath, storagePlatform, 0, ownerId, readers, writers, Option.empty, Some(fpath), Some(true))
     case _ =>
       new BossCreationObject(fpath, storagePlatform, 0, ownerId, readers, writers)
