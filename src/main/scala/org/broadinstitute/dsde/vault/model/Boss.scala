@@ -4,7 +4,7 @@ import org.broadinstitute.dsde.vault.VaultConfig
 import spray.json.DefaultJsonProtocol
 
 object BossJsonProtocol extends DefaultJsonProtocol {
-  implicit val impBossCreationObject = jsonFormat7(BossCreationObject)
+  implicit val impBossCreationObject = jsonFormat9(BossCreationObject)
   implicit val impBossResolutionRequest = jsonFormat4(BossResolutionRequest)
   implicit val impBossResolutionResponse = jsonFormat4(BossResolutionResponse)
 }
@@ -16,7 +16,9 @@ case class BossCreationObject(
   ownerId: String,
   readers: List[String],
   writers: List[String],
-  objectId: Option[String] = None
+  objectId: Option[String] = None,
+  directoryPath: Option[String] = None,
+  forceLocation: Option[Boolean] = None
 )
 
 case class BossResolutionRequest(
@@ -39,8 +41,12 @@ object BossDefaults {
   val storagePlatform = VaultConfig.BOSS.defaultStoragePlatform
   val validityPeriodSeconds = VaultConfig.BOSS.defaultValidityPeriodSeconds
 
-  def getCreationRequest(objectName: String): BossCreationObject =
-    new BossCreationObject(objectName, storagePlatform, 0, ownerId, readers, writers)
+  def getCreationRequest(fpath: String, forceLocation: Option[String]): BossCreationObject = forceLocation match {
+    case Some(forceLocation) if forceLocation.toBoolean =>
+      new BossCreationObject(fpath, storagePlatform, 0, ownerId, readers, writers, Option.empty, Some(fpath), Some(true))
+    case _ =>
+      new BossCreationObject(fpath, storagePlatform, 0, ownerId, readers, writers)
+  }
 
   def getResolutionRequest(httpMethod: String): BossResolutionRequest =
     new BossResolutionRequest(validityPeriodSeconds, httpMethod, None, None)

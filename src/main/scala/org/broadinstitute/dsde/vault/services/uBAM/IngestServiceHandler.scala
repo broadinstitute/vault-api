@@ -14,7 +14,7 @@ import spray.json._
 import uBAMJsonProtocol._
 
 object IngestServiceHandler {
-  case class IngestMessage(ingest: UBamIngest)
+  case class IngestMessage(ingest: UBamIngest, forceLocation: Option[String] = None)
 
   def props(requestContext: RequestContext, bossService: ActorRef, dmService: ActorRef): Props =
     Props(new IngestServiceHandler(requestContext, bossService, dmService))
@@ -49,13 +49,13 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
   var dmId: Option[String] = None
 
   def receive = {
-    case IngestMessage(ingest: UBamIngest) =>
+    case IngestMessage(ingest: UBamIngest, forceLocation: Option[String]) =>
       log.debug("Received uBAM ingest message")
       fileCount = ingest.files.size
       metadata = ingest.metadata
       ingest.files.foreach {
         case (ftype, fpath) =>
-          bossService ! BossClientService.BossCreateObject(BossDefaults.getCreationRequest(fpath), ftype)
+          bossService ! BossClientService.BossCreateObject(BossDefaults.getCreationRequest(fpath, forceLocation), ftype)
       }
 
     case BossObjectCreated(bossObject: BossCreationObject, creationKey: String) =>
