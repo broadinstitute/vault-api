@@ -25,7 +25,8 @@ trait IngestService extends HttpService {
       " Returns the Vault ID of the object as well as presigned PUT urls - one for each key in the 'files' subobject. If a custom header of type 'X-Force-Location' has a case-insensitive " +
       " value of 'true', then the file path locations will not be ignored and instead will be used as the location of the file object.")
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.UBamIngest", paramType = "body", value = "uBAM to create")
+    new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.UBamIngest", paramType = "body", value = "uBAM to create"),
+    new ApiImplicitParam(name = "X-Force-Location", required = false, dataType = "boolean", paramType = "header", value = "When true, honors file path locations")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Successful"),
