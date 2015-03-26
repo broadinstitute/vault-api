@@ -41,11 +41,11 @@ object BossDefaults {
   val storagePlatform = VaultConfig.BOSS.defaultStoragePlatform
   val validityPeriodSeconds = VaultConfig.BOSS.defaultValidityPeriodSeconds
 
-  def getCreationRequest(objectName: String, forceLocation: Option[String]): BossCreationObject = forceLocation match {
-    case Some(forceLocation) =>
-      new BossCreationObject(objectName, storagePlatform, 0, ownerId, readers, writers, Option.empty, Some(forceLocation), Some(true))
-    case None =>
-      new BossCreationObject(objectName, storagePlatform, 0, ownerId, readers, writers)
+  def getCreationRequest(fpath: String, forceLocation: Option[String]): BossCreationObject = forceLocation match {
+    case Some(forceLocation) if forceLocation.equalsIgnoreCase("true") =>
+      new BossCreationObject(fpath, storagePlatform, 0, ownerId, readers, writers, Option.empty, Some(fpath), Some(true))
+    case _ =>
+      new BossCreationObject(fpath, storagePlatform, 0, ownerId, readers, writers)
   }
 
   def getResolutionRequest(httpMethod: String): BossResolutionRequest =

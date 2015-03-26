@@ -36,10 +36,9 @@ class IngestServiceSpec extends VaultFreeSpec with IngestService {
 
     "when calling POST to the " + path + " path with a UBamIngest object and Force-Location header" - {
       "should return a valid response with predefined gcs bucket names" in {
-        val gcsBucketName = "gcsLocationThatAlreadyExists"
-        Post(path, ubamIngest) ~> addHeader("X-Force-Location", gcsBucketName) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post(path, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
           status should equal(OK)
-          all (responseAs[UBamIngestResponse].files.values) should include(gcsBucketName)
+          all (responseAs[UBamIngestResponse].files.values) should include("/path/to/ingest")
         }
       }
     }
