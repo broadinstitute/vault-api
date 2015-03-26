@@ -5,10 +5,15 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import akka.util.Timeout
+import org.broadinstitute.dsde.vault.DmClientService._
+import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
+import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
+import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, EntitySearchResult, UBam, UBamIngest, _}
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
+import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
 
 import scala.util.{Failure, Success}
@@ -34,11 +39,6 @@ object DmClientService {
 
 case class DmClientService(requestContext: RequestContext) extends Actor {
 
-  import org.broadinstitute.dsde.vault.DmClientService._
-  import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
-  import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
-  import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
-  import spray.httpx.SprayJsonSupport._
   import system.dispatcher
 
   implicit val timeout = Timeout(5, TimeUnit.SECONDS)

@@ -2,11 +2,14 @@ package org.broadinstitute.dsde.vault
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
+import org.broadinstitute.dsde.vault.BossClientService._
+import org.broadinstitute.dsde.vault.model.BossJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{BossCreationObject, BossResolutionRequest, BossResolutionResponse}
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.BasicHttpCredentials
 import spray.http.HttpHeaders.Cookie
+import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
 
 import scala.util.{Failure, Success}
@@ -21,10 +24,6 @@ object BossClientService {
 }
 
 case class BossClientService(requestContext: RequestContext) extends Actor {
-
-  import org.broadinstitute.dsde.vault.BossClientService._
-  import org.broadinstitute.dsde.vault.model.BossJsonProtocol._
-  import spray.httpx.SprayJsonSupport._
 
   implicit val system = context.system
   import system.dispatcher

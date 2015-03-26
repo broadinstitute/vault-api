@@ -4,9 +4,11 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.DmClientService.DMAnalysisCreated
+import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.services.analysis.IngestServiceHandler.IngestMessage
+import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
 
 object IngestServiceHandler {
@@ -20,8 +22,6 @@ object IngestServiceHandler {
 
 case class IngestServiceHandler(requestContext: RequestContext, dmService: ActorRef) extends Actor {
 
-  import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
-  import spray.httpx.SprayJsonSupport._
   implicit val system = context.system
   val log = Logging(system, getClass)
 
