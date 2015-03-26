@@ -14,10 +14,15 @@ trait IngestService extends HttpService {
 
   val routes = ingestRoute
 
-  @ApiOperation(value = "Creates uBAM objects", nickname = "ubam_ingest", httpMethod = "POST",
-    produces = "application/json", consumes = "application/json", response = classOf[UBamIngestResponse],
+  @ApiOperation(
+    value = "Creates uBAM objects",
+    nickname = "ubam_ingest",
+    httpMethod = "POST",
+    produces = "application/json",
+    consumes = "application/json",
+    response = classOf[UBamIngestResponse],
     notes = "Accepts a json packet as POST. Creates a Vault object with the supplied metadata and allocates BOSS objects for each supplied file key; ignores the values for each file. " +
-      " Returns the Vault ID of the object as well as presigned PUT urls - one for each key in the 'files' subobject.")
+      " Returns the Vault ID of the object as well as presigned PUT urls - one for each key in the 'files' subobject. If a custom header of type 'X-Force-Location' is provided, then that location will be used as the file location.")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.UBamIngest", paramType = "body", value = "uBAM to create")
   ))
@@ -29,14 +34,17 @@ trait IngestService extends HttpService {
   def ingestRoute =
     path("ubams") {
       post {
-        respondWithMediaType(`application/json`) {
-          entity(as[UBamIngest]) {
-            ingest =>
-              requestContext =>
-                val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
-                val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-                val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossService, dmService))
-                ingestActor ! IngestServiceHandler.IngestMessage(ingest)
+        optionalHeaderValueByName("X-Force-Location") {
+          forceLocation =>
+          respondWithMediaType(`application/json`) {
+            entity(as[UBamIngest]) {
+              ingest =>
+                requestContext =>
+                  val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+                  val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+                  val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossService, dmService))
+                  ingestActor ! IngestServiceHandler.IngestMessage(ingest, forceLocation)
+            }
           }
         }
       }

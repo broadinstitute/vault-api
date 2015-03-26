@@ -1,10 +1,12 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
-import org.broadinstitute.dsde.vault.model.UBamIngest
+import org.broadinstitute.dsde.vault.model.{UBamIngestResponse, UBamIngest}
+import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
+import spray.httpx.SprayJsonSupport._
 
 class IngestServiceSpec extends VaultFreeSpec with IngestService {
 
@@ -14,21 +16,30 @@ class IngestServiceSpec extends VaultFreeSpec with IngestService {
 
   "IngestServiceSpec" - {
 
+    val ubamIngest = new UBamIngest(
+      files = Map(("bam", "/path/to/ingest/bam"),("bai", "/path/to/ingest/bai")),
+      metadata = Map(("ownerId", "testUser"),("randomData", "7"))
+    )
+
     "when calling POST to the " + path + " path with a UBamIngest object" - {
       "should return a valid response" in {
         // As designed, the API returns an object that only contains an id and files, but not the supplied metadata
-        val ubamIngest = new UBamIngest(
-          files = Map(("bam", "/path/to/ingest/bam"),("bai", "/path/to/ingest/bai")),
-          metadata = Map(("ownerId", "testUser"),("randomData", "7"))
-        )
-        import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
-        import spray.httpx.SprayJsonSupport._
         Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
           status should equal(OK)
           responseAs[String] should include("bam")
           responseAs[String] should include("bai")
           responseAs[String] shouldNot include("randomData")
           responseAs[String] shouldNot include("testUser")
+        }
+      }
+    }
+
+    "when calling POST to the " + path + " path with a UBamIngest object and Force-Location header" - {
+      "should return a valid response with predefined gcs bucket names" in {
+        val gcsBucketName = "gcsLocationThatAlreadyExists"
+        Post(path, ubamIngest) ~> addHeader("X-Force-Location", gcsBucketName) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+          status should equal(OK)
+          all (responseAs[UBamIngestResponse].files.values) should include(gcsBucketName)
         }
       }
     }
