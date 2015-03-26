@@ -5,7 +5,7 @@ import java.util.concurrent.TimeUnit
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import akka.util.Timeout
-import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, EntitySearchResult, UBamIngest, UBam}
+import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, EntitySearchResult, UBam, UBamIngest, _}
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
@@ -23,6 +23,8 @@ object DmClientService {
   case class DMAnalysisCreated(analysis: Analysis)
   case class DMResolveAnalysis(analysisId: String)
   case class DMAnalysisResolved(analysis: Analysis)
+  case class DMUpdateAnalysis(analysisId: String, update: AnalysisUpdate)
+  case class DMAnalysisUpdated(analysis: Analysis)
 
   case class DMLookupEntity(entityType: String, attributeName: String, attributeValue: String)
   case class DMLookupResolved(result: EntitySearchResult)
@@ -55,6 +57,9 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
     case DMResolveAnalysis(analysisId) =>
       resolveAnalysis(sender(), analysisId)
+
+    case DMUpdateAnalysis(analysisId, update) =>
+      updateAnalysis(sender(), analysisId, update)
 
     case DMLookupEntity(entityType, attributeName, attributeValue) =>
       lookup(sender(), entityType, attributeName, attributeValue)
@@ -124,6 +129,27 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
       case Failure(error) =>
         log.error(error, "Couldn't find Analysis with id: " + analysisId)
+        senderRef ! ClientFailure(error.getMessage)
+    }
+  }
+
+  // TODO: Fix the following hack when reverse-lookup authentication service is implemented
+  // Any metadata passed in needs to be ignored. Metadata passed to DM needs to include a temporary ownerId key/value.
+  // This needs to change when authorship is appropriately determined through the authentication service.
+  def updateAnalysis(senderRef: ActorRef, analysisId: String, update: AnalysisUpdate): Unit = {
+    log.debug("Updating an Analysis through the DM API for Analysis id: " + analysisId)
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[Analysis]
+    val analysisDmUpdate = new AnalysisDMUpdate(update.files, Map("ownerId" -> "foo"))
+    val responseFuture = pipeline {
+      Post(VaultConfig.DataManagement.analysesUpdateUrl(analysisId), analysisDmUpdate)
+    }
+    responseFuture onComplete {
+      case Success(analysis) =>
+        log.debug("Analysis updated: " + analysis.id)
+        senderRef ! DMAnalysisUpdated(analysis)
+
+      case Failure(error) =>
+        log.error(error, "Couldn't update Analysis with id: " + analysisId)
         senderRef ! ClientFailure(error.getMessage)
     }
   }

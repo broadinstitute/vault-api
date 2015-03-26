@@ -24,7 +24,7 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   val uBAMDescribe = new uBAM.DescribeService with ActorRefFactoryContext
   val uBAMRedirect = new uBAM.RedirectService with ActorRefFactoryContext
 
-  val analysisIngest = new analysis.IngestService with ActorRefFactoryContext
+  val analysisIngest = new analysis.IngestAnalysisService with ActorRefFactoryContext
   val analysisDescribe = new analysis.DescribeService with ActorRefFactoryContext
   val analysisUpdate = new analysis.UpdateService with ActorRefFactoryContext
 
@@ -44,7 +44,7 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
       typeOf[uBAM.IngestService],
       typeOf[uBAM.DescribeService],
       typeOf[uBAM.RedirectService],
-      typeOf[analysis.IngestService],
+      typeOf[analysis.IngestAnalysisService],
       typeOf[analysis.DescribeService],
       typeOf[analysis.UpdateService],
       typeOf[lookup.LookupService])
