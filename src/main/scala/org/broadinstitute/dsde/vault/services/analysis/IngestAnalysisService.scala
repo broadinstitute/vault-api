@@ -2,15 +2,15 @@ package org.broadinstitute.dsde.vault.services.analysis
 
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
+import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
 import spray.http.MediaTypes._
+import spray.httpx.SprayJsonSupport._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait IngestAnalysisService extends HttpService {
 
-  import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
-  import spray.httpx.SprayJsonSupport._
   val routes = ingestRoute
 
   @ApiOperation(
