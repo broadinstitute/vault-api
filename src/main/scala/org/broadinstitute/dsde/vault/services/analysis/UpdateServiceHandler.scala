@@ -57,11 +57,11 @@ case class UpdateServiceHandler(requestContext: RequestContext, dmService: Actor
     case BossObjectCreated(bossObject: BossCreationObject, creationKey: String) =>
       bossObjects += creationKey -> bossObject.objectId.get
       bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
-      if (fileCount == bossObjects.size)
-        dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(bossObjects))
 
     case BossObjectResolved(bossObject: BossResolutionResponse, creationKey: String) =>
       bossURLs += creationKey -> bossObject.objectUrl
+      if (fileCount == bossObjects.size)
+        dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(bossObjects))
 
     case DMAnalysisUpdated(analysis) =>
       requestContext.complete(new Analysis(dmId.get, analysis.input, analysis.metadata, Option(bossURLs)))
