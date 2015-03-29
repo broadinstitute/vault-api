@@ -19,7 +19,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with UpdateService with In
   val openAmResponse = getOpenAmToken.get
 
   var testDataGuid: String = "invalid-id"
-  val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "vcfValue", "bam" -> "bamValue"))
+  val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "path/to/ingest/vcf", "bai" -> "path/to/ingest/bai", "bam" -> "path/to/ingest/bam"))
   val path = s"/analyses/%s/outputs"
 
   "AnalysisUpdateService" - {
@@ -40,9 +40,24 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with UpdateService with In
       "should return as OK" in {
         Post(path.format(testDataGuid), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> updateRoute ~> check {
           status should equal(OK)
-          responseAs[Analysis]
-          responseAs[Analysis].id should be (testDataGuid)
-          responseAs[Analysis].files should equal (Some(analysisUpdate.files))
+          val analysisResponse = responseAs[Analysis]
+          analysisResponse.id should be (testDataGuid)
+          analysisResponse.files.get isDefinedAt "bam"
+          analysisResponse.files.get isDefinedAt "bai"
+          analysisResponse.files.get isDefinedAt "vcf"
+        }
+      }
+    }
+
+    // TODO: Update this test once creation no longer returns pre-signed urls when forceLocation is true
+    "when calling POST to the " + path + " path with a Analysis object and Force-Location header" - {
+      "should return a valid response with paths as part of the file path names" in {
+        Post(path.format(testDataGuid), analysisUpdate) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> updateRoute ~> check {
+          status should equal(OK)
+          val analysisResponse = responseAs[Analysis]
+          analysisResponse.files.get("bam") should include("path/to/ingest/bam")
+          analysisResponse.files.get("bai") should include("path/to/ingest/bai")
+          analysisResponse.files.get("vcf") should include("path/to/ingest/vcf")
         }
       }
     }
