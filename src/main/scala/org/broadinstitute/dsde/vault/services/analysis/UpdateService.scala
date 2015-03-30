@@ -28,7 +28,8 @@ trait UpdateService extends HttpService {
       "case-insensitive value of 'true', then the file path locations will be used as the location of the file object.")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "Analysis Vault ID"),
-    new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.AnalysisUpdate", paramType = "body", value = "Analysis outputs to add")
+    new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.AnalysisUpdate", paramType = "body", value = "Analysis outputs to add"),
+    new ApiImplicitParam(name = "X-Force-Location", required = false, dataType = "boolean", paramType = "header", value = "When true, honors file path locations")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "OK"),
