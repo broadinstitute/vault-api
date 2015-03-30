@@ -94,13 +94,13 @@ case class UpdateServiceHandler(requestContext: RequestContext, dmService: Actor
         case true =>
           if (fileCount == bossObjects.size) {
             log.debug("'X-Force-Location' Analysis update complete")
-            requestContext.complete(new Analysis(analysis.id, analysis.input, analysis.metadata, Option(providedFiles)))
+            requestContext.complete(analysis.copy(files = Option(providedFiles)))
             context.stop(self)
           }
         case false =>
           if (fileCount == bossURLs.size) {
             log.debug("Analysis update complete")
-            requestContext.complete(new Analysis(analysis.id, analysis.input, analysis.metadata, Option(bossURLs)))
+            requestContext.complete(analysis.copy(files = Option(bossURLs)))
             context.stop(self)
           }
       }
