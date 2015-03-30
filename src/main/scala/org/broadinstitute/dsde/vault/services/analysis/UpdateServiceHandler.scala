@@ -68,7 +68,7 @@ case class UpdateServiceHandler(requestContext: RequestContext, dmService: Actor
       // If the client is using the "X-Force-Location" header, no need to populate PUT urls.
       // Instead, forward to the DM service if all BOSS objects have been created.
       if (forceLocationHeader && fileCount == bossObjects.size) {
-        dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(providedFiles))
+        dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(bossObjects))
       }
       else {
         bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
@@ -94,13 +94,13 @@ case class UpdateServiceHandler(requestContext: RequestContext, dmService: Actor
         case true =>
           if (fileCount == bossObjects.size) {
             log.debug("'X-Force-Location' Analysis update complete")
-            requestContext.complete(new Analysis(dmId.get, analysis.input, analysis.metadata, analysis.files))
+            requestContext.complete(new Analysis(analysis.id, analysis.input, analysis.metadata, Option(providedFiles)))
             context.stop(self)
           }
         case false =>
           if (fileCount == bossURLs.size) {
             log.debug("Analysis update complete")
-            requestContext.complete(new Analysis(dmId.get, analysis.input, analysis.metadata, Option(bossURLs)))
+            requestContext.complete(new Analysis(analysis.id, analysis.input, analysis.metadata, Option(bossURLs)))
             context.stop(self)
           }
       }
