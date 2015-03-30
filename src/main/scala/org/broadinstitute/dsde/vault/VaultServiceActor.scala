@@ -69,10 +69,9 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
       pathPrefix("swagger") {
         // if the user just hits "swagger", redirect to the index page with our api docs specified on the url
         pathEndOrSingleSlash { p =>
-          // dynamically calculate the context path, which may be different in various environments
-          val path = p.request.uri.path.toString
-          val dynamicContext = path.substring(0, path.indexOf("swagger"))
-          p.redirect("/swagger/index.html?url=" + dynamicContext + "api-docs", TemporaryRedirect)
+          // the base context path may be different in various environments
+          val dynamicContext = VaultConfig.SwaggerConfig.baseUrl
+          p.redirect(dynamicContext + "swagger/index.html?url=" + dynamicContext + "api-docs", TemporaryRedirect)
         } ~
           pathPrefix("swagger/index.html") {
             getFromResource("META-INF/resources/webjars/swagger-ui/2.1.8-M1/index.html")
