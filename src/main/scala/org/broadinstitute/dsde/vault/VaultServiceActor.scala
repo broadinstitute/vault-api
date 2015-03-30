@@ -3,9 +3,10 @@ package org.broadinstitute.dsde.vault
 import akka.actor.ActorLogging
 import com.gettyimages.spray.swagger.SwaggerHttpService
 import com.wordnik.swagger.model.ApiInfo
+import org.broadinstitute.dsde.vault.common.openam.OpenAMDirectives._
 import org.broadinstitute.dsde.vault.services._
-import spray.routing.HttpServiceActor
 import spray.http.StatusCodes._
+import spray.routing.HttpServiceActor
 
 import scala.reflect.runtime.universe._
 
@@ -33,11 +34,13 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
 
   // this actor runs all routes
   def receive = runRoute(
-    uBAMIngest.routes ~ uBAMDescribe.routes ~ uBAMRedirect.routes ~
-    analysisIngest.routes ~ analysisDescribe.routes ~ analysisUpdate.routes ~ analysisRedirect.routes ~
-    lookupService.routes ~
-    swaggerService.routes ~ swaggerUiService
-    )
+    swaggerService.routes ~ swaggerUiService ~
+      logOpenAMRequest {
+        uBAMIngest.routes ~ uBAMDescribe.routes ~ uBAMRedirect.routes ~
+          analysisIngest.routes ~ analysisDescribe.routes ~ analysisUpdate.routes ~
+          analysisRedirect.routes ~ lookupService.routes
+      }
+  )
 
   val swaggerService = new SwaggerHttpService {
     // All documented API services must be added to these API types
@@ -52,9 +55,13 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
       typeOf[lookup.LookupService])
 
     override def apiVersion = VaultConfig.SwaggerConfig.apiVersion
+
     override def baseUrl = VaultConfig.SwaggerConfig.baseUrl
+
     override def docsPath = VaultConfig.SwaggerConfig.apiDocs
+
     override def actorRefFactory = context
+
     override def apiInfo = Some(
       new ApiInfo(
         VaultConfig.SwaggerConfig.info,

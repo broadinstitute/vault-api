@@ -1,5 +1,6 @@
 package org.broadinstitute.dsde.vault.common.openam
 
+import org.slf4j.LoggerFactory
 import spray.routing.Directives._
 
 object OpenAMDirectives {
@@ -26,6 +27,28 @@ object OpenAMDirectives {
     _ map {
       // get the common name from the token
       case token => commonNameFromToken(token)
+    }
+  }
+
+  // Internet says hit slf4j directly if outside an actor...
+  // https://groups.google.com/forum/#!topic/akka-user/_bIiPKoGJXY
+  lazy val logOpenAMRequestLogger = LoggerFactory.getLogger("org.broadinstitute.dsde.vault.common.openam.OpenAMRequest")
+
+  // Partially based off DebuggingDirectives.logRequest, sans magnets, with requestInstance instead of mapRequest
+  val logOpenAMRequest = commonNameFromCookie flatMap { commonName =>
+    requestInstance flatMap { request =>
+      // Quoting based off ELF string format: http://en.wikipedia.org/wiki/Extended_Log_Format
+      val commonNameQuoted = """"%s"""".format(commonName.replaceAll("\"", "\"\""))
+      val method = request.method.name
+      val uri = request.uri
+      var message = s"$commonNameQuoted $method $uri"
+      if (logOpenAMRequestLogger.isDebugEnabled) {
+        if (request.entity.nonEmpty) {
+          message += "%n".format() + request.entity.asString
+        }
+      }
+      logOpenAMRequestLogger.info(message)
+      pass
     }
   }
 
