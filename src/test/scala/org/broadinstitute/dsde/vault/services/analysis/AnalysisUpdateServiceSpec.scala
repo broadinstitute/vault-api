@@ -41,23 +41,23 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with UpdateService with In
         Post(path.format(testDataGuid), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> updateRoute ~> check {
           status should equal(OK)
           val analysisResponse = responseAs[Analysis]
+          val files = responseAs[Analysis].files
           analysisResponse.id should be (testDataGuid)
-          analysisResponse.files.get isDefinedAt "bam"
-          analysisResponse.files.get isDefinedAt "bai"
-          analysisResponse.files.get isDefinedAt "vcf"
+          files.get isDefinedAt "bam"
+          files.get isDefinedAt "bai"
+          files.get isDefinedAt "vcf"
         }
       }
     }
 
-    // TODO: Update this test once creation no longer returns pre-signed urls when forceLocation is true
-    "when calling POST to the " + path + " path with a Analysis object and Force-Location header" - {
+    "when calling POST to the " + path + " path with a Analysis object and 'X-Force-Location' header" - {
       "should return a valid response with paths as part of the file path names" in {
         Post(path.format(testDataGuid), analysisUpdate) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> updateRoute ~> check {
           status should equal(OK)
-          val analysisResponse = responseAs[Analysis]
-          analysisResponse.files.get("bam") should include("path/to/ingest/bam")
-          analysisResponse.files.get("bai") should include("path/to/ingest/bai")
-          analysisResponse.files.get("vcf") should include("path/to/ingest/vcf")
+          val files = responseAs[Analysis].files
+          files.get("bam") should equal("path/to/ingest/bam")
+          files.get("bai") should equal("path/to/ingest/bai")
+          files.get("vcf") should equal("path/to/ingest/vcf")
         }
       }
     }

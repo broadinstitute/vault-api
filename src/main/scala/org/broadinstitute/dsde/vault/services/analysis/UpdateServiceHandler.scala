@@ -44,11 +44,20 @@ case class UpdateServiceHandler(requestContext: RequestContext, dmService: Actor
   // set by UpdateMessage
   var dmId: Option[String] = None
 
+  // Capture the update files in the case of "X-Force-Location" header.
+  var providedFiles: Map[String, String] = Map.empty
+
+  // Capture the case where the client is using "X-Force-Location" headers.
+  // No need to populate bossURLs and we return the Analysis using the provided files.
+  var forceLocationHeader: Boolean = false
+
   override def receive: Receive = {
 
     case UpdateMessage(id: String, update: AnalysisUpdate, forceLocation: Option[String]) =>
       dmId = Some(id)
       fileCount = update.files.size
+      forceLocationHeader = forceLocation.getOrElse("false").toBoolean
+      providedFiles = update.files
       update.files.foreach {
         case (ftype, fpath) =>
           bossService ! BossClientService.BossCreateObject(BossDefaults.getCreationRequest(fpath, forceLocation), ftype)
@@ -56,16 +65,22 @@ case class UpdateServiceHandler(requestContext: RequestContext, dmService: Actor
 
     case BossObjectCreated(bossObject: BossCreationObject, creationKey: String) =>
       bossObjects += creationKey -> bossObject.objectId.get
-      bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
+      // If the client is using the "X-Force-Location" header, no need to populate PUT urls.
+      // Instead, forward to the DM service if all BOSS objects have been created.
+      if (forceLocationHeader && fileCount == bossObjects.size) {
+        dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(providedFiles))
+      }
+      else {
+        bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
+      }
 
     case BossObjectResolved(bossObject: BossResolutionResponse, creationKey: String) =>
       bossURLs += creationKey -> bossObject.objectUrl
-      if (fileCount == bossObjects.size)
+      if (fileCount == bossURLs.size)
         dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(bossObjects))
 
     case DMAnalysisUpdated(analysis) =>
-      requestContext.complete(new Analysis(dmId.get, analysis.input, analysis.metadata, Option(bossURLs)))
-      context.stop(self)
+      completeIfDone(analysis)
 
     case ClientFailure(message: String) =>
       log.error("Client failure: " + message)
@@ -73,5 +88,21 @@ case class UpdateServiceHandler(requestContext: RequestContext, dmService: Actor
       context.stop(self)
 
   }
+
+  def completeIfDone(analysis: Analysis): Unit =
+    forceLocationHeader match {
+        case true =>
+          if (fileCount == bossObjects.size) {
+            log.debug("'X-Force-Location' Analysis update complete")
+            requestContext.complete(new Analysis(dmId.get, analysis.input, analysis.metadata, analysis.files))
+            context.stop(self)
+          }
+        case false =>
+          if (fileCount == bossURLs.size) {
+            log.debug("Analysis update complete")
+            requestContext.complete(new Analysis(dmId.get, analysis.input, analysis.metadata, Option(bossURLs)))
+            context.stop(self)
+          }
+      }
 
 }

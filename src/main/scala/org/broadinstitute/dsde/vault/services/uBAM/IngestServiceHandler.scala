@@ -48,11 +48,20 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
   // consumed by UBamIngestResponse after this has been set and [fileCount] bossURLs have been added
   var dmId: Option[String] = None
 
+  // Capture the update files in the case of "X-Force-Location" header.
+  var providedFiles: Map[String, String] = Map.empty
+
+  // Capture the case where the client is using "X-Force-Location" headers.
+  // No need to populate bossURLs and we return the Analysis using the provided files.
+  var forceLocationHeader: Boolean = false
+
   def receive = {
     case IngestMessage(ingest: UBamIngest, forceLocation: Option[String]) =>
       log.debug("Received uBAM ingest message")
       fileCount = ingest.files.size
       metadata = ingest.metadata
+      forceLocationHeader = forceLocation.getOrElse("false").toBoolean
+      providedFiles = ingest.files
       ingest.files.foreach {
         case (ftype, fpath) =>
           bossService ! BossClientService.BossCreateObject(BossDefaults.getCreationRequest(fpath, forceLocation), ftype)
@@ -60,9 +69,16 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
 
     case BossObjectCreated(bossObject: BossCreationObject, creationKey: String) =>
       bossObjects += creationKey -> bossObject.objectId.get
-      bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
-      if (fileCount == bossObjects.size)
+      // If the client is using the "X-Force-Location" header, no need to populate PUT urls.
+      // Instead, forward to the DM service if all BOSS objects have been created.
+      if (forceLocationHeader && fileCount == bossObjects.size) {
         dmService ! DmClientService.DMCreateUBam(new UBamIngest(bossObjects, metadata))
+      }
+      else {
+        bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
+        if (fileCount == bossObjects.size)
+          dmService ! DmClientService.DMCreateUBam(new UBamIngest(bossObjects, metadata))
+      }
 
     case BossObjectResolved(bossObject: BossResolutionResponse, creationKey: String) =>
       bossURLs += creationKey -> bossObject.objectUrl
@@ -81,10 +97,17 @@ case class IngestServiceHandler(requestContext: RequestContext, bossService: Act
   def completeIfDone =
     dmId match {
       case Some(id) =>
-        if (fileCount == bossURLs.size) {
-          log.debug("uBAM ingest complete")
-          requestContext.complete(UBamIngestResponse(id, bossURLs).toJson.prettyPrint)
-          context.stop(self)
+        forceLocationHeader match {
+          case true =>
+            log.debug("'X-Force-Location' uBAM ingest complete")
+            requestContext.complete(UBamIngestResponse(id, providedFiles).toJson.prettyPrint)
+            context.stop(self)
+          case false =>
+            if (fileCount == bossURLs.size) {
+              log.debug("uBAM ingest complete")
+              requestContext.complete(UBamIngestResponse(id, bossURLs).toJson.prettyPrint)
+              context.stop(self)
+            }
         }
       case _ => None
     }
