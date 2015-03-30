@@ -34,14 +34,13 @@ class IngestServiceSpec extends VaultFreeSpec with IngestService {
       }
     }
 
-    // TODO: Update this test once creation no longer returns pre-signed urls when forceLocation is true
-    "when calling POST to the " + path + " path with a UBamIngest object and Force-Location header" - {
-      "should return a valid response with predefined gcs bucket names" in {
+    "when calling POST to the " + path + " path with a UBamIngest object and 'X-Force-Location' header" - {
+      "should return a valid response with the provided file paths" in {
         Post(path, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
           status should equal(OK)
-          val ingestResponse = responseAs[UBamIngestResponse]
-          ingestResponse.files.get("bam").get should include("/path/to/ingest/bam")
-          ingestResponse.files.get("bai").get should include("/path/to/ingest/bai")
+          val files = responseAs[UBamIngestResponse].files
+          files.get("bam").get should equal("/path/to/ingest/bam")
+          files.get("bai").get should equal("/path/to/ingest/bai")
         }
       }
     }
