@@ -8,7 +8,7 @@ import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
 import spray.httpx.SprayJsonSupport._
 
-class IngestServiceSpec extends VaultFreeSpec with IngestService {
+class IngestServiceSpec extends VaultFreeSpec with UBamIngestService {
 
   def actorRefFactory = system
   val path = "/ubams"

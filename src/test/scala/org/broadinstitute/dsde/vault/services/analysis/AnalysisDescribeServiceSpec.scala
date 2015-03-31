@@ -9,7 +9,7 @@ import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.unmarshalling._
 
-class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService with UpdateService with IngestAnalysisService {
+class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeService with AnalysisUpdateService with AnalysisIngestService {
 
   override val routes = describeRoute
 

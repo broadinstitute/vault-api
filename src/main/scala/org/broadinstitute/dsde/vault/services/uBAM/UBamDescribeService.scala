@@ -8,7 +8,7 @@ import org.broadinstitute.dsde.vault.model._
 import spray.routing._
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
-trait DescribeService extends HttpService {
+trait UBamDescribeService extends HttpService {
 
   val routes = describeRoute
 

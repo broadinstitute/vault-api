@@ -10,7 +10,7 @@ import spray.httpx.SprayJsonSupport._
 import uBAMJsonProtocol._
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
-trait IngestService extends HttpService {
+trait UBamIngestService extends HttpService {
 
   val routes = ingestRoute
 

@@ -8,7 +8,7 @@ import spray.http.MediaTypes._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
-trait DescribeService extends HttpService {
+trait AnalysisDescribeService extends HttpService {
 
   val routes = describeRoute
 

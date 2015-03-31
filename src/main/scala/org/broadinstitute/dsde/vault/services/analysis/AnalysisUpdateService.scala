@@ -12,7 +12,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 1)
-trait UpdateService extends HttpService {
+trait AnalysisUpdateService extends HttpService {
 
   val routes = updateRoute
 

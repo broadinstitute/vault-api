@@ -20,14 +20,14 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
     def actorRefFactory = context
   }
 
-  val uBAMIngest = new uBAM.IngestService with ActorRefFactoryContext
-  val uBAMDescribe = new uBAM.DescribeService with ActorRefFactoryContext
-  val uBAMRedirect = new uBAM.RedirectService with ActorRefFactoryContext
+  val uBAMIngest = new uBAM.UBamIngestService with ActorRefFactoryContext
+  val uBAMDescribe = new uBAM.UBamDescribeService with ActorRefFactoryContext
+  val uBAMRedirect = new uBAM.UBamRedirectService with ActorRefFactoryContext
 
-  val analysisIngest = new analysis.IngestAnalysisService with ActorRefFactoryContext
-  val analysisDescribe = new analysis.DescribeService with ActorRefFactoryContext
-  val analysisUpdate = new analysis.UpdateService with ActorRefFactoryContext
-  val analysisRedirect = new analysis.RedirectService with ActorRefFactoryContext
+  val analysisIngest = new analysis.AnalysisIngestService with ActorRefFactoryContext
+  val analysisDescribe = new analysis.AnalysisDescribeService with ActorRefFactoryContext
+  val analysisUpdate = new analysis.AnalysisUpdateService with ActorRefFactoryContext
+  val analysisRedirect = new analysis.AnalysisRedirectService with ActorRefFactoryContext
 
   val lookupService = new lookup.LookupService with ActorRefFactoryContext
 
@@ -42,13 +42,13 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   val swaggerService = new SwaggerHttpService {
     // All documented API services must be added to these API types
     override def apiTypes = Seq(
-      typeOf[uBAM.IngestService],
-      typeOf[uBAM.DescribeService],
-      typeOf[uBAM.RedirectService],
-      typeOf[analysis.IngestAnalysisService],
-      typeOf[analysis.DescribeService],
-      typeOf[analysis.UpdateService],
-      typeOf[analysis.RedirectService],
+      typeOf[uBAM.UBamIngestService],
+      typeOf[uBAM.UBamDescribeService],
+      typeOf[uBAM.UBamRedirectService],
+      typeOf[analysis.AnalysisIngestService],
+      typeOf[analysis.AnalysisDescribeService],
+      typeOf[analysis.AnalysisUpdateService],
+      typeOf[analysis.AnalysisRedirectService],
       typeOf[lookup.LookupService])
 
     override def apiVersion = VaultConfig.SwaggerConfig.apiVersion

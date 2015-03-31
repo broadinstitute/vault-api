@@ -4,13 +4,13 @@ import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
-import org.broadinstitute.dsde.vault.services.uBAM.IngestService
+import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
 import spray.httpx.SprayJsonSupport._
 
-class AnalysisUpdateServiceSpec extends VaultFreeSpec with UpdateService with IngestService {
+class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService with UBamIngestService {
 
   override val routes = updateRoute
 

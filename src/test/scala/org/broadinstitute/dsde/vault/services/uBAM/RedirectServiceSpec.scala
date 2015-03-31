@@ -8,7 +8,7 @@ import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class RedirectServiceSpec extends VaultFreeSpec with RedirectService with IngestService {
+class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService {
 
   override val routes = redirectRoute
 

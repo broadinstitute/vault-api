@@ -1,20 +1,20 @@
-package org.broadinstitute.dsde.vault.services.uBAM
+package org.broadinstitute.dsde.vault.services.analysis
 
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.routing._
 
-@Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
-trait RedirectService extends HttpService {
+@Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 0)
+trait AnalysisRedirectService extends HttpService {
 
   val routes = redirectRoute
 
-  @ApiOperation(value = "Redirects to presigned GET URLs for uBAM files", nickname = "ubam_redirect", httpMethod = "GET",
-    notes = "Returns an HTTP 307 redirect to a presigned GET URL for the specified uBAM file. If the caller would like presigned URLs to all files within an object, " +
+  @ApiOperation(value = "Redirects to presigned GET URLs for analyses", nickname = "analysis_redirect", httpMethod = "GET",
+    notes = "Returns an HTTP 307 redirect to a presigned GET URL for the specified analysis output file. If the caller would like presigned URLs to all files within an analysis, " +
       "it is the caller's responsibility to make multiple requests to this API - one for each file.")
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "uBAM Vault ID"),
-    new ApiImplicitParam(name = "filetype", required = true, dataType = "string", paramType = "path", value = "The user-specified unique key for this file, e.g. 'bam' or 'bai'")
+    new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "Analysis Vault ID"),
+    new ApiImplicitParam(name = "filetype", required = true, dataType = "string", paramType = "path", value = "The user-specified unique key for this file, e.g. 'bam' or 'vcf'")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 307, message = "Redirected"),
@@ -23,7 +23,7 @@ trait RedirectService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def redirectRoute =
-    path("ubams" / Segment / Segment) {
+    path("analyses" / Segment / Segment) {
       (id, filetype) =>
         get {
           requestContext =>
