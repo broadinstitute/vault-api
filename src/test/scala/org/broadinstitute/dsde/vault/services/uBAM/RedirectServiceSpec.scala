@@ -16,13 +16,14 @@ class RedirectServiceSpec extends VaultFreeSpec with RedirectService with Ingest
   val path = "/ubams"
   val openAmResponse = getOpenAmToken.get
   var testingId = "invalid_UUID"
+  var forceTestingId = "invalid_UUID"
+
+  val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
+  val metadata = Map("ownerId" -> "user")
 
   "RedirectuBAMService" - {
     "while preparing the ubam test data" - {
       "should successfully store the data" in {
-        val path = "/ubams"
-        val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
-        val metadata = Map("ownerId" -> "user")
         val ubamIngest = new UBamIngest(files, metadata)
         Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
           status should equal(OK)
@@ -34,7 +35,6 @@ class RedirectServiceSpec extends VaultFreeSpec with RedirectService with Ingest
     "when calling GET to the " + path + " path with a valid Vault ID and a valid file type" - {
       "should return a redirect url to the file" in {
         Get(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> redirectRoute ~> check {
-          println(entity.toString)
           status should equal(TemporaryRedirect)
         }
       }
@@ -43,7 +43,6 @@ class RedirectServiceSpec extends VaultFreeSpec with RedirectService with Ingest
     "when calling GET to the " + path + " path with a valid Vault ID and an invalid file type" - {
       "should return a Bad Request response" in {
         Get(path + "/" + testingId + "/invalid") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(redirectRoute) ~> check {
-          println(entity.toString)
           status should equal(BadRequest)
         }
       }
@@ -71,6 +70,27 @@ class RedirectServiceSpec extends VaultFreeSpec with RedirectService with Ingest
         Post(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(redirectRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
+        }
+      }
+    }
+
+    "X-Force-Location API: while preparing the ubam test data" - {
+      "should successfully store the data" in {
+        val ubamIngest = new UBamIngest(files, metadata)
+        Post(path, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+          status should equal(OK)
+          forceTestingId = responseAs[UBamIngestResponse].id
+          files.get("bam").get should equal("/path/to/ingest/bam")
+          files.get("bai").get should equal("/path/to/ingest/bai")
+
+        }
+      }
+    }
+
+    "X-Force-Location API: when calling GET to the " + path + " path with a valid Vault ID and a valid file type" - {
+      "should return a redirect url to the file" in {
+        Get(path + "/" + forceTestingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> redirectRoute ~> check {
+          status should equal(TemporaryRedirect)
         }
       }
     }

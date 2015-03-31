@@ -9,7 +9,6 @@ object AnalysisJsonProtocol extends DefaultJsonProtocol {
   implicit val impAnalysisIngestResponse = jsonFormat1(AnalysisIngestResponse)
   implicit val impAnalysisIngest = jsonFormat2(AnalysisIngest)
   implicit val impAnalysis = jsonFormat4(Analysis)
-  implicit val impAnalysisResponse = jsonFormat1(AnalysisIngestResponse)
   implicit val impAnalysisUpdate = jsonFormat1(AnalysisUpdate)
   implicit val impAnalysisDMUpdate = jsonFormat2(AnalysisDMUpdate)
 }

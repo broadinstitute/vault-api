@@ -2,7 +2,8 @@ package org.broadinstitute.dsde.vault.services.analysis
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
-import org.broadinstitute.dsde.vault.DmClientService
+import org.broadinstitute.dsde.vault.model.Analysis
+import org.broadinstitute.dsde.vault.{VaultConfig, DmClientService}
 import org.broadinstitute.dsde.vault.DmClientService.DMAnalysisResolved
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.services.ClientFailure
@@ -27,8 +28,12 @@ case class DescribeServiceHandler(requestContext: RequestContext, dmService: Act
       log.debug("Received Analysis describe message")
       dmService ! DmClientService.DMResolveAnalysis(dmId)
 
-    case DMAnalysisResolved(analysis) =>
-      requestContext.complete(analysis)
+    case DMAnalysisResolved(resolvedAnalysis) =>
+      val redirects = resolvedAnalysis.files.getOrElse(Map.empty) map {
+        case (fileType, _) => (fileType, VaultConfig.Vault.analysisRedirectUrl(resolvedAnalysis.id, fileType))
+      }
+
+      requestContext.complete(resolvedAnalysis.copy(files = Option(redirects)))
       context.stop(self)
 
     case ClientFailure(message: String) =>

@@ -1,7 +1,7 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
 import org.broadinstitute.dsde.vault.VaultFreeSpec
-import org.broadinstitute.dsde.vault.model.Analysis
+import org.broadinstitute.dsde.vault.model.{AnalysisIngestResponse, AnalysisIngest, AnalysisUpdate, Analysis}
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import spray.http.HttpCookie
 import spray.http.HttpHeaders.Cookie
@@ -9,15 +9,32 @@ import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.unmarshalling._
 
-class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
+class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService with UpdateService with IngestAnalysisService {
+
+  override val routes = describeRoute
 
   def actorRefFactory = system
 
   val path = "/analyses"
   val openAmResponse = getOpenAmToken.get
-  val testId = "f222066b-a822-4d67-b946-3f486fc620ba"
+  var testId = "invalid_UUID"
 
   "DescribeAnalysisService" - {
+    "when calling POST to the ingest path in order to set up" - {
+      "should return as OK" in {
+        val ingestPath = "/analyses"
+        val analysisIngest = new AnalysisIngest(
+          input = List(),
+          metadata = Map("ownerId" -> "testUser", "randomData" -> "7")
+        )
+        Post(ingestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+          status should equal(OK)
+          val respAnalysis = responseAs[AnalysisIngestResponse]
+          testId = respAnalysis.id
+        }
+      }
+    }
+
     "when calling GET to the " + path + " path with a Vault ID" - {
       "should return that ID" in {
         Get(path + "/" + testId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> describeRoute ~> check {
@@ -31,17 +48,48 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService {
           respAnalysis.id should equal(testId)
           respAnalysis.input shouldBe empty
           respAnalysis.files.get shouldBe empty
-          respAnalysis.metadata should equal(Map("ownerId" -> "testUser"))
+          respAnalysis.metadata should equal(Map("ownerId" -> "testUser", "randomData" -> "7"))
         }
       }
     }
 
-    "DescribeAnalysisService" - {
-      "when calling GET to the " + path + " path with an invalid Vault ID" - {
-        "should return a Not Found error" in {
-          Get(path + "/" + "unknown-not-found-id") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(describeRoute) ~> check {
-            status should equal(NotFound)
-          }
+    "when calling POST to the update path in order to add completed files" - {
+      "should return as OK" in {
+        val updatePath = s"/analyses/%s/outputs"
+        val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "path/to/ingest/vcf", "bai" -> "path/to/ingest/bai", "bam" -> "path/to/ingest/bam"))
+        Post(updatePath.format(testId), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> updateRoute ~> check {
+          status should equal(OK)
+          val analysisResponse = responseAs[Analysis]
+          val files = responseAs[Analysis].files
+          analysisResponse.id should be (testId)
+          files.get isDefinedAt "bam"
+          files.get isDefinedAt "bai"
+          files.get isDefinedAt "vcf"
+        }
+      }
+    }
+
+    "when calling GET to the " + path + " path with a Vault ID" - {
+      "should reference the new files" in {
+        Get(path + "/" + testId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> describeRoute ~> check {
+          status should equal(OK)
+          val respAnalysis = responseAs[Analysis]
+          respAnalysis.id should equal(testId)
+          respAnalysis.files.get shouldNot be(empty)
+          respAnalysis.files.get.getOrElse("bam", "error") should (be an (URL) and not be a (UUID))
+          respAnalysis.files.get.getOrElse("bai", "error") should (be an (URL) and not be a (UUID))
+          respAnalysis.files.get.getOrElse("vcf", "error") should (be an (URL) and not be a (UUID))
+          respAnalysis.files.get.getOrElse("bam", "error") shouldNot include("ingest")
+          respAnalysis.files.get.getOrElse("bai", "error") shouldNot include("ingest")
+          respAnalysis.files.get.getOrElse("vcf", "error") shouldNot include("ingest")
+         }
+      }
+    }
+
+    "when calling GET to the " + path + " path with an invalid Vault ID" - {
+      "should return a Not Found error" in {
+        Get(path + "/" + "unknown-not-found-id") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(describeRoute) ~> check {
+          status should equal(NotFound)
         }
       }
     }

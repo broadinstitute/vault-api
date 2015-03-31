@@ -18,12 +18,12 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService with Ingest
   val openAmResponse = getOpenAmToken.get
   var testingId = "invalid_UUID"
 
+  val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
+  val metadata = Map("ownerId" -> "user")
+
   "DescribeuBAMService" - {
     "while preparing the ubam test data" - {
       "should successfully store the data" in {
-        val path = "/ubams"
-        val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
-        val metadata = Map("ownerId" -> "user")
         val ubamIngest = new UBamIngest(files, metadata)
         Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
           status should equal(OK)
@@ -36,9 +36,13 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService with Ingest
       "should return that ID" in {
         Get(path + "/" + testingId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> describeRoute ~> check {
           status should equal(OK)
-          entity.toString should include(testingId)
-          import uBAMJsonProtocol._
-          entity.as[UBam].isRight shouldBe true
+          val response = responseAs[UBam]
+          response.id should be(testingId)
+          response.metadata should equal(Map("ownerId" -> "user"))
+          response.files.getOrElse("bam", "error") should (be an (URL) and not be a (UUID))
+          response.files.getOrElse("bai", "error") should (be an (URL) and not be a (UUID))
+          response.files.getOrElse("bam", "error") shouldNot include("ingest")
+          response.files.getOrElse("bai", "error") shouldNot include("ingest")
         }
       }
     }

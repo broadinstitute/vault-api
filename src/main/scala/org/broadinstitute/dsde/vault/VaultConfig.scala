@@ -29,6 +29,7 @@ object VaultConfig {
   object Vault {
     private val vault = config.getConfig("vault")
     def uBamRedirectUrl(id: String, fileType: String) = vault.getString("ubamsRedirectUrl").format(id, fileType)
+    def analysisRedirectUrl(id: String, fileType: String) = vault.getString("analysesRedirectUrl").format(id, fileType)
   }
 
   object DataManagement {
