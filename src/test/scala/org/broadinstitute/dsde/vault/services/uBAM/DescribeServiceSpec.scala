@@ -39,8 +39,8 @@ class DescribeServiceSpec extends VaultFreeSpec with DescribeService with Ingest
           val response = responseAs[UBam]
           response.id should be(testingId)
           response.metadata should equal(Map("ownerId" -> "user"))
-          response.files.getOrElse("bam", "error") should startWith("http")   // TODO: better way to distinguish URL from UUID?
-          response.files.getOrElse("bai", "error") should startWith("http")   // TODO: better way to distinguish URL from UUID?
+          response.files.getOrElse("bam", "error") should (be an (URL) and not be a (UUID))
+          response.files.getOrElse("bai", "error") should (be an (URL) and not be a (UUID))
           response.files.getOrElse("bam", "error") shouldNot include("ingest")
           response.files.getOrElse("bai", "error") shouldNot include("ingest")
         }

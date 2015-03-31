@@ -76,9 +76,9 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with DescribeService wit
           val respAnalysis = responseAs[Analysis]
           respAnalysis.id should equal(testId)
           respAnalysis.files.get shouldNot be(empty)
-          respAnalysis.files.get.getOrElse("bam", "error") should startWith("http")   // TODO: better way to distinguish URL from UUID?
-          respAnalysis.files.get.getOrElse("bai", "error") should startWith("http")   // TODO: better way to distinguish URL from UUID?
-          respAnalysis.files.get.getOrElse("vcf", "error") should startWith("http")   // TODO: better way to distinguish URL from UUID?
+          respAnalysis.files.get.getOrElse("bam", "error") should (be an (URL) and not be a (UUID))
+          respAnalysis.files.get.getOrElse("bai", "error") should (be an (URL) and not be a (UUID))
+          respAnalysis.files.get.getOrElse("vcf", "error") should (be an (URL) and not be a (UUID))
           respAnalysis.files.get.getOrElse("bam", "error") shouldNot include("ingest")
           respAnalysis.files.get.getOrElse("bai", "error") shouldNot include("ingest")
           respAnalysis.files.get.getOrElse("vcf", "error") shouldNot include("ingest")

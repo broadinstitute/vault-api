@@ -1,6 +1,5 @@
 package org.broadinstitute.dsde.vault.services.lookup
 
-import java.util.UUID
 import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.{UBamIngestResponse, UBamIngest, EntitySearchResult}
 import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
@@ -20,7 +19,7 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with IngestServ
   val openAmResponse = getOpenAmToken.get
 
   var testDataGuid: String = "not-a-uuid"
-  val testValue = UUID.randomUUID().toString
+  val testValue = java.util.UUID.randomUUID().toString
 
   "LookupService" - {
     "while preparing the ubam test data" - {
