@@ -29,11 +29,29 @@ object VaultConfig {
     private val vault = config.getConfig("vault")
     lazy val server = vault.getString("server")
 
-    def uBamRedirectPath(id: String, fileType: String) = vault.getString("ubamsRedirectPath").format(id, fileType)
-    def uBamRedirectUrl(id: String, fileType: String) = server + uBamRedirectPath(id, fileType)
+    lazy val analysisIngestPath = vault.getString("analysesIngestPath")
+    lazy val analysisIngestUrl = server + analysisIngestPath
+
+    def analysisDescribePath(id: String) = vault.getString("analysesDescribePath").format(id)
+    def analysisDescribeUrl(id: String) = server + analysisDescribePath(id)
+
+    def analysisUpdatePath(id: String) = vault.getString("analysesUpdatePath").format(id)
+    def analysisUpdateUrl(id: String) = server + analysisUpdatePath(id)
 
     def analysisRedirectPath(id: String, fileType: String) = vault.getString("analysesRedirectPath").format(id, fileType)
     def analysisRedirectUrl(id: String, fileType: String) = server + analysisRedirectPath(id, fileType)
+
+    def lookupPath(entityType: String, attributeName: String, attributeValue: String) = vault.getString("lookupPath").format(entityType, attributeName, attributeValue)
+    def lookupUrl(entityType: String, attributeName: String, attributeValue: String) = server + lookupPath(entityType, attributeName, attributeValue)
+
+    lazy val ubamIngestPath = vault.getString("ubamsIngestPath")
+    lazy val ubamIngestUrl = server + ubamIngestPath
+
+    def ubamDescribePath(id: String) = vault.getString("ubamsDescribePath").format(id)
+    def ubamDescribeUrl(id: String) = server + ubamDescribePath(id)
+
+    def ubamRedirectPath(id: String, fileType: String) = vault.getString("ubamsRedirectPath").format(id, fileType)
+    def ubamRedirectUrl(id: String, fileType: String) = server + ubamRedirectPath(id, fileType)
   }
 
   object DataManagement {

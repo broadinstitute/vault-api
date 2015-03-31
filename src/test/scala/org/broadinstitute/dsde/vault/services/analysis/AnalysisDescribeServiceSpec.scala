@@ -1,6 +1,6 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
-import org.broadinstitute.dsde.vault.VaultFreeSpec
+import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import org.broadinstitute.dsde.vault.model.{AnalysisIngestResponse, AnalysisIngest, AnalysisUpdate, Analysis}
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import spray.http.HttpCookie
@@ -15,19 +15,17 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
 
   def actorRefFactory = system
 
-  val path = "/analyses"
   val openAmResponse = getOpenAmToken.get
   var testId = "invalid_UUID"
 
   "AnalysisDescribeServiceSpec" - {
-    "when calling POST to the ingest path in order to set up" - {
+    "when calling POST to the Analysis Ingest path in order to set up" - {
       "should return as OK" in {
-        val ingestPath = "/analyses"
         val analysisIngest = new AnalysisIngest(
           input = List(),
           metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
-        Post(ingestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
           status should equal(OK)
           val respAnalysis = responseAs[AnalysisIngestResponse]
           testId = respAnalysis.id
@@ -35,9 +33,9 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
       }
     }
 
-    "when calling GET to the " + path + " path with a Vault ID" - {
+    "when calling GET to the Analysis Describe path with a Vault ID" - {
       "should return that ID" in {
-        Get(path + "/" + testId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisDescribeRoute ~> check {
+        Get(VaultConfig.Vault.analysisDescribePath(testId)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisDescribeRoute ~> check {
           status should equal(OK)
           // test response as raw string
           entity.toString should include(testId)
@@ -53,11 +51,10 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
       }
     }
 
-    "when calling POST to the update path in order to add completed files" - {
+    "when calling POST to the Analysis Update path in order to add completed files" - {
       "should return as OK" in {
-        val updatePath = s"/analyses/%s/outputs"
         val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "path/to/ingest/vcf", "bai" -> "path/to/ingest/bai", "bam" -> "path/to/ingest/bam"))
-        Post(updatePath.format(testId), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
+        Post(VaultConfig.Vault.analysisUpdatePath(testId), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
           status should equal(OK)
           val analysisResponse = responseAs[Analysis]
           val files = responseAs[Analysis].files
@@ -69,9 +66,9 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
       }
     }
 
-    "when calling GET to the " + path + " path with a Vault ID" - {
+    "when calling GET to the Analysis Describe path with a Vault ID" - {
       "should reference the new files" in {
-        Get(path + "/" + testId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisDescribeRoute ~> check {
+        Get(VaultConfig.Vault.analysisDescribePath(testId)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisDescribeRoute ~> check {
           status should equal(OK)
           val respAnalysis = responseAs[Analysis]
           respAnalysis.id should equal(testId)
@@ -86,26 +83,26 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
       }
     }
 
-    "when calling GET to the " + path + " path with an invalid Vault ID" - {
+    "when calling GET to the Analysis Describe path with an invalid Vault ID" - {
       "should return a Not Found error" in {
-        Get(path + "/" + "unknown-not-found-id") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisDescribeRoute) ~> check {
+        Get(VaultConfig.Vault.analysisDescribePath("unknown-not-found-id")) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisDescribeRoute) ~> check {
           status should equal(NotFound)
         }
       }
     }
 
-    "when calling PUT to the " + path + " path with a Vault ID" - {
+    "when calling PUT to the Analysis Describe path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Put(path + "/" + testId) ~> sealRoute(analysisDescribeRoute) ~> check {
+        Put(VaultConfig.Vault.analysisDescribePath(testId)) ~> sealRoute(analysisDescribeRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
         }
       }
     }
 
-    "when calling POST to the " + path + " path with a Vault ID" - {
+    "when calling POST to the Analysis Describe path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Post(path + "/" + testId) ~> sealRoute(analysisDescribeRoute) ~> check {
+        Post(VaultConfig.Vault.analysisDescribePath(testId)) ~> sealRoute(analysisDescribeRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
         }
