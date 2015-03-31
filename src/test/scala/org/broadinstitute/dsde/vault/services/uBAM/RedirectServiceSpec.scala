@@ -10,7 +10,7 @@ import spray.httpx.SprayJsonSupport._
 
 class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService {
 
-  override val routes = redirectRoute
+  override val routes = uBamRedirectRoute
 
   def actorRefFactory = system
   val path = "/ubams"
@@ -25,7 +25,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
     "while preparing the ubam test data" - {
       "should successfully store the data" in {
         val ubamIngest = new UBamIngest(files, metadata)
-        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           testingId = responseAs[UBamIngestResponse].id
         }
@@ -34,7 +34,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
 
     "when calling GET to the " + path + " path with a valid Vault ID and a valid file type" - {
       "should return a redirect url to the file" in {
-        Get(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> redirectRoute ~> check {
+        Get(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamRedirectRoute ~> check {
           status should equal(TemporaryRedirect)
         }
       }
@@ -42,7 +42,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
 
     "when calling GET to the " + path + " path with a valid Vault ID and an invalid file type" - {
       "should return a Bad Request response" in {
-        Get(path + "/" + testingId + "/invalid") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(redirectRoute) ~> check {
+        Get(path + "/" + testingId + "/invalid") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamRedirectRoute) ~> check {
           status should equal(BadRequest)
         }
       }
@@ -50,7 +50,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
 
     "when calling GET to the " + path + " path with an invalid Vault ID and a valid file type" - {
       "should return a a Not Found response" in {
-        Get(path + "/12345-67890-12345/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(redirectRoute) ~> check {
+        Get(path + "/12345-67890-12345/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamRedirectRoute) ~> check {
           status should equal(NotFound)
         }
       }
@@ -58,7 +58,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
 
     "when calling PUT to the " + path + " path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Put(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(redirectRoute) ~> check {
+        Put(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamRedirectRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
         }
@@ -67,7 +67,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
 
     "when calling POST to the " + path + " path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Post(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(redirectRoute) ~> check {
+        Post(path + "/" + testingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamRedirectRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
         }
@@ -77,7 +77,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
     "X-Force-Location API: while preparing the ubam test data" - {
       "should successfully store the data" in {
         val ubamIngest = new UBamIngest(files, metadata)
-        Post(path, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post(path, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           forceTestingId = responseAs[UBamIngestResponse].id
           files.get("bam").get should equal("/path/to/ingest/bam")
@@ -89,7 +89,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
 
     "X-Force-Location API: when calling GET to the " + path + " path with a valid Vault ID and a valid file type" - {
       "should return a redirect url to the file" in {
-        Get(path + "/" + forceTestingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> redirectRoute ~> check {
+        Get(path + "/" + forceTestingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamRedirectRoute ~> check {
           status should equal(TemporaryRedirect)
         }
       }

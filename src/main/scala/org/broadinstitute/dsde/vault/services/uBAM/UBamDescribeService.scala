@@ -10,7 +10,7 @@ import spray.routing._
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait UBamDescribeService extends HttpService {
 
-  val routes = describeRoute
+  val routes = uBamDescribeRoute
 
   @ApiOperation(value = "Describes a uBAM's metadata and associated files.  Does not generate presigned URLs.",
     nickname = "ubam_describe",
@@ -26,7 +26,7 @@ trait UBamDescribeService extends HttpService {
     new ApiResponse(code = 404, message = "Vault ID Not Found"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
-  def describeRoute = {
+  def uBamDescribeRoute = {
     path("ubams" / Segment) {
       id =>
         get {

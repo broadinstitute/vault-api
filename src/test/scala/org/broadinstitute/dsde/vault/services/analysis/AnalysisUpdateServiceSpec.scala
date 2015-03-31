@@ -12,7 +12,7 @@ import spray.httpx.SprayJsonSupport._
 
 class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService with UBamIngestService {
 
-  override val routes = updateRoute
+  override val routes = analysisUpdateRoute
 
   def actorRefFactory = system
 
@@ -29,7 +29,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
         val files = Map(("bam", "/path/to/ingest/bam"))
         val metadata = Map("ownerId" -> "user")
         val ubamIngest = new UBamIngest(files, metadata)
-        Post("/ubams", ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post("/ubams", ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           testDataGuid = responseAs[UBamIngestResponse].id
         }
@@ -38,7 +38,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
 
     "when calling POST to the " + path + " path with a valid Vault ID and valid body" - {
       "should return as OK" in {
-        Post(path.format(testDataGuid), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> updateRoute ~> check {
+        Post(path.format(testDataGuid), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
           status should equal(OK)
           val analysisResponse = responseAs[Analysis]
           val files = responseAs[Analysis].files
@@ -52,7 +52,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
 
     "when calling POST to the " + path + " path with a Analysis object and 'X-Force-Location' header" - {
       "should return a valid response with paths as part of the file path names" in {
-        Post(path.format(testDataGuid), analysisUpdate) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> updateRoute ~> check {
+        Post(path.format(testDataGuid), analysisUpdate) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
           status should equal(OK)
           val files = responseAs[Analysis].files
           files.get("bam") should equal("path/to/ingest/bam")
@@ -64,7 +64,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
 
     "when calling POST to the " + path + " path with an invalid Vault ID and valid body" - {
       "should return a Not Found error" in {
-        Post(path.format("unknown-not-found-id"), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(updateRoute) ~> check {
+        Post(path.format("unknown-not-found-id"), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
           status should equal(NotFound)
         }
       }
@@ -73,7 +73,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
     "when calling POST to the " + path + " path with an invalid body" - {
       "should return a Bad Request error" in {
         val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
-        Post(path.format(testDataGuid), malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(updateRoute) ~> check {
+        Post(path.format(testDataGuid), malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
           status should equal(BadRequest)
         }
       }
@@ -81,7 +81,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
 
     "when calling PUT to the " + path + " path" - {
       "should return a MethodNotAllowed error" in {
-        Put(path.format(testDataGuid)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(updateRoute) ~> check {
+        Put(path.format(testDataGuid)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }
@@ -90,7 +90,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
 
     "when calling GET to the " + path + " path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Get(path.format(testDataGuid)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(updateRoute) ~> check {
+        Get(path.format(testDataGuid)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }

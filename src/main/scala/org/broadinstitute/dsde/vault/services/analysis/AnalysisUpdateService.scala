@@ -14,7 +14,7 @@ import spray.routing._
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 1)
 trait AnalysisUpdateService extends HttpService {
 
-  val routes = updateRoute
+  val routes = analysisUpdateRoute
 
   @Path("/{id}/outputs")
   @ApiOperation(
@@ -37,7 +37,7 @@ trait AnalysisUpdateService extends HttpService {
     new ApiResponse(code = 404, message = "Vault ID Not Found"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
-  def updateRoute =
+  def analysisUpdateRoute =
     path("analyses" / Segment / "outputs") {
       id => {
         post {

@@ -12,7 +12,7 @@ import uBAMJsonProtocol._
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait UBamIngestService extends HttpService {
 
-  val routes = ingestRoute
+  val routes = uBamIngestRoute
 
   @ApiOperation(
     value = "Creates uBAM objects",
@@ -33,7 +33,7 @@ trait UBamIngestService extends HttpService {
     new ApiResponse(code = 400, message = "Malformed Input"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
-  def ingestRoute =
+  def uBamIngestRoute =
     path("ubams") {
       post {
         optionalHeaderValueByName("X-Force-Location") {

@@ -24,7 +24,7 @@ class IngestServiceSpec extends VaultFreeSpec with UBamIngestService {
     "when calling POST to the " + path + " path with a UBamIngest object" - {
       "should return a valid response" in {
         // As designed, the API returns an object that only contains an id and files, but not the supplied metadata
-        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           responseAs[String] should include("bam")
           responseAs[String] should include("bai")
@@ -36,7 +36,7 @@ class IngestServiceSpec extends VaultFreeSpec with UBamIngestService {
 
     "when calling POST to the " + path + " path with a UBamIngest object and 'X-Force-Location' header" - {
       "should return a valid response with the provided file paths" in {
-        Post(path, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post(path, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           val files = responseAs[UBamIngestResponse].files
           files.get("bam").get should equal("/path/to/ingest/bam")
@@ -47,7 +47,7 @@ class IngestServiceSpec extends VaultFreeSpec with UBamIngestService {
 
     "when calling GET to the " + path + " path" - {
       "should return a MethodNotAllowed error" in {
-        Get(path) ~> sealRoute(ingestRoute) ~> check {
+        Get(path) ~> sealRoute(uBamIngestRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }
@@ -56,7 +56,7 @@ class IngestServiceSpec extends VaultFreeSpec with UBamIngestService {
 
     "when calling PUT to the " + path + " path" - {
       "should return a MethodNotAllowed error" in {
-        Put(path) ~> sealRoute(ingestRoute) ~> check {
+        Put(path) ~> sealRoute(uBamIngestRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }
@@ -66,7 +66,7 @@ class IngestServiceSpec extends VaultFreeSpec with UBamIngestService {
     "when calling POST to the " + path + " path with a malformed UBamIngest object" - {
       "should return an invalid response" in {
         val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
-        Post(path, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(ingestRoute) ~> check {
+        Post(path, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamIngestRoute) ~> check {
           status should equal(BadRequest)
         }
       }

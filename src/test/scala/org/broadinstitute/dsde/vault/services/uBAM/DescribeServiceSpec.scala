@@ -11,7 +11,7 @@ import spray.httpx.SprayJsonSupport._
 
 class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService {
 
-  override val routes = describeRoute
+  override val routes = uBamDescribeRoute
 
   def actorRefFactory = system
   val path = "/ubams"
@@ -25,7 +25,7 @@ class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UB
     "while preparing the ubam test data" - {
       "should successfully store the data" in {
         val ubamIngest = new UBamIngest(files, metadata)
-        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           testingId = responseAs[UBamIngestResponse].id
         }
@@ -34,7 +34,7 @@ class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UB
 
     "when calling GET to the " + path + " path with a Vault ID" - {
       "should return that ID" in {
-        Get(path + "/" + testingId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> describeRoute ~> check {
+        Get(path + "/" + testingId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamDescribeRoute ~> check {
           status should equal(OK)
           val response = responseAs[UBam]
           response.id should be(testingId)
@@ -49,7 +49,7 @@ class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UB
 
     "when calling GET to the " + path + " path with an unknown Vault ID" - {
       "should return a 404 not found error" in {
-        Get(path + "/12345-67890-12345") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(describeRoute) ~> check {
+        Get(path + "/12345-67890-12345") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamDescribeRoute) ~> check {
           status should equal(NotFound)
         }
       }
@@ -57,7 +57,7 @@ class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UB
 
     "when calling PUT to the " + path + " path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Put(path + "/" + testingId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(describeRoute) ~> check {
+        Put(path + "/" + testingId) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamDescribeRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
         }
@@ -66,7 +66,7 @@ class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UB
 
     "when calling POST to the " + path + " path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Post(path + "/arbitrary_id") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(describeRoute) ~> check {
+        Post(path + "/arbitrary_id") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamDescribeRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
         }

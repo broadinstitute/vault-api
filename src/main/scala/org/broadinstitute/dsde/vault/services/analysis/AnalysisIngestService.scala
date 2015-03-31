@@ -11,7 +11,7 @@ import spray.routing._
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait AnalysisIngestService extends HttpService {
 
-  val routes = ingestRoute
+  val routes = analysisIngestRoute
 
   @ApiOperation(
     value = "Creates Analysis objects",
@@ -30,7 +30,7 @@ trait AnalysisIngestService extends HttpService {
     new ApiResponse(code = 400, message = "Malformed Input"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
-  def ingestRoute =
+  def analysisIngestRoute =
     path("analyses") {
       post {
         respondWithMediaType(`application/json`) {
