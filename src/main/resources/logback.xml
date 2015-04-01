@@ -24,6 +24,12 @@
         </encoder>
     </appender>
 
+    <appender name="SYSLOG" class="ch.qos.logback.classic.net.SyslogAppender">
+        <syslogHost>localhost</syslogHost>
+        <facility>AUTH</facility>
+        <suffixPattern>[%thread] %logger %msg</suffixPattern>
+    </appender>
+
     <logger name="org.broadinstitute.dsde" level="info" additivity="false">
         <appender-ref ref="file"/>
         <appender-ref ref="console"/>
@@ -37,6 +43,7 @@
     <root level="warn">
         <appender-ref ref="file"/>
         <appender-ref ref="console"/>
+        <appender-ref ref="SYSLOG" />
     </root>
 
 </configuration>
