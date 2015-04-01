@@ -5,9 +5,9 @@ import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 0)
-trait RedirectService extends HttpService {
+trait AnalysisRedirectService extends HttpService {
 
-  val routes = redirectRoute
+  val routes = analysisRedirectRoute
 
   @ApiOperation(value = "Redirects to presigned GET URLs for analyses", nickname = "analysis_redirect", httpMethod = "GET",
     notes = "Returns an HTTP 307 redirect to a presigned GET URL for the specified analysis output file. If the caller would like presigned URLs to all files within an analysis, " +
@@ -22,7 +22,7 @@ trait RedirectService extends HttpService {
     new ApiResponse(code = 404, message = "Vault ID Not Found"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
-  def redirectRoute =
+  def analysisRedirectRoute =
     path("analyses" / Segment / Segment) {
       (id, filetype) =>
         get {

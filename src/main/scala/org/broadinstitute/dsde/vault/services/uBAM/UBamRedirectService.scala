@@ -5,9 +5,9 @@ import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.routing._
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
-trait RedirectService extends HttpService {
+trait UBamRedirectService extends HttpService {
 
-  val routes = redirectRoute
+  val routes = uBamRedirectRoute
 
   @ApiOperation(value = "Redirects to presigned GET URLs for uBAM files", nickname = "ubam_redirect", httpMethod = "GET",
     notes = "Returns an HTTP 307 redirect to a presigned GET URL for the specified uBAM file. If the caller would like presigned URLs to all files within an object, " +
@@ -22,7 +22,7 @@ trait RedirectService extends HttpService {
     new ApiResponse(code = 404, message = "Vault ID Not Found"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
-  def redirectRoute =
+  def uBamRedirectRoute =
     path("ubams" / Segment / Segment) {
       (id, filetype) =>
         get {

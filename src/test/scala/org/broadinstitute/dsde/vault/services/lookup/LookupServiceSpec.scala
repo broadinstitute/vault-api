@@ -4,13 +4,13 @@ import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.{UBamIngestResponse, UBamIngest, EntitySearchResult}
 import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
-import org.broadinstitute.dsde.vault.services.uBAM.IngestService
+import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import spray.http.HttpCookie
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class LookupServiceSpec extends VaultFreeSpec with LookupService with IngestService {
+class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngestService {
 
   override val routes = lookupRoute
 
@@ -28,7 +28,7 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with IngestServ
         val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
         val metadata = Map("ownerId" -> "user", "uniqueTest" -> testValue)
         val ubamIngest = new UBamIngest(files, metadata)
-        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           testDataGuid = responseAs[UBamIngestResponse].id
         }

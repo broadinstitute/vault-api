@@ -6,7 +6,7 @@ import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
 
-class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestAnalysisService {
+class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService {
 
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.impAnalysisIngest
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.impAnalysisIngestResponse
@@ -23,7 +23,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestAnalysisService
           input = List(),
           metadata = Map("ownerId" -> "testUser", "randomData" -> "7")
         )
-        Post(path, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> ingestRoute ~> check {
+        Post(path, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
           status should equal(OK)
           // test response as raw string
           entity.toString should include("id")
@@ -38,7 +38,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestAnalysisService
     "when calling POST to the " + path + " path with invalid input" - {
       "should return a Bad Request error" in {
         val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
-        Post(path, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(ingestRoute) ~> check {
+        Post(path, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(BadRequest)
         }
       }
@@ -47,7 +47,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestAnalysisService
 
     "when calling PUT to the " + path + " path" - {
       "should return a MethodNotAllowed error" in {
-        Put(path) ~> sealRoute(ingestRoute) ~> check {
+        Put(path) ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }
@@ -56,7 +56,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with IngestAnalysisService
 
     "when calling GET to the " + path + " path" - {
       "should return a MethodNotAllowed error" in {
-        Get(path) ~> sealRoute(ingestRoute) ~> check {
+        Get(path) ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }

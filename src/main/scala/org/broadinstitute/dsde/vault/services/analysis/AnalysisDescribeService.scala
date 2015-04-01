@@ -8,9 +8,9 @@ import spray.http.MediaTypes._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
-trait DescribeService extends HttpService {
+trait AnalysisDescribeService extends HttpService {
 
-  val routes = describeRoute
+  val routes = analysisDescribeRoute
 
   @ApiOperation(value = "Describes an Analysis' metadata, inputs, and output files.  Does not generate presigned URLs.",
     nickname = "analysis_describe",
@@ -27,7 +27,7 @@ trait DescribeService extends HttpService {
     new ApiResponse(code = 404, message = "Vault ID Not Found"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
-  def describeRoute = {
+  def analysisDescribeRoute = {
     path("analyses" / Segment) {
       id => {
         get {
