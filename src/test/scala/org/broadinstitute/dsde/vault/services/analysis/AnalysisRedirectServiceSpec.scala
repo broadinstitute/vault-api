@@ -22,7 +22,7 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
   val metadata = Map("testAttr" -> "testValue")
   val files = Map(("bam", "/path/to/outputs/bam"), ("vcf", "/path/to/outputs/vcf"))
 
-  "Analysis Redirect Service" - {
+  "AnalysisRedirectServiceSpec" - {
     "while preparing the analysis test data" - {
       "should successfully store the data" in {
         val analysisIngest = new AnalysisIngest(inputs, metadata)

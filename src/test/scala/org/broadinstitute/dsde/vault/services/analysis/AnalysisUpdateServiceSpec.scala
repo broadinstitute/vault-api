@@ -22,7 +22,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
   val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "path/to/ingest/vcf", "bai" -> "path/to/ingest/bai", "bam" -> "path/to/ingest/bam"))
   val path = s"/analyses/%s/outputs"
 
-  "AnalysisUpdateService" - {
+  "AnalysisUpdateServiceSpec" - {
 
     "while preparing the ubam test data" - {
       "should successfully store the data" in {

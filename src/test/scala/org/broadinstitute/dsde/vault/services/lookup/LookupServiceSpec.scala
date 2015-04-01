@@ -21,7 +21,7 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngest
   var testDataGuid: String = "not-a-uuid"
   val testValue = java.util.UUID.randomUUID().toString
 
-  "LookupService" - {
+  "LookupServiceSpec" - {
     "while preparing the ubam test data" - {
       "should successfully store the data" in {
         val path = "/ubams"

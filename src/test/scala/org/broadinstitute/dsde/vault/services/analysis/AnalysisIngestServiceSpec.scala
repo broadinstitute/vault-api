@@ -16,7 +16,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
   val path = "/analyses"
   val openAmResponse = getOpenAmToken.get
 
-  "AnalysisIngestService" - {
+  "AnalysisIngestServiceSpec" - {
     "when calling POST to the " + path + " path with empty input and valid metadata" - {
       "should return an ID" in {
         val analysisIngest = new AnalysisIngest(

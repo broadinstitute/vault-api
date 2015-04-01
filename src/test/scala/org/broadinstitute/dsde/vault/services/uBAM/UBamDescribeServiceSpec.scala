@@ -8,7 +8,7 @@ import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService {
+class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService {
 
   override val routes = uBamDescribeRoute
 
@@ -20,7 +20,7 @@ class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UB
   val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
   val metadata = Map("testAttr" -> "testValue")
 
-  "DescribeuBAMService" - {
+  "UBamDescribeServiceSpec" - {
     "while preparing the ubam test data" - {
       "should successfully store the data" in {
         val ubamIngest = new UBamIngest(files, metadata)

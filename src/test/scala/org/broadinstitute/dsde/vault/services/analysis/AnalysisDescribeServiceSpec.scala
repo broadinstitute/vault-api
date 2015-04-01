@@ -19,7 +19,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
   val openAmResponse = getOpenAmToken.get
   var testId = "invalid_UUID"
 
-  "DescribeAnalysisService" - {
+  "AnalysisDescribeServiceSpec" - {
     "when calling POST to the ingest path in order to set up" - {
       "should return as OK" in {
         val ingestPath = "/analyses"

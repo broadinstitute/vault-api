@@ -8,7 +8,7 @@ import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService {
+class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService {
 
   override val routes = uBamRedirectRoute
 
@@ -21,7 +21,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
   val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
   val metadata = Map("testAttr" -> "testValue")
 
-  "RedirectuBAMService" - {
+  "UBamRedirectServiceSpec" - {
     "while preparing the ubam test data" - {
       "should successfully store the data" in {
         val ubamIngest = new UBamIngest(files, metadata)
