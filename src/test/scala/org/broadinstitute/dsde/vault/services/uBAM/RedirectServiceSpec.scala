@@ -91,6 +91,10 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
       "should return a redirect url to the file" in {
         Get(path + "/" + forceTestingId + "/bai") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamRedirectRoute ~> check {
           status should equal(TemporaryRedirect)
+          // test that the redirect properly handles the file path we passed in, which includes slashes
+          // this test will fail if Google changes how they sign urls
+          header("Location") shouldNot be(None)
+          header("Location").get.value should include("/path/to/ingest/bai?GoogleAccessId=")
         }
       }
     }

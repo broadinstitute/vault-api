@@ -114,6 +114,10 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
       "should return a redirect url to the file" in {
         Get(path + "/" + forceTestingId + "/bam") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisRedirectRoute) ~> check {
           status should equal(TemporaryRedirect)
+          // test that the redirect properly handles the file path we passed in, which includes slashes
+          // this test will fail if Google changes how they sign urls
+          header("Location") shouldNot be(None)
+          header("Location").get.value should include("/path/to/outputs/bam?GoogleAccessId=")
         }
       }
     }
