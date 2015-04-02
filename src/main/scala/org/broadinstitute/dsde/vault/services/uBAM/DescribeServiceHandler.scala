@@ -31,7 +31,7 @@ case class DescribeServiceHandler(requestContext: RequestContext, dmService: Act
 
     case DMUBamResolved(resolvedUBam: UBam) =>
       val redirects = resolvedUBam.files.map {
-        case (fileType, _) => (fileType, VaultConfig.Vault.uBamRedirectUrl(resolvedUBam.id, fileType))
+        case (fileType, _) => (fileType, VaultConfig.Vault.ubamRedirectUrl(resolvedUBam.id, fileType))
       }
       requestContext.complete(UBam(resolvedUBam.id, redirects, resolvedUBam.metadata).toJson.prettyPrint)
       context.stop(self)

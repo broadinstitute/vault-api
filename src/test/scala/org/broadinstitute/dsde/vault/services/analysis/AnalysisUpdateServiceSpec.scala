@@ -1,6 +1,6 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
-import org.broadinstitute.dsde.vault.VaultFreeSpec
+import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
@@ -20,25 +20,24 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
 
   var testDataGuid: String = "invalid-id"
   val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "path/to/ingest/vcf", "bai" -> "path/to/ingest/bai", "bam" -> "path/to/ingest/bam"))
-  val path = s"/analyses/%s/outputs"
 
-  "AnalysisUpdateService" - {
+  "AnalysisUpdateServiceSpec" - {
 
     "while preparing the ubam test data" - {
-      "should successfully store the data" in {
+      "should successfully store the data using the UBam Ingest path" in {
         val files = Map(("bam", "/path/to/ingest/bam"))
         val metadata = Map("testAttr" -> "testValue")
         val ubamIngest = new UBamIngest(files, metadata)
-        Post("/ubams", ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
+        Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           testDataGuid = responseAs[UBamIngestResponse].id
         }
       }
     }
 
-    "when calling POST to the " + path + " path with a valid Vault ID and valid body" - {
+    "when calling POST to the Analysis Update path with a valid Vault ID and valid body" - {
       "should return as OK" in {
-        Post(path.format(testDataGuid), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
+        Post(VaultConfig.Vault.analysisUpdatePath(testDataGuid), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
           status should equal(OK)
           val analysisResponse = responseAs[Analysis]
           val files = responseAs[Analysis].files
@@ -50,9 +49,9 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
       }
     }
 
-    "when calling POST to the " + path + " path with a Analysis object and 'X-Force-Location' header" - {
+    "when calling POST to the Analysis Update path with a Analysis object and 'X-Force-Location' header" - {
       "should return a valid response with paths as part of the file path names" in {
-        Post(path.format(testDataGuid), analysisUpdate) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
+        Post(VaultConfig.Vault.analysisUpdatePath(testDataGuid), analysisUpdate) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
           status should equal(OK)
           val files = responseAs[Analysis].files
           files.get("bam") should equal("path/to/ingest/bam")
@@ -62,35 +61,35 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
       }
     }
 
-    "when calling POST to the " + path + " path with an invalid Vault ID and valid body" - {
+    "when calling POST to the Analysis Update path with an invalid Vault ID and valid body" - {
       "should return a Not Found error" in {
-        Post(path.format("unknown-not-found-id"), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
+        Post(VaultConfig.Vault.analysisUpdatePath("unknown-not-found-id"), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
           status should equal(NotFound)
         }
       }
     }
 
-    "when calling POST to the " + path + " path with an invalid body" - {
+    "when calling POST to the Analysis Update path with an invalid body" - {
       "should return a Bad Request error" in {
         val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
-        Post(path.format(testDataGuid), malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
+        Post(VaultConfig.Vault.analysisUpdatePath(testDataGuid), malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
           status should equal(BadRequest)
         }
       }
     }
 
-    "when calling PUT to the " + path + " path" - {
+    "when calling PUT to the Analysis Update path" - {
       "should return a MethodNotAllowed error" in {
-        Put(path.format(testDataGuid)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
+        Put(VaultConfig.Vault.analysisUpdatePath(testDataGuid)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }
       }
     }
 
-    "when calling GET to the " + path + " path with a Vault ID" - {
+    "when calling GET to the Analysis Update path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Get(path.format(testDataGuid)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
+        Get(VaultConfig.Vault.analysisUpdatePath(testDataGuid)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisUpdateRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }

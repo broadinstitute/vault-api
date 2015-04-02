@@ -10,7 +10,6 @@ object VaultConfig {
     lazy val interface = httpConfig.getString("interface")
     lazy val port = httpConfig.getInt("port")
   }
-  //Config Settings
 
   object SwaggerConfig {
     private val swagger = config.getConfig("swagger")
@@ -28,25 +27,66 @@ object VaultConfig {
 
   object Vault {
     private val vault = config.getConfig("vault")
-    def uBamRedirectUrl(id: String, fileType: String) = vault.getString("ubamsRedirectUrl").format(id, fileType)
-    def analysisRedirectUrl(id: String, fileType: String) = vault.getString("analysesRedirectUrl").format(id, fileType)
+    lazy val server = vault.getString("server")
+
+    lazy val analysisIngestPath = vault.getString("analysesIngestPath")
+    lazy val analysisIngestUrl = server + analysisIngestPath
+
+    def analysisDescribePath(id: String) = vault.getString("analysesDescribePath").format(id)
+    def analysisDescribeUrl(id: String) = server + analysisDescribePath(id)
+
+    def analysisUpdatePath(id: String) = vault.getString("analysesUpdatePath").format(id)
+    def analysisUpdateUrl(id: String) = server + analysisUpdatePath(id)
+
+    def analysisRedirectPath(id: String, fileType: String) = vault.getString("analysesRedirectPath").format(id, fileType)
+    def analysisRedirectUrl(id: String, fileType: String) = server + analysisRedirectPath(id, fileType)
+
+    def lookupPath(entityType: String, attributeName: String, attributeValue: String) = vault.getString("lookupPath").format(entityType, attributeName, attributeValue)
+    def lookupUrl(entityType: String, attributeName: String, attributeValue: String) = server + lookupPath(entityType, attributeName, attributeValue)
+
+    lazy val ubamIngestPath = vault.getString("ubamsIngestPath")
+    lazy val ubamIngestUrl = server + ubamIngestPath
+
+    def ubamDescribePath(id: String) = vault.getString("ubamsDescribePath").format(id)
+    def ubamDescribeUrl(id: String) = server + ubamDescribePath(id)
+
+    def ubamRedirectPath(id: String, fileType: String) = vault.getString("ubamsRedirectPath").format(id, fileType)
+    def ubamRedirectUrl(id: String, fileType: String) = server + ubamRedirectPath(id, fileType)
   }
 
   object DataManagement {
     private val dm = config.getConfig("dm")
-    lazy val ubamsUrl = dm.getString("ubamsUrl")
-    def uBamResolveUrl(id: String) = dm.getString("ubamsResolveUrl").format(id)
-    lazy val analysesUrl = dm.getString("analysesUrl")
-    def analysesResolveUrl(id: String) = dm.getString("analysesResolveUrl").format(id)
-    def analysesUpdateUrl(id: String) = dm.getString("analysesUpdateUrl").format(id)
-    def queryLookupUrl(entityType: String, attributeName: String, attributeValue: String) = dm.getString("queryLookupUrl").format(entityType, attributeName, attributeValue)
+    lazy val server = dm.getString("server")
+
+    lazy val ubamsPath = dm.getString("ubamsPath")
+    lazy val ubamsUrl = server + ubamsPath
+
+    def uBamResolvePath(id: String) = dm.getString("ubamsResolvePath").format(id)
+    def uBamResolveUrl(id: String) = server + uBamResolvePath(id)
+
+    lazy val analysesPath = dm.getString("analysesPath")
+    lazy val analysesUrl = server + analysesPath
+
+    def analysesResolvePath(id: String) = dm.getString("analysesResolvePath").format(id)
+    def analysesResolveUrl(id: String) = server + analysesResolvePath(id)
+
+    def analysesUpdatePath(id: String) = dm.getString("analysesUpdatePath").format(id)
+    def analysesUpdateUrl(id: String) = server + analysesUpdatePath(id)
+
+    def queryLookupPath(entityType: String, attributeName: String, attributeValue: String) = dm.getString("queryLookupPath").format(entityType, attributeName, attributeValue)
+    def queryLookupUrl(entityType: String, attributeName: String, attributeValue: String) = server + queryLookupPath(entityType, attributeName, attributeValue)
   }
 
   object BOSS {
     private val boss = config.getConfig("boss")
-    lazy val objectsUrl = boss.getString("objectsUrl")
-    lazy val objectResolvePath = boss.getString("objectResolvePath")
-    def objectResolveUrl(id: String) = objectsUrl + id + objectResolvePath
+    lazy val server = boss.getString("server")
+
+    lazy val objectsPath = boss.getString("objectsPath")
+    lazy val objectsUrl = server + objectsPath
+
+    def objectResolvePath(id: String) = boss.getString("objectResolvePath").format(id)
+    def objectResolveUrl(id: String) = server + objectResolvePath(id)
+
     lazy val defaultStoragePlatform = boss.getString("defaultStoragePlatform")
     lazy val defaultValidityPeriodSeconds = boss.getInt("defaultValidityPeriodSeconds")
     lazy val bossUser = boss.getString("bossUser")

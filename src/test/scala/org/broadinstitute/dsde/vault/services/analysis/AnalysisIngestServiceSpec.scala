@@ -1,6 +1,6 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
-import org.broadinstitute.dsde.vault.VaultFreeSpec
+import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import org.broadinstitute.dsde.vault.model.{AnalysisIngest, AnalysisIngestResponse}
 import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
@@ -13,17 +13,16 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
   import spray.httpx.SprayJsonSupport._
   def actorRefFactory = system
 
-  val path = "/analyses"
   val openAmResponse = getOpenAmToken.get
 
-  "AnalysisIngestService" - {
-    "when calling POST to the " + path + " path with empty input and valid metadata" - {
+  "AnalysisIngestServiceSpec" - {
+    "when calling POST to the Analysis Ingest path with empty input and valid metadata" - {
       "should return an ID" in {
         val analysisIngest = new AnalysisIngest(
           input = List(),
           metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
-        Post(path, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
           status should equal(OK)
           // test response as raw string
           entity.toString should include("id")
@@ -35,28 +34,28 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
       }
     }
 
-    "when calling POST to the " + path + " path with invalid input" - {
+    "when calling POST to the Analysis Ingest path with invalid input" - {
       "should return a Bad Request error" in {
         val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
-        Post(path, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisIngestRoute) ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(BadRequest)
         }
       }
     }
 
 
-    "when calling PUT to the " + path + " path" - {
+    "when calling PUT to the Analysis Ingest path" - {
       "should return a MethodNotAllowed error" in {
-        Put(path) ~> sealRoute(analysisIngestRoute) ~> check {
+        Put(VaultConfig.Vault.analysisIngestPath) ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }
       }
     }
 
-    "when calling GET to the " + path + " path" - {
+    "when calling GET to the Analysis Ingest path" - {
       "should return a MethodNotAllowed error" in {
-        Get(path) ~> sealRoute(analysisIngestRoute) ~> check {
+        Get(VaultConfig.Vault.analysisIngestPath) ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: POST")
         }
