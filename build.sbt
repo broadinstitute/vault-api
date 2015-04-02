@@ -22,7 +22,6 @@ libraryDependencies ++= {
     ,"org.webjars"         %   "swagger-ui"    % "2.1.8-M1"
     // -- Logging --
     ,"ch.qos.logback" % "logback-classic" % "1.1.2"
-    ,"com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
   )
 }
 
