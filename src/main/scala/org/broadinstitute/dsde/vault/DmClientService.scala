@@ -133,13 +133,11 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
     }
   }
 
-  // TODO: Fix the following hack when reverse-lookup authentication service is implemented
-  // Any metadata passed in needs to be ignored. Metadata passed to DM needs to include a temporary ownerId key/value.
-  // This needs to change when authorship is appropriately determined through the authentication service.
+  // We explicitly ignore any metadata passed in from the client.
   def updateAnalysis(senderRef: ActorRef, analysisId: String, update: AnalysisUpdate): Unit = {
     log.debug("Updating an Analysis through the DM API for Analysis id: " + analysisId)
     val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[Analysis]
-    val analysisDmUpdate = new AnalysisDMUpdate(update.files, Map("ownerId" -> "foo"))
+    val analysisDmUpdate = new AnalysisDMUpdate(update.files, Map.empty[String,String])
     val responseFuture = pipeline {
       Post(VaultConfig.DataManagement.analysesUpdateUrl(analysisId), analysisDmUpdate)
     }
