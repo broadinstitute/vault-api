@@ -18,7 +18,7 @@ class IngestServiceSpec extends VaultFreeSpec with UBamIngestService {
 
     val ubamIngest = new UBamIngest(
       files = Map(("bam", "/path/to/ingest/bam"),("bai", "/path/to/ingest/bai")),
-      metadata = Map(("ownerId", "testUser"),("randomData", "7"))
+      metadata = Map(("testAttr", "testValue"),("randomData", "7"))
     )
 
     "when calling POST to the " + path + " path with a UBamIngest object" - {

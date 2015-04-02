@@ -19,7 +19,7 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
   var forceTestingId = "invalid_UUID"
 
   val inputs = List()
-  val metadata = Map("ownerId" -> "user")
+  val metadata = Map("testAttr" -> "testValue")
   val files = Map(("bam", "/path/to/outputs/bam"), ("vcf", "/path/to/outputs/vcf"))
 
   "Analysis Redirect Service" - {
@@ -29,7 +29,7 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
         Post(path, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
           status should equal(OK)
           testingId = responseAs[Analysis].id
-          responseAs[Analysis].metadata.getOrElse("ownerId", "get failed") should equal("user")
+          responseAs[Analysis].metadata.getOrElse("testAttr", "get failed") should equal("testValue")
         }
       }
       "should successfully update the data" in {
@@ -94,7 +94,7 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
         Post(path, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
           status should equal(OK)
           forceTestingId = responseAs[Analysis].id
-          responseAs[Analysis].metadata.getOrElse("ownerId", "get failed") should equal("user")
+          responseAs[Analysis].metadata.getOrElse("testAttr", "get failed") should equal("testValue")
         }
       }
       "should successfully update the data" in {
