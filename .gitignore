@@ -2,6 +2,7 @@
 *.log
 
 # sbt specific
+.sbtopts
 .cache/
 .history/
 .lib/

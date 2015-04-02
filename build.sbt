@@ -28,3 +28,11 @@ libraryDependencies ++= {
 Revolver.settings
 
 javaOptions in Revolver.reStart += "-Dconfig.file=application.conf"
+
+// Copy over various properties
+val copyProperties = Seq("openam", "boss")
+
+javaOptions in Revolver.reStart ++= new scala.sys.SystemProperties()
+  .filterKeys(key => copyProperties.contains(key) || copyProperties.exists(prefix => key.startsWith(prefix + ".")))
+  .map { case (key, value) => s"-D$key=$value" }
+  .toSeq
