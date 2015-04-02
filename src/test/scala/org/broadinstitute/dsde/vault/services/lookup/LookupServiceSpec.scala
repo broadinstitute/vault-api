@@ -26,7 +26,7 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngest
       "should successfully store the data" in {
         val path = "/ubams"
         val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
-        val metadata = Map("ownerId" -> "user", "uniqueTest" -> testValue)
+        val metadata = Map("testAttr" -> "testValue", "uniqueTest" -> testValue)
         val ubamIngest = new UBamIngest(files, metadata)
         Post(path, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
@@ -63,7 +63,7 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngest
       }
 
       "Lookup of mismatched attribute name + value should return not found" in {
-        Get(s"/query/ubam/ownerId/$testValue") ~> sealRoute(lookupRoute) ~> check {
+        Get(s"/query/ubam/testAttr/$testValue") ~> sealRoute(lookupRoute) ~> check {
           status === NotFound
         }
       }

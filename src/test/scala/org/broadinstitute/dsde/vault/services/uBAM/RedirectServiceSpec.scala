@@ -19,7 +19,7 @@ class RedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UB
   var forceTestingId = "invalid_UUID"
 
   val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
-  val metadata = Map("ownerId" -> "user")
+  val metadata = Map("testAttr" -> "testValue")
 
   "RedirectuBAMService" - {
     "while preparing the ubam test data" - {

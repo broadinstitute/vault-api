@@ -21,7 +21,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
       "should return an ID" in {
         val analysisIngest = new AnalysisIngest(
           input = List(),
-          metadata = Map("ownerId" -> "testUser", "randomData" -> "7")
+          metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
         Post(path, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
           status should equal(OK)

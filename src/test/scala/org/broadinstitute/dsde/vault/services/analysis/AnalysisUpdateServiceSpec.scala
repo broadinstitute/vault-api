@@ -27,7 +27,7 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
     "while preparing the ubam test data" - {
       "should successfully store the data" in {
         val files = Map(("bam", "/path/to/ingest/bam"))
-        val metadata = Map("ownerId" -> "user")
+        val metadata = Map("testAttr" -> "testValue")
         val ubamIngest = new UBamIngest(files, metadata)
         Post("/ubams", ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)

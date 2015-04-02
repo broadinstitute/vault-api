@@ -25,7 +25,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
         val ingestPath = "/analyses"
         val analysisIngest = new AnalysisIngest(
           input = List(),
-          metadata = Map("ownerId" -> "testUser", "randomData" -> "7")
+          metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
         Post(ingestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
           status should equal(OK)
@@ -48,7 +48,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
           respAnalysis.id should equal(testId)
           respAnalysis.input shouldBe empty
           respAnalysis.files.get shouldBe empty
-          respAnalysis.metadata should equal(Map("ownerId" -> "testUser", "randomData" -> "7"))
+          respAnalysis.metadata should equal(Map("testAttr" -> "testValue", "randomData" -> "7"))
         }
       }
     }

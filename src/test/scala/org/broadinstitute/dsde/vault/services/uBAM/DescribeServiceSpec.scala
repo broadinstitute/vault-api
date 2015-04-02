@@ -18,7 +18,7 @@ class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UB
   var testingId = "invalid_UUID"
 
   val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
-  val metadata = Map("ownerId" -> "user")
+  val metadata = Map("testAttr" -> "testValue")
 
   "DescribeuBAMService" - {
     "while preparing the ubam test data" - {
@@ -37,7 +37,7 @@ class DescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UB
           status should equal(OK)
           val response = responseAs[UBam]
           response.id should be(testingId)
-          response.metadata should equal(Map("ownerId" -> "user"))
+          response.metadata should equal(Map("testAttr" -> "testValue"))
           response.files.getOrElse("bam", "error") should (be an (URL) and not be a (UUID))
           response.files.getOrElse("bai", "error") should (be an (URL) and not be a (UUID))
           response.files.getOrElse("bam", "error") shouldNot include("ingest")
