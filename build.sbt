@@ -16,12 +16,12 @@ libraryDependencies ++= {
     ,"io.spray"            %%  "spray-client"  % sprayV
     ,"io.spray"            %%  "spray-testkit" % sprayV  % "test"
     ,"com.typesafe.akka"   %%  "akka-actor"    % akkaV
+    ,"com.typesafe.akka"   %%  "akka-slf4j"    % akkaV
     ,"org.scalatest"       %%  "scalatest"     % "2.2.1" % "test"
     ,"com.gettyimages"     %%  "spray-swagger" % "0.5.0"
     ,"org.webjars"         %   "swagger-ui"    % "2.1.8-M1"
     // -- Logging --
     ,"ch.qos.logback" % "logback-classic" % "1.1.2"
-    ,"com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
   )
 }
 
