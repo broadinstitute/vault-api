@@ -33,6 +33,7 @@ class OpenAMDirectivesSpec extends FreeSpec with Matchers with ScalatestRouteTes
       // A fixture for loaning: http://doc.scalatest.org/2.0/org/scalatest/FreeSpec.html#loanFixtureMethods
       // Based on http://stackoverflow.com/questions/5448673/slf4j-logback-how-to-configure-loggers-in-runtime/5715581#5715581
       class TestLogger {
+        // may fail due to race condition in SLF4J.  See build.sbt for details/workaround
         private val context = LoggerFactory.getILoggerFactory.asInstanceOf[LoggerContext]
         private val encoder = new EchoEncoder[ILoggingEvent]
         private val logByteStream = new ByteArrayOutputStream(512)
