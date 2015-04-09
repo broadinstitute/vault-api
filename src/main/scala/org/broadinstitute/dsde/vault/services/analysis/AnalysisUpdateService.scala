@@ -23,9 +23,8 @@ trait AnalysisUpdateService extends HttpService {
     httpMethod = "POST",
     produces = "application/json",
     consumes = "application/json",
-    notes = "Accepts a json packet as POST. Updates the Vault analysis object with the supplied output files. " +
-      "Returns the Vault ID of the created object. If a custom header of type 'X-Force-Location' has a " +
-      "case-insensitive value of 'true', then the file path locations will be used as the location of the file object.")
+    notes = "Accepts a json packet as POST. Updates the Vault analysis object with the supplied output files. Returns the Vault ID of the created object." +
+      " If a custom header of type 'X-Force-Location' has a case-insensitive value of 'true', then the file path locations will be used as the location of the file object.")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "Analysis Vault ID"),
     new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.AnalysisUpdate", paramType = "body", value = "Analysis outputs to add"),

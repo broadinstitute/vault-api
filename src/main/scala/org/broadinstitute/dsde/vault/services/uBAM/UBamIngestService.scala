@@ -21,9 +21,8 @@ trait UBamIngestService extends HttpService {
     produces = "application/json",
     consumes = "application/json",
     response = classOf[UBamIngestResponse],
-    notes = "Accepts a json packet as POST. Creates a Vault object with the supplied metadata and allocates BOSS objects for each supplied file key; ignores the values for each file. " +
-      " Returns the Vault ID of the object as well as presigned PUT urls - one for each key in the 'files' subobject. If a custom header of type 'X-Force-Location' has a case-insensitive " +
-      " value of 'true', then the file path locations will not be ignored and instead will be used as the location of the file object.")
+    notes = "Accepts a json packet as POST. Creates a Vault object with the supplied metadata and allocates BOSS objects for each supplied file key; ignores the values for each file. Returns the Vault ID of the object as well as" +
+      " presigned PUT urls - one for each key in the 'files' subobject. If a custom header of type 'X-Force-Location' has a case-insensitive value of 'true', then the file path locations will not be ignored and instead will be used as the location of the file object.")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.UBamIngest", paramType = "body", value = "uBAM to create"),
     new ApiImplicitParam(name = "X-Force-Location", required = false, dataType = "boolean", paramType = "header", value = "When true, honors file path locations")
