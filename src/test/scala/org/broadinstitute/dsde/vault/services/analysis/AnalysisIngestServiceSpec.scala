@@ -15,8 +15,6 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
   import spray.httpx.SprayJsonSupport._
   def actorRefFactory = system
 
-  val openAmResponse = getOpenAmToken.get
-
   var createdUBams: Seq[String] = Seq("bad", "ids")
 
   override def beforeAll(): Unit = {
@@ -29,7 +27,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
     // create a few ubams
     createdUBams = (for (x <- 1 to 3) yield
 
-      Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
+      Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> addOpenAmCookie ~> uBamIngestRoute ~> check {
         status should equal(OK)
         responseAs[UBamIngestResponse].id
       }
@@ -48,7 +46,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
           input = List(),
           metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
           status should equal(OK)
           // test response as raw string
           entity.toString should include("id")
@@ -66,7 +64,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
           input = List(createdUBams.head),
           metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
           status should equal(OK)
           // test response as raw string
           entity.toString should include("id")
@@ -84,7 +82,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
           input = List(createdUBams.head) :+ "intentionallyBadForeignKey",
           metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisIngestRoute) ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(NotFound)
         }
       }
@@ -96,7 +94,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
           input = createdUBams.toList,
           metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
           status should equal(OK)
           // test response as raw string
           entity.toString should include("id")
@@ -114,7 +112,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
           input = createdUBams.toList :+ "intentionallyBadForeignKey",
           metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisIngestRoute) ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(NotFound)
         }
       }
@@ -123,7 +121,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
     "when calling POST to the Analysis Ingest path with an invalid object" - {
       "should return a Bad Request error" in {
         val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
-        Post(VaultConfig.Vault.analysisIngestPath, malformedEntity) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisIngestRoute) ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, malformedEntity) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
           status should equal(BadRequest)
         }
       }

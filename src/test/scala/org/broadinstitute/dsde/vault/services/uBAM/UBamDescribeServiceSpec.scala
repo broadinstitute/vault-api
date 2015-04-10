@@ -11,7 +11,6 @@ import spray.httpx.SprayJsonSupport._
 class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService {
 
   def actorRefFactory = system
-  val openAmResponse = getOpenAmToken.get
   var testingId = "invalid_UUID"
 
   val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
@@ -21,7 +20,7 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
     "while preparing the ubam test data" - {
       "should successfully store the data using the UBam Ingest path" in {
         val ubamIngest = new UBamIngest(files, metadata)
-        Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
+        Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> addOpenAmCookie ~> uBamIngestRoute ~> check {
           status should equal(OK)
           testingId = responseAs[UBamIngestResponse].id
         }
@@ -30,7 +29,7 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
 
     "when calling GET to the UBam Describe path with a Vault ID" - {
       "should return that ID" in {
-        Get(VaultConfig.Vault.ubamDescribePath(testingId)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamDescribeRoute ~> check {
+        Get(VaultConfig.Vault.ubamDescribePath(testingId)) ~> addOpenAmCookie ~> uBamDescribeRoute ~> check {
           status should equal(OK)
           val response = responseAs[UBam]
           response.id should be(testingId)
@@ -45,7 +44,7 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
 
     "when calling GET to the UBam Describe path with an unknown Vault ID" - {
       "should return a 404 not found error" in {
-        Get(VaultConfig.Vault.ubamDescribePath("12345-67890-12345")) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamDescribeRoute) ~> check {
+        Get(VaultConfig.Vault.ubamDescribePath("12345-67890-12345")) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
           status should equal(NotFound)
         }
       }
@@ -53,7 +52,7 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
 
     "when calling PUT to the UBam Describe path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Put(VaultConfig.Vault.ubamDescribePath(testingId)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamDescribeRoute) ~> check {
+        Put(VaultConfig.Vault.ubamDescribePath(testingId)) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
         }
@@ -62,7 +61,7 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
 
     "when calling POST to the UBam Describe path with a Vault ID" - {
       "should return a MethodNotAllowed error" in {
-        Post(VaultConfig.Vault.ubamDescribePath("arbitrary_id")) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(uBamDescribeRoute) ~> check {
+        Post(VaultConfig.Vault.ubamDescribePath("arbitrary_id")) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
           status should equal(MethodNotAllowed)
           entity.toString should include("HTTP method not allowed, supported methods: GET")
         }

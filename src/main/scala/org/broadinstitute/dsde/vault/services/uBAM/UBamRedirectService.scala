@@ -23,15 +23,13 @@ trait UBamRedirectService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def uBamRedirectRoute =
-    path("ubams" / Segment / Segment) {
-      (id, filetype) =>
-        get {
-          requestContext =>
-            val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
-            val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-            val redirectActor = actorRefFactory.actorOf(RedirectServiceHandler.props(requestContext, bossService, dmService))
-            redirectActor ! RedirectServiceHandler.RedirectMessage(id, filetype)
-        }
+    path("ubams" / Segment / Segment) { (id, filetype) =>
+      get { requestContext =>
+        val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+        val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+        val redirectActor = actorRefFactory.actorOf(RedirectServiceHandler.props(requestContext, bossService, dmService))
+        redirectActor ! RedirectServiceHandler.RedirectMessage(id, filetype)
+      }
     }
 
 }

@@ -13,7 +13,6 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
 
   def actorRefFactory = system
 
-  val openAmResponse = getOpenAmToken.get
   var testId = "invalid_UUID"
 
   "AnalysisDescribeServiceSpec" - {
@@ -23,7 +22,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
           input = List(),
           metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
         )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisIngestRoute ~> check {
+        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
           status should equal(OK)
           val respAnalysis = responseAs[AnalysisIngestResponse]
           testId = respAnalysis.id
@@ -33,7 +32,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
 
     "when calling GET to the Analysis Describe path with a Vault ID" - {
       "should return that ID" in {
-        Get(VaultConfig.Vault.analysisDescribePath(testId)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisDescribeRoute ~> check {
+        Get(VaultConfig.Vault.analysisDescribePath(testId)) ~> addOpenAmCookie ~> analysisDescribeRoute ~> check {
           status should equal(OK)
           // test response as raw string
           entity.toString should include(testId)
@@ -52,7 +51,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
     "when calling POST to the Analysis Update path in order to add completed files" - {
       "should return as OK" in {
         val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "vault/test/test.vcf", "bai" -> "vault/test/test.bai", "bam" -> "vault/test/test.bam"))
-        Post(VaultConfig.Vault.analysisUpdatePath(testId), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
+        Post(VaultConfig.Vault.analysisUpdatePath(testId), analysisUpdate) ~> addOpenAmCookie ~> analysisUpdateRoute ~> check {
           status should equal(OK)
           val analysisResponse = responseAs[Analysis]
           val files = responseAs[Analysis].files
@@ -66,7 +65,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
 
     "when calling GET to the Analysis Describe path with a Vault ID" - {
       "should reference the new files" in {
-        Get(VaultConfig.Vault.analysisDescribePath(testId)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisDescribeRoute ~> check {
+        Get(VaultConfig.Vault.analysisDescribePath(testId)) ~> addOpenAmCookie ~> analysisDescribeRoute ~> check {
           status should equal(OK)
           val respAnalysis = responseAs[Analysis]
           respAnalysis.id should equal(testId)
@@ -83,7 +82,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
 
     "when calling GET to the Analysis Describe path with an invalid Vault ID" - {
       "should return a Not Found error" in {
-        Get(VaultConfig.Vault.analysisDescribePath("unknown-not-found-id")) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> sealRoute(analysisDescribeRoute) ~> check {
+        Get(VaultConfig.Vault.analysisDescribePath("unknown-not-found-id")) ~> addOpenAmCookie ~> sealRoute(analysisDescribeRoute) ~> check {
           status should equal(NotFound)
         }
       }
@@ -107,6 +106,5 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
       }
     }
   }
-
 }
 
