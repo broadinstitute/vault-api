@@ -20,14 +20,16 @@ trait AnalysisIngestService extends HttpService {
     produces = "application/json",
     consumes = "application/json",
     response = classOf[AnalysisIngestResponse],
-    notes = "Accepts a json packet as POST. Creates a Vault object with the supplied metadata and creates relationships for each input id. " +
-      " Returns the Vault ID of the created object.")
+    notes = """Accepts a json packet as POST. Creates a Vault object with the supplied metadata and creates relationships for each input id.
+      Returns the Vault ID of the created object. The values of the 'input' array must be valid Vault IDs for the ubams used as input to this analysis.
+      If an invalid id is specified inside the input array, this API will fail with a 404 response code.""")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.AnalysisIngest", paramType = "body", value = "Analysis to create")
   ))
   @ApiResponses(Array(
     new ApiResponse(code = 200, message = "Successful"),
     new ApiResponse(code = 400, message = "Malformed Input"),
+    new ApiResponse(code = 404, message = "Not Found: if the 'input' array includes an invalid id"),
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def analysisIngestRoute =

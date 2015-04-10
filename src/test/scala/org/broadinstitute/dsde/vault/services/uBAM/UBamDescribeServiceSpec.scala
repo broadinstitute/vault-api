@@ -16,7 +16,7 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
   val openAmResponse = getOpenAmToken.get
   var testingId = "invalid_UUID"
 
-  val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
+  val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
   val metadata = Map("testAttr" -> "testValue")
 
   "UBamDescribeServiceSpec" - {

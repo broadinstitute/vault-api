@@ -16,7 +16,7 @@ class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService {
   "UBamIngestServiceSpec" - {
 
     val ubamIngest = new UBamIngest(
-      files = Map(("bam", "/path/to/ingest/bam"),("bai", "/path/to/ingest/bai")),
+      files = Map(("bam", "vault/test/test.bam"),("bai", "vault/test/test.bai")),
       metadata = Map(("testAttr", "testValue"),("randomData", "7"))
     )
 
@@ -38,8 +38,8 @@ class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService {
         Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           val files = responseAs[UBamIngestResponse].files
-          files.get("bam").get should equal("/path/to/ingest/bam")
-          files.get("bai").get should equal("/path/to/ingest/bai")
+          files.get("bam").get should equal("vault/test/test.bam")
+          files.get("bai").get should equal("vault/test/test.bai")
         }
       }
     }

@@ -17,7 +17,7 @@ class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService wit
   var testingId = "invalid_UUID"
   var forceTestingId = "invalid_UUID"
 
-  val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
+  val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
   val metadata = Map("testAttr" -> "testValue")
 
   "UBamRedirectServiceSpec" - {
@@ -79,8 +79,8 @@ class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService wit
         Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
           status should equal(OK)
           forceTestingId = responseAs[UBamIngestResponse].id
-          files.get("bam").get should equal("/path/to/ingest/bam")
-          files.get("bai").get should equal("/path/to/ingest/bai")
+          files.get("bam").get should equal("vault/test/test.bam")
+          files.get("bai").get should equal("vault/test/test.bai")
 
         }
       }
@@ -93,7 +93,7 @@ class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService wit
           // test that the redirect properly handles the file path we passed in, which includes slashes
           // this test will fail if Google changes how they sign urls
           header("Location") shouldNot be(None)
-          header("Location").get.value should include("/path/to/ingest/bai?GoogleAccessId=")
+          header("Location").get.value should include("vault/test/test.bai?GoogleAccessId=")
         }
       }
     }

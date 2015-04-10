@@ -24,7 +24,7 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngest
   "LookupServiceSpec" - {
     "while preparing the ubam test data" - {
       "should successfully store the data using the UBam Ingest path" in {
-        val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
+        val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
         val metadata = Map("testAttr" -> "testValue", "uniqueTest" -> testValue)
         val ubamIngest = new UBamIngest(files, metadata)
         Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
