@@ -24,7 +24,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
   override def beforeAll(): Unit = {
 
     // test ubam for ingest
-    val files = Map(("bam", "/path/to/ingest/bam"), ("bai", "/path/to/ingest/bai"))
+    val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
     val metadata = Map("testAttr" -> "testValue")
     val ubamIngest = new UBamIngest(files, metadata)
 

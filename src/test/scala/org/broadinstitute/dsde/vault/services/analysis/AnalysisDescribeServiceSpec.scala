@@ -53,7 +53,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
 
     "when calling POST to the Analysis Update path in order to add completed files" - {
       "should return as OK" in {
-        val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "path/to/ingest/vcf", "bai" -> "path/to/ingest/bai", "bam" -> "path/to/ingest/bam"))
+        val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "vault/test/test.vcf", "bai" -> "vault/test/test.bai", "bam" -> "vault/test/test.bam"))
         Post(VaultConfig.Vault.analysisUpdatePath(testId), analysisUpdate) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
           status should equal(OK)
           val analysisResponse = responseAs[Analysis]

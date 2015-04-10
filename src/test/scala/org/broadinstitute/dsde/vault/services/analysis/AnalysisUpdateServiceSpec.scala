@@ -19,13 +19,13 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
   val openAmResponse = getOpenAmToken.get
 
   var testDataGuid: String = "invalid-id"
-  val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "path/to/ingest/vcf", "bai" -> "path/to/ingest/bai", "bam" -> "path/to/ingest/bam"))
+  val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "vault/test/test.vcf", "bai" -> "vault/test/test.bai", "bam" -> "vault/test/test.bam"))
 
   "AnalysisUpdateServiceSpec" - {
 
     "while preparing the ubam test data" - {
       "should successfully store the data using the UBam Ingest path" in {
-        val files = Map(("bam", "/path/to/ingest/bam"))
+        val files = Map(("bam", "vault/test/test.bam"))
         val metadata = Map("testAttr" -> "testValue")
         val ubamIngest = new UBamIngest(files, metadata)
         Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
@@ -54,9 +54,9 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
         Post(VaultConfig.Vault.analysisUpdatePath(testDataGuid), analysisUpdate) ~> addHeader("X-Force-Location", "true") ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> analysisUpdateRoute ~> check {
           status should equal(OK)
           val files = responseAs[Analysis].files
-          files.get("bam") should equal("path/to/ingest/bam")
-          files.get("bai") should equal("path/to/ingest/bai")
-          files.get("vcf") should equal("path/to/ingest/vcf")
+          files.get("bam") should equal("vault/test/test.bam")
+          files.get("bai") should equal("vault/test/test.bai")
+          files.get("vcf") should equal("vault/test/test.vcf")
         }
       }
     }

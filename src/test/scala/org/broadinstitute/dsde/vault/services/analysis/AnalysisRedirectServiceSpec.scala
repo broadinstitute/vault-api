@@ -19,7 +19,7 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
 
   val inputs = List()
   val metadata = Map("testAttr" -> "testValue")
-  val files = Map(("bam", "/path/to/outputs/bam"), ("vcf", "/path/to/outputs/vcf"))
+  val files = Map(("bam", "vault/test/test.bam"), ("vcf", "vault/test/test.vcf"))
 
   "AnalysisRedirectServiceSpec" - {
     "while preparing the analysis test data" - {
@@ -103,8 +103,8 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
           val analysisResponse = responseAs[Analysis]
           val files = responseAs[Analysis].files
           analysisResponse.id should be (forceTestingId)
-          files.get("bam") should equal("/path/to/outputs/bam")
-          files.get("vcf") should equal("/path/to/outputs/vcf")
+          files.get("bam") should equal("vault/test/test.bam")
+          files.get("vcf") should equal("vault/test/test.vcf")
         }
       }
     }
@@ -116,7 +116,7 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
           // test that the redirect properly handles the file path we passed in, which includes slashes
           // this test will fail if Google changes how they sign urls
           header("Location") shouldNot be(None)
-          header("Location").get.value should include("/path/to/outputs/bam?GoogleAccessId=")
+          header("Location").get.value should include("vault/test/test.bam?GoogleAccessId=")
         }
       }
     }
