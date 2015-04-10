@@ -1,8 +1,48 @@
-name          := "Vault-Orchestration"
+name := "Vault-Orchestration"
 
-version       := "0.1"
+val vaultOrg = "org.broadinstitute.dsde.vault"
 
-scalaVersion  := "2.11.2"
+organization := vaultOrg
+
+// Canonical version
+val versionRoot = "0.1"
+
+// Get the revision, or -1 (later will be bumped to zero)
+val versionRevision = ("git rev-list --count HEAD" #|| "echo -1").!!.trim.toInt
+
+// Set the suffix to None...
+val versionSuffix = {
+  try {
+    // ...except when there are no modifications...
+    if ("git diff --quiet HEAD".! == 0) {
+      // ...then set the suffix to the revision "dash" git hash
+      Option(versionRevision + "-" + "git rev-parse --short HEAD".!!.trim)
+    } else {
+      None
+    }
+  } catch {
+    case e: Exception =>
+      None
+  }
+}
+
+// Set the composite version
+version := versionRoot + "-" + versionSuffix.getOrElse((versionRevision + 1) + "-SNAPSHOT")
+
+val artifactory = "http://artifactory.broadinstitute.org:8081/artifactory/"
+
+credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
+
+publishTo := {
+  if (isSnapshot.value)
+    None // NOTE: Use publish-local when working on snapshots
+  else
+    Option("artifactory-releases-publish" at artifactory + "libs-release-local")
+}
+
+resolvers += "artifactory-releases" at artifactory + "libs-release"
+
+scalaVersion := "2.11.2"
 
 scalacOptions := Seq("-unchecked", "-deprecation", "-encoding", "utf8")
 
@@ -10,22 +50,23 @@ libraryDependencies ++= {
   val akkaV = "2.3.6"
   val sprayV = "1.3.2"
   Seq(
-    "io.spray"             %%  "spray-can"     % sprayV
-    ,"io.spray"            %%  "spray-routing" % sprayV
-    ,"io.spray"            %%  "spray-json"    % "1.3.1"
-    ,"io.spray"            %%  "spray-client"  % sprayV
-    ,"io.spray"            %%  "spray-testkit" % sprayV  % "test"
-    ,"com.typesafe.akka"   %%  "akka-actor"    % akkaV
-    ,"com.typesafe.akka"   %%  "akka-slf4j"    % akkaV
-    ,"org.scalatest"       %%  "scalatest"     % "2.2.1" % "test"
-    ,"com.gettyimages"     %%  "spray-swagger" % "0.5.0"
-    ,"org.webjars"         %   "swagger-ui"    % "2.1.8-M1"
+    vaultOrg %% "vault-common" % "0.1-6-b6c0205"
+    , "io.spray" %% "spray-can" % sprayV
+    , "io.spray" %% "spray-routing" % sprayV
+    , "io.spray" %% "spray-json" % "1.3.1"
+    , "io.spray" %% "spray-client" % sprayV
+    , "io.spray" %% "spray-testkit" % sprayV % "test"
+    , "com.typesafe.akka" %% "akka-actor" % akkaV
+    , "com.typesafe.akka" %% "akka-slf4j" % akkaV
+    , "org.scalatest" %% "scalatest" % "2.2.1" % "test"
+    , "com.gettyimages" %% "spray-swagger" % "0.5.0"
+    , "org.webjars" % "swagger-ui" % "2.1.8-M1"
     // -- Logging --
-    ,"ch.qos.logback" % "logback-classic" % "1.1.2"
+    , "ch.qos.logback" % "logback-classic" % "1.1.2"
   )
 }
 
-Revolver.settings
+Revolver.settings.settings
 
 javaOptions in Revolver.reStart += "-Dconfig.file=application.conf"
 
