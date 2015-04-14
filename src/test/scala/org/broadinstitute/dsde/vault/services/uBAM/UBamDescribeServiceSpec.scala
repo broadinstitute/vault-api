@@ -1,14 +1,18 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
+import java.util.concurrent.TimeUnit
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{UBam, UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService {
+import scala.concurrent.duration.FiniteDuration
+
+class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService{
 
   override val routes = uBamDescribeRoute ~  uBamDescribeListRoute
+  override implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(120, TimeUnit.SECONDS))
 
   def actorRefFactory = system
 
@@ -116,5 +120,4 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
       }
     }
   }
-
 }

@@ -53,7 +53,10 @@ libraryDependencies ++= {
     , "com.gettyimages" %% "spray-swagger" % "0.5.0"
     , "org.webjars" % "swagger-ui" % "2.1.8-M1"
     // -- Logging --
-    , "ch.qos.logback" % "logback-classic" % "1.1.2"
+    ,"ch.qos.logback" % "logback-classic" % "1.1.2"
+    ,"com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
+    // -- Testing --
+    ,"org.mock-server" % "mockserver-netty" % "3.9.2" % "test"
   )
 }
 
