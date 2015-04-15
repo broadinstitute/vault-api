@@ -3,13 +3,14 @@ package org.broadinstitute.dsde.vault.services.uBAM
 import java.util.concurrent.TimeUnit
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{UBam, UBamIngest, UBamIngestResponse}
+import org.broadinstitute.dsde.vault.services.mock.MockServers
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
 import scala.concurrent.duration.FiniteDuration
 
-class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService{
+class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService with MockServers {
 
   override val routes = uBamDescribeRoute ~  uBamDescribeListRoute
   override implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(120, TimeUnit.SECONDS))
@@ -62,30 +63,30 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
             }
           }
         }
+      }
 
-        "when calling GET to the UBam Describe path with an unknown Vault ID" - {
-          "should return a 404 not found error" in {
-            Get(VaultConfig.Vault.ubamDescribePath("12345-67890-12345").versioned(version)) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
-              status should equal(NotFound)
-            }
+      "when calling GET to the UBam Describe path with an unknown Vault ID" - {
+        "should return a 404 not found error" in {
+          Get(VaultConfig.Vault.ubamDescribePath("12345-67890-12345").versioned(version)) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
+            status should equal(NotFound)
           }
         }
+      }
 
-        "when calling PUT to the UBam Describe path with a Vault ID" - {
-          "should return a MethodNotAllowed error" in {
-            Put(VaultConfig.Vault.ubamDescribePath(testingId).versioned(version)) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
-              status should equal(MethodNotAllowed)
-              entity.toString should include("HTTP method not allowed, supported methods: GET")
-            }
+      "when calling PUT to the UBam Describe path with a Vault ID" - {
+        "should return a MethodNotAllowed error" in {
+          Put(VaultConfig.Vault.ubamDescribePath(testingId).versioned(version)) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
+            status should equal(MethodNotAllowed)
+            entity.toString should include("HTTP method not allowed, supported methods: GET")
           }
         }
+      }
 
-        "when calling POST to the UBam Describe path with a Vault ID" - {
-          "should return a MethodNotAllowed error" in {
-            Post(VaultConfig.Vault.ubamDescribePath("arbitrary_id").versioned(version)) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
-              status should equal(MethodNotAllowed)
-              entity.toString should include("HTTP method not allowed, supported methods: GET")
-            }
+      "when calling POST to the UBam Describe path with a Vault ID" - {
+        "should return a MethodNotAllowed error" in {
+          Post(VaultConfig.Vault.ubamDescribePath("arbitrary_id").versioned(version)) ~> addOpenAmCookie ~> sealRoute(uBamDescribeRoute) ~> check {
+            status should equal(MethodNotAllowed)
+            entity.toString should include("HTTP method not allowed, supported methods: GET")
           }
         }
 
