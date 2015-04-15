@@ -5,7 +5,7 @@ import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.http.MediaTypes._
 import spray.routing._
 import org.broadinstitute.dsde.vault.model._
-
+import org.broadinstitute.dsde.vault.services.common.BossObjectsCreationHandler
 import spray.httpx.SprayJsonSupport._
 import uBAMJsonProtocol._
 
@@ -42,8 +42,9 @@ trait UBamIngestService extends HttpService {
               ingest =>
                 requestContext =>
                   val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+                  val bossMultiService = actorRefFactory.actorOf(BossObjectsCreationHandler.props(bossService))
                   val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-                  val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossService, dmService))
+                  val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossMultiService, dmService))
                   ingestActor ! IngestServiceHandler.IngestMessage(ingest, forceLocation)
             }
           }

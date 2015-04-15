@@ -12,13 +12,15 @@ import spray.http.HttpHeaders.Cookie
 import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
 
-import scala.util.{Failure, Success}
+import scala.util.{Failure, Success, Try}
 
 object BossClientService {
   case class BossCreateObject(obj: BossCreationObject, creationKey: String)
-  case class BossObjectCreated(bossObject: BossCreationObject, creationKey: String)
+  case class BossObjectCreated(bossId: Try[String], creationKey: String)
   case class BossResolveObject(obj: BossResolutionRequest, id: String, creationKey: String)
-  case class BossObjectResolved(bossObject: BossResolutionResponse, creationKey: String)
+  case class BossObjectResolved(bossURL: Try[String], creationKey: String)
+  case class BossDeleteObject(bossId: String, creationKey: String)
+  case class BossObjectDeleted(bossId: Try[String], creationKey: String)
 
   def props(requestContext: RequestContext): Props = Props(new BossClientService(requestContext))
 }
@@ -36,6 +38,9 @@ case class BossClientService(requestContext: RequestContext) extends Actor {
 
     case BossResolveObject(obj, id, creationKey) =>
       resolve(sender(), obj, id, creationKey)
+
+    case BossDeleteObject(id, creationKey) =>
+      delete(sender(), id, creationKey)
   }
 
   def create(senderRef: ActorRef, obj: BossCreationObject, creationKey: String): Unit = {
@@ -46,12 +51,13 @@ case class BossClientService(requestContext: RequestContext) extends Actor {
     }
     responseFuture onComplete {
       case Success(createdObject) =>
-        log.debug("BOSS object created with id: " + createdObject.objectId.get)
-        senderRef ! BossObjectCreated(createdObject, creationKey)
+        val id = createdObject.objectId.get
+        log.debug("BOSS object created with id: " + id)
+        senderRef ! BossObjectCreated(Success(id), creationKey)
 
       case Failure(error) =>
         log.error(error, "Failure creating BOSS object")
-        senderRef ! ClientFailure(error.getMessage)
+        senderRef ! BossObjectCreated(Failure(error), creationKey)
     }
   }
 
@@ -63,13 +69,30 @@ case class BossClientService(requestContext: RequestContext) extends Actor {
     }
     responseFuture onComplete {
       case Success(resolvedObject) =>
-        log.debug("BOSS object resolved with presigned URL: " + resolvedObject.objectUrl)
-        senderRef ! BossObjectResolved(resolvedObject, creationKey)
+        val bossURL = resolvedObject.objectUrl
+        log.debug("BOSS object resolved with presigned URL: " + bossURL)
+        senderRef ! BossObjectResolved(Success(bossURL), creationKey)
 
       case Failure(error) =>
         log.error(error, "Failure resolving BOSS object")
-        senderRef ! ClientFailure(error.getMessage)
+        senderRef ! BossObjectResolved(Failure(error), creationKey)
     }
   }
 
+  def delete(senderRef: ActorRef, id: String, creationKey: String): Unit = {
+    log.debug("Deleting an object in the BOSS API with id: " + id)
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive
+    val responseFuture = pipeline {
+      Delete(VaultConfig.BOSS.objectResolveUrl(id)) ~> addCredentials(bossCredentials)
+    }
+    responseFuture onComplete {
+      case Success(createdObject) =>
+        log.debug("BOSS object deleted with id: " + id)
+        senderRef ! BossObjectDeleted(Success(id), creationKey)
+
+      case Failure(error) =>
+        log.error(error, "Failure deleting BOSS object")
+        senderRef ! BossObjectDeleted(Failure(error), creationKey)
+    }
+  }
 }

@@ -7,6 +7,7 @@ import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.impAnalysisUpdate
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.services.common.BossObjectsCreationHandler
 import spray.http.MediaTypes._
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
@@ -47,8 +48,9 @@ trait AnalysisUpdateService extends HttpService {
                 update =>
                   requestContext => {
                     val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+                    val bossMultiService = actorRefFactory.actorOf(BossObjectsCreationHandler.props(bossService))
                     val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-                    val updateActor = actorRefFactory.actorOf(UpdateServiceHandler.props(requestContext, dmService, bossService))
+                    val updateActor = actorRefFactory.actorOf(UpdateServiceHandler.props(requestContext, dmService, bossMultiService))
                     updateActor ! UpdateServiceHandler.UpdateMessage(id, update, forceLocation)
                   }
               }

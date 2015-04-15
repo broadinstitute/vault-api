@@ -9,6 +9,7 @@ import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.services.analysis.UpdateServiceHandler.UpdateMessage
+import org.broadinstitute.dsde.vault.services.common.BossObjectsCreationHandler._
 import spray.httpx.SprayJsonSupport._
 import spray.routing.RequestContext
 
@@ -58,51 +59,35 @@ case class UpdateServiceHandler(requestContext: RequestContext, dmService: Actor
       fileCount = update.files.size
       forceLocationHeader = forceLocation.getOrElse("false").toBoolean
       providedFiles = update.files
-      update.files.foreach {
-        case (ftype, fpath) =>
-          bossService ! BossClientService.BossCreateObject(BossDefaults.getCreationRequest(fpath, forceLocation), ftype)
-      }
+      bossService ! CreateObjectsMessage(providedFiles,forceLocationHeader)
 
-    case BossObjectCreated(bossObject: BossCreationObject, creationKey: String) =>
-      bossObjects += creationKey -> bossObject.objectId.get
-      // If the client is using the "X-Force-Location" header, no need to populate PUT urls.
-      // Instead, forward to the DM service if all BOSS objects have been created.
-      if (forceLocationHeader && fileCount == bossObjects.size) {
-        dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(bossObjects))
-      }
-      else {
-        bossService ! BossClientService.BossResolveObject(BossDefaults.getResolutionRequest("PUT"), bossObject.objectId.get, creationKey)
-      }
+    case ObjectsCreatedMessage(objectIDs: Map[String,String], objectURLs: Map[String,String]) =>
+      bossObjects = objectIDs
+      bossURLs = objectURLs
+      dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(bossObjects))
 
-    case BossObjectResolved(bossObject: BossResolutionResponse, creationKey: String) =>
-      bossURLs += creationKey -> bossObject.objectUrl
-      if (fileCount == bossURLs.size)
-        dmService ! DmClientService.DMUpdateAnalysis(dmId.get, new AnalysisUpdate(bossObjects))
+    case ObjectsCreationFailedMessage(message: String) =>
+      fail(message)
 
     case DMAnalysisUpdated(analysis) =>
-      completeIfDone(analysis)
-
-    case ClientFailure(message: String) =>
-      log.error("Client failure: " + message)
-      requestContext.reject()
+      if (forceLocationHeader) {
+        log.debug("'X-Force-Location' Analysis update complete")
+        requestContext.complete(analysis.copy(files = Option(providedFiles)))
+      }
+      else {
+        log.debug("Analysis update complete")
+        requestContext.complete(analysis.copy(files = Option(bossURLs)))
+      }
       context.stop(self)
 
+    case ClientFailure(message: String) =>
+      bossService ! DeleteObjectsMessage(bossObjects)
+      fail(message)
   }
 
-  def completeIfDone(analysis: Analysis): Unit =
-    forceLocationHeader match {
-        case true =>
-          if (fileCount == bossObjects.size) {
-            log.debug("'X-Force-Location' Analysis update complete")
-            requestContext.complete(analysis.copy(files = Option(providedFiles)))
-            context.stop(self)
-          }
-        case false =>
-          if (fileCount == bossURLs.size) {
-            log.debug("Analysis update complete")
-            requestContext.complete(analysis.copy(files = Option(bossURLs)))
-            context.stop(self)
-          }
-      }
-
+  def fail(message: String) = {
+    log.error("Client failure: " + message)
+    requestContext.reject()
+    context.stop(self)
+  }
 }

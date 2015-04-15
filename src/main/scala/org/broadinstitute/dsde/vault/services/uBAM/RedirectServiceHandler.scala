@@ -9,6 +9,7 @@ import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import org.broadinstitute.dsde.vault.services.uBAM.RedirectServiceHandler.RedirectMessage
 import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
+import scala.util.{Try,Success,Failure}
 import spray.http.StatusCodes
 import spray.routing.RequestContext
 
@@ -47,13 +48,23 @@ case class RedirectServiceHandler(requestContext: RequestContext, bossService: A
           context.stop(self)
       }
 
-    case BossObjectResolved(bossObject: BossResolutionResponse, fileType: String) =>
-      log.debug("Resolved Boss object, redirecting to " + bossObject.objectUrl)
-      requestContext.redirect(bossObject.objectUrl, StatusCodes.TemporaryRedirect)
+    case BossObjectResolved(bossURL: Try[String], fileType: String) =>
+      bossURL match {
+        case Success(url) =>
+          log.debug("Resolved Boss object, redirecting to " + url)
+          requestContext.redirect(url, StatusCodes.TemporaryRedirect)
+          context.stop(self)
+        case Failure(ex) =>
+          fail(ex.getMessage)
+      }
 
     case ClientFailure(message: String) =>
-      log.error("Client failure: " + message)
-      requestContext.reject()
-      context.stop(self)
+      fail(message)
+  }
+
+  def fail(message: String): Unit = {
+    log.error("Client failure: " + message)
+    requestContext.reject()
+    context.stop(self)
   }
 }
