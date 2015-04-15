@@ -3,7 +3,8 @@ package org.broadinstitute.dsde.vault.services.mock
 import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.BossJsonProtocol._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
-import org.broadinstitute.dsde.vault.model.{UBamIngestResponse, BossCreationObject, BossResolutionResponse, UBam}
+import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
+import org.broadinstitute.dsde.vault.model._
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.model.Header
@@ -37,6 +38,11 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
     val ubamResponse = new UBamIngestResponse(
       "testing_id",
       Map(("bam", "http://localhost:8080/path/to/bam"), ("bai", "http://localhost:8080/path/to/bai"))
+    )
+
+    val lookupResponse = new EntitySearchResult(
+      "testing_id",
+    "ubam"
     )
 
     mockDMServer = startClientAndServer(8989)
@@ -82,6 +88,17 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
         org.mockserver.model.HttpResponse.response()
           .withBody("HTTP method not allowed, supported methods: GET")
           .withStatusCode(405)
+      )
+
+    mockDMServer.when(
+      request()
+        .withMethod("GET")
+        .withPath("/query/ubam/uniqueTest/.*")
+    ).respond(
+        org.mockserver.model.HttpResponse.response()
+          .withHeader(header)
+          .withBody(lookupResponse.toJson.prettyPrint)
+          .withStatusCode(200)
       )
 
   }

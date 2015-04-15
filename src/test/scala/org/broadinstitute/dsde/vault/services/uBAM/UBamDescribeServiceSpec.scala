@@ -16,7 +16,6 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
   override implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(120, TimeUnit.SECONDS))
 
   def actorRefFactory = system
-
   var testingId = "invalid_UUID"
 
   val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
