@@ -29,7 +29,7 @@ val versionSuffix = {
 // Set the composite version
 version := versionRoot + "-" + versionSuffix.getOrElse((versionRevision + 1) + "-SNAPSHOT")
 
-val artifactory = "http://artifactory.broadinstitute.org:8081/artifactory/"
+val artifactory = "https://artifactory.broadinstitute.org/artifactory/"
 
 credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
 
@@ -50,7 +50,7 @@ libraryDependencies ++= {
   val akkaV = "2.3.6"
   val sprayV = "1.3.2"
   Seq(
-    vaultOrg %% "vault-common" % "0.1-6-b6c0205"
+    vaultOrg %% "vault-common" % "0.1-8-b3e439b"
     , "io.spray" %% "spray-can" % sprayV
     , "io.spray" %% "spray-routing" % sprayV
     , "io.spray" %% "spray-json" % "1.3.1"
