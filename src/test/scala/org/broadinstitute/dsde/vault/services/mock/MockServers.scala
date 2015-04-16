@@ -1,18 +1,18 @@
 package org.broadinstitute.dsde.vault.services.mock
 
-import org.broadinstitute.dsde.vault.VaultFreeSpec
 import org.broadinstitute.dsde.vault.model.BossJsonProtocol._
-import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.mockserver.integration.ClientAndServer
 import org.mockserver.integration.ClientAndServer.startClientAndServer
 import org.mockserver.model.Header
+import org.mockserver.model.HttpResponse._
 import org.mockserver.model.HttpRequest.request
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{BeforeAndAfterAll, Suite}
 import spray.json._
 
-trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
+trait MockServers extends Suite with BeforeAndAfterAll {
 
   var mockDMServer: ClientAndServer = _
   var mockBossServer: ClientAndServer = _
@@ -52,7 +52,7 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
           .withMethod("GET")
           .withPath("/ubams/testing_id")
       ).respond(
-        org.mockserver.model.HttpResponse.response()
+        response()
           .withHeaders(header)
           .withBody(ubam.toJson.prettyPrint)
           .withStatusCode(200)
@@ -64,7 +64,7 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
           .withMethod("GET")
           .withPath("/ubams/12345-67890-12345")
       ).respond(
-        org.mockserver.model.HttpResponse.response()
+        response()
           .withHeaders(header)
           .withStatusCode(404)
       )
@@ -74,7 +74,7 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
         .withMethod("POST")
         .withPath("/ubams")
     ).respond(
-        org.mockserver.model.HttpResponse.response()
+        response()
           .withHeaders(header)
           .withBody(ubam.toJson.prettyPrint)
           .withStatusCode(200)
@@ -85,7 +85,7 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
         .withMethod("PUT")
         .withPath("/ubams")
     ).respond(
-        org.mockserver.model.HttpResponse.response()
+        response()
           .withBody("HTTP method not allowed, supported methods: GET")
           .withStatusCode(405)
       )
@@ -95,7 +95,7 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
         .withMethod("GET")
         .withPath("/query/ubam/uniqueTest/.*")
     ).respond(
-        org.mockserver.model.HttpResponse.response()
+        response()
           .withHeader(header)
           .withBody(lookupResponse.toJson.prettyPrint)
           .withStatusCode(200)
@@ -121,7 +121,7 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
         .withMethod("POST")
         .withPath("/objects/")
     ).respond(
-        org.mockserver.model.HttpResponse.response()
+        response()
           .withHeaders(header)
           .withBody(bossObject.toJson.prettyPrint)
           .withStatusCode(200)
@@ -132,7 +132,7 @@ trait MockServers extends VaultFreeSpec with BeforeAndAfterAll {
         .withMethod("POST")
         .withPath("/objects/testing_id/resolve")
     ).respond(
-        org.mockserver.model.HttpResponse.response()
+        response()
           .withHeaders(header)
           .withBody(bossResponse.toJson.prettyPrint)
           .withStatusCode(200)
