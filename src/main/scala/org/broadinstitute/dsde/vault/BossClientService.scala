@@ -83,7 +83,7 @@ case class BossClientService(requestContext: RequestContext) extends Actor {
     log.debug("Deleting an object in the BOSS API with id: " + id)
     val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive
     val responseFuture = pipeline {
-      Delete(VaultConfig.BOSS.objectResolveUrl(id)) ~> addCredentials(bossCredentials)
+      Delete(VaultConfig.BOSS.objectIDUrl(id)) ~> addCredentials(bossCredentials)
     }
     responseFuture onComplete {
       case Success(createdObject) =>

@@ -84,6 +84,8 @@ object VaultConfig {
     lazy val objectsPath = boss.getString("objectsPath")
     lazy val objectsUrl = server + objectsPath
 
+    def objectIDPath(id: String) = boss.getString("objectIDPath").format(id)
+    def objectIDUrl(id: String) = server + objectIDPath(id)
     def objectResolvePath(id: String) = boss.getString("objectResolvePath").format(id)
     def objectResolveUrl(id: String) = server + objectResolvePath(id)
 
