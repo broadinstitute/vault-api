@@ -6,6 +6,7 @@ import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import org.scalatest.{DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
+import org.broadinstitute.dsde.vault.model.Properties._
 
 @DoNotDiscover
 class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectService with AnalysisIngestService with AnalysisUpdateService{
@@ -13,6 +14,7 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
   def actorRefFactory = system
   var testingId = "invalid_UUID"
   var forceTestingId = "invalid_UUID"
+  var testProperties: Map[String, String] = Map.empty
 
   val inputs = List()
   val metadata = Map("testAttr" -> "testValue")
@@ -34,8 +36,21 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
             val analysisIngest = new AnalysisIngest(inputs, metadata)
             Post(VaultConfig.Vault.analysisIngestPath.versioned(version), analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
               status should equal(OK)
+              val response = responseAs[Analysis]
               testingId = responseAs[Analysis].id
-              responseAs[Analysis].metadata.getOrElse("testAttr", "get failed") should equal("testValue")
+              response.metadata.getOrElse("testAttr", "get failed") should equal("testValue")
+
+              version match {
+                case Some(x) if x > 1 =>
+                  response.properties shouldNot be(empty)
+                  testProperties = response.properties.get
+                  testProperties.get(CreatedBy) shouldNot be(empty)
+                  testProperties.get(CreatedDate) shouldNot be(empty)
+                  testProperties.get(ModifiedBy) should be(empty)
+                  testProperties.get(ModifiedDate) should be(empty)
+                case _ =>
+                  response.properties shouldBe empty
+              }
             }
           }
           "should successfully update the data using the Analysis Update path" in {
@@ -48,6 +63,18 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
               files.get isDefinedAt "bam"
               files.get isDefinedAt "bai"
               files.get isDefinedAt "vcf"
+
+              version match {
+                case Some(x) if x > 1 =>
+                  analysisResponse.properties shouldNot be(empty)
+                  val newProperties = analysisResponse.properties.get
+                  newProperties.get(CreatedBy) should equal(testProperties.get(CreatedBy))
+                  newProperties.get(CreatedDate) should equal(testProperties.get(CreatedDate))
+                  newProperties.get(ModifiedBy) shouldNot be(empty)
+                  newProperties.get(ModifiedDate) shouldNot be(empty)
+                case _ =>
+                  analysisResponse.properties shouldBe empty
+              }
             }
           }
         }

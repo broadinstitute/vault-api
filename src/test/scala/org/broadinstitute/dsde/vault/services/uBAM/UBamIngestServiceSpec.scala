@@ -4,6 +4,7 @@ import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import org.scalatest.{DoNotDiscover, Suite}
+import org.broadinstitute.dsde.vault.model.Properties._
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpEntity, MediaTypes}
 import spray.httpx.SprayJsonSupport._
@@ -39,6 +40,19 @@ class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService{
               responseAs[String] should include("bai")
               responseAs[String] shouldNot include("randomData")
               responseAs[String] shouldNot include("testUser")
+
+              val properties = responseAs[UBamIngestResponse].properties
+              version match {
+                case Some(x) if x > 1 =>
+                  properties shouldNot be(empty)
+                  properties.get.get(CreatedBy) shouldNot be(empty)
+                  properties.get.get(CreatedDate) shouldNot be(empty)
+                  properties.get.get(ModifiedBy) should be(empty)
+                  properties.get.get(ModifiedDate) should be(empty)
+                case _ =>
+                  properties shouldBe empty
+              }
+
             }
           }
         }
@@ -47,9 +61,22 @@ class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService{
           "should return a valid response with the provided file paths" in {
             Post(VaultConfig.Vault.ubamIngestPath.versioned(version), ubamIngest) ~> addHeader("X-Force-Location", "true") ~> addOpenAmCookie ~> uBamIngestRoute ~> check {
               status should equal(OK)
-              val files = responseAs[UBamIngestResponse].files
+              val response = responseAs[UBamIngestResponse]
+              val files = response.files
               files.get("bam").get should equal("vault/test/test.bam")
               files.get("bai").get should equal("vault/test/test.bai")
+
+              version match {
+                case Some(x) if x > 1 =>
+                  response.properties shouldNot be(empty)
+                  val properties = response.properties.get
+                  properties.get(CreatedBy) shouldNot be(empty)
+                  properties.get(CreatedDate) shouldNot be(empty)
+                  properties.get(ModifiedBy) should be(empty)
+                  properties.get(ModifiedDate) should be(empty)
+                case _ =>
+                  response.properties shouldBe empty
+              }
             }
           }
         }

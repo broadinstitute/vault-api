@@ -2,6 +2,7 @@ package org.broadinstitute.dsde.vault.services.analysis
 
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.model.Properties._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
@@ -16,7 +17,9 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
   def actorRefFactory = system
 
   var testDataGuid: String = "invalid-id"
-  val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "vault/test/test.vcf", "bai" -> "vault/test/test.bai", "bam" -> "vault/test/test.bam"))
+  var testProperties = Map.empty[String, String]
+  val analysisUpdate = new AnalysisUpdate(
+      files = Map("vcf" -> "vault/test/test.vcf", "bai" -> "vault/test/test.bai", "bam" -> "vault/test/test.bam"))
 
   val versions = Table(
     "version",
@@ -36,7 +39,20 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
             val ubamIngest = new UBamIngest(files, metadata)
             Post(VaultConfig.Vault.ubamIngestPath.versioned(version), ubamIngest) ~> addOpenAmCookie ~> uBamIngestRoute ~> check {
               status should equal(OK)
-              testDataGuid = responseAs[UBamIngestResponse].id
+              val response = responseAs[UBamIngestResponse]
+              testDataGuid = response.id
+
+              version match {
+                case Some(x) if x > 1 =>
+                  response.properties shouldNot be(empty)
+                  testProperties = response.properties.get
+                  testProperties.get(CreatedBy) shouldNot be(empty)
+                  testProperties.get(CreatedDate) shouldNot be(empty)
+                  testProperties.get(ModifiedBy) should be(empty)
+                  testProperties.get(ModifiedDate) should be(empty)
+                case _ =>
+                  response.properties shouldBe empty
+              }
             }
           }
         }
@@ -51,6 +67,18 @@ class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService
               files.get isDefinedAt "bam"
               files.get isDefinedAt "bai"
               files.get isDefinedAt "vcf"
+
+              version match {
+                case Some(x) if x > 1 =>
+                  analysisResponse.properties shouldNot be(empty)
+                  val newProperties = analysisResponse.properties.get
+                  newProperties.get(CreatedBy) should equal(testProperties.get(CreatedBy))
+                  newProperties.get(CreatedDate) should equal(testProperties.get(CreatedDate))
+                  newProperties.get(ModifiedBy) shouldNot be(empty)
+                  newProperties.get(ModifiedDate) shouldNot be(empty)
+                case _ =>
+                  analysisResponse.properties shouldBe empty
+              }
             }
           }
         }

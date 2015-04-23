@@ -4,6 +4,7 @@ import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{UBam, UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import org.scalatest.{DoNotDiscover, Suite}
+import org.broadinstitute.dsde.vault.model.Properties._
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
@@ -15,6 +16,7 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
   def actorRefFactory = system
 
   var testingId = "invalid_UUID"
+  var testProperties = Map.empty[String, String]
 
   val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
   val metadata = Map("testAttr" -> "testValue")
@@ -41,7 +43,20 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
             val ubamIngest = new UBamIngest(files, metadata)
             Post(VaultConfig.Vault.ubamIngestPath.versioned(version), ubamIngest) ~> addOpenAmCookie ~> uBamIngestRoute ~> check {
               status should equal(OK)
-              testingId = responseAs[UBamIngestResponse].id
+              val response = responseAs[UBamIngestResponse]
+              testingId = response.id
+
+              version match {
+                case Some(x) if x > 1 =>
+                  response.properties shouldNot be(empty)
+                  testProperties = response.properties.get
+                  testProperties.get(CreatedBy) shouldNot be(empty)
+                  testProperties.get(CreatedDate) shouldNot be(empty)
+                  testProperties.get(ModifiedBy) shouldBe empty
+                  testProperties.get(ModifiedDate) shouldBe empty
+                case _ =>
+                  response.properties shouldBe empty
+              }
             }
           }
         }
@@ -57,6 +72,18 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
               response.files.getOrElse("bai", "error") should (be an (URL) and not be a(UUID))
               response.files.getOrElse("bam", "error") shouldNot include("ingest")
               response.files.getOrElse("bai", "error") shouldNot include("ingest")
+
+              version match {
+                case Some(x) if x > 1 =>
+                  response.properties shouldNot be(empty)
+                  val newProperties = response.properties.get
+                  newProperties.get(CreatedBy) should equal(testProperties.get(CreatedBy))
+                  newProperties.get(CreatedDate) should equal(testProperties.get(CreatedDate))
+                  newProperties.get(ModifiedBy) should be(empty)
+                  newProperties.get(ModifiedDate) should be(empty)
+                case _ =>
+                  response.properties shouldBe empty
+              }
             }
           }
         }
