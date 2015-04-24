@@ -52,6 +52,13 @@ object VaultConfig {
 
     def ubamRedirectPath(id: String, fileType: String) = vault.getString("ubamsRedirectPath").format(id, fileType)
     def ubamRedirectUrl(id: String, fileType: String) = server + ubamRedirectPath(id, fileType)
+
+    def ubamCollectionDescribePath(id: String) = vault.getString("ubamCollectionDescribePath").format(id)
+    def ubamCollectionDescribeUrl(id: String) = server + ubamCollectionDescribePath(id)
+
+    lazy val ubamCollectionIngestPath = vault.getString("ubamCollectionIngestPath")
+    lazy val ubamCollectionIngestUrl = server + ubamIngestPath
+
   }
 
   object DataManagement {
@@ -71,6 +78,12 @@ object VaultConfig {
 
     def analysesUpdatePath(id: String) = dm.getString("analysesUpdatePath").format(id)
     def analysesUpdateUrl(id: String) = server + analysesUpdatePath(id)
+
+    def uBamCollectionResolvePath(id: String) = dm.getString("uBamCollectionResolvePath").format(id)
+    def uBamCollectionResolveUrl(id: String) = server + uBamCollectionResolvePath(id)
+
+    lazy val collectionsPath = dm.getString("ubamCollectionPath")
+    lazy val collectionsUrl = server + collectionsPath
 
     def queryLookupPath(entityType: String, attributeName: String, attributeValue: String) = dm.getString("queryLookupPath").format(entityType, attributeName, attributeValue)
     def queryLookupUrl(entityType: String, attributeName: String, attributeValue: String) = server + queryLookupPath(entityType, attributeName, attributeValue)

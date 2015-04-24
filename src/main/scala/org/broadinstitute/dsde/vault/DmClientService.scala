@@ -9,6 +9,7 @@ import org.broadinstitute.dsde.vault.DmClientService._
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
+import org.broadinstitute.dsde.vault.model.uBAMCollectionJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, EntitySearchResult, UBam, UBamIngest, _}
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
@@ -36,6 +37,10 @@ object DmClientService {
 
   case class DMLookupEntity(entityType: String, attributeName: String, attributeValue: String)
   case class DMLookupResolved(result: EntitySearchResult)
+  case class DMCreateUBamCollection(ubamCollectionIngest: UBamCollectionIngest)
+  case class DMUBamCollectionCreated(uBAMCollection: UBamCollection)
+  case class DMResolveUBamCollection(uBamCollectionId: String)
+  case class DMUBamCollectionResolved(uBamCollection: UBamCollection)
 
 
   def props(requestContext: RequestContext): Props = Props(new DmClientService(requestContext))
@@ -59,6 +64,12 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
 
     case DMResolveUBamList(version: Int, pageLimit: Option[Int]) =>
       resolveUBamList(sender(), version, pageLimit)
+
+    case DMCreateUBamCollection(ubamCollectionIngest) =>
+      createUBamCollection(sender(), ubamCollectionIngest)
+
+    case DMResolveUBamCollection(uBamCollectionId) =>
+      resolveUBamCollection(sender(),uBamCollectionId)
 
     case DMCreateAnalysis(analysisIngest) =>
       createAnalysis(sender(), analysisIngest)
@@ -117,13 +128,45 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
       pageLimit.foreach(limit => uri = uri.withQuery("page[limit]" -> limit.toString))
       Get(uri)
     }
-   responseFuture onComplete {
+    responseFuture onComplete {
 
       case Success(resolvedUBams) =>
         requestContext.complete(resolvedUBams)
 
       case Failure(error) =>
-        log.error(error, "Couldn't find uBAMs" )
+        log.error(error, "Couldn't find uBAMs")
+    }
+  }
+
+  def createUBamCollection(senderRef: ActorRef, ubamCollectionIngest: UBamCollectionIngest): Unit = {
+    log.debug("Creating a uBAM Collection object in the DM")
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[UBamCollection]
+    val responseFuture = pipeline {
+      Post(VaultConfig.DataManagement.collectionsUrl, ubamCollectionIngest)
+    }
+    responseFuture onComplete {
+      case Success(createdUBamCollection) =>
+        log.debug("uBAM Collection created with id: " + createdUBamCollection.id)
+        senderRef ! DMUBamCollectionCreated(createdUBamCollection)
+
+      case Failure(error) =>
+        log.error(error, "Failure creating uBAM Collection object")
+        senderRef ! ClientFailure(error.getMessage)
+    }
+  }
+
+  def resolveUBamCollection(senderRef: ActorRef, uBamCollectionId: String): Unit = {
+    log.debug("Querying the DM API for an UbamCollection  id: " + uBamCollectionId)
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[UBamCollection]
+    val responseFuture = pipeline {
+      Get(VaultConfig.DataManagement.uBamCollectionResolveUrl(uBamCollectionId))
+    }
+    responseFuture onComplete {
+      case Success(uBamCollection) =>
+        log.debug("uBamCollection found: " + uBamCollection.id)
+        senderRef ! DMUBamCollectionResolved(uBamCollection)
+      case Failure(error) =>
+        log.error(error, "Couldn't find uBamCollection with id: " + uBamCollectionId)
         senderRef ! ClientFailure(error.getMessage)
     }
   }
