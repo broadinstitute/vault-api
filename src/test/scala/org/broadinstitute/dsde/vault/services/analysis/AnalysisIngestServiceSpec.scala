@@ -10,8 +10,6 @@ import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
 
 class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService with UBamIngestService with BeforeAndAfterAll {
 
-  override val routes = analysisIngestRoute
-
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.{impAnalysisIngest, impAnalysisIngestResponse}
   import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol.{impUBamIngest, impUBamIngestResponse}
   import spray.httpx.SprayJsonSupport._

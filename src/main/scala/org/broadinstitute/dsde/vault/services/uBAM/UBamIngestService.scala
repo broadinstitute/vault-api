@@ -12,7 +12,7 @@ import uBAMJsonProtocol._
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait UBamIngestService extends HttpService {
 
-  val routes = uBamIngestRoute
+  val ubiRoute = uBamIngestRoute
 
   @ApiOperation(
     value = "Creates uBAM objects",

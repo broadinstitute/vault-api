@@ -12,8 +12,6 @@ import spray.httpx.SprayJsonSupport._
 
 class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngestService {
 
-  override val routes = lookupRoute
-
   def actorRefFactory = system
 
   val openAmResponse = getOpenAmToken.get

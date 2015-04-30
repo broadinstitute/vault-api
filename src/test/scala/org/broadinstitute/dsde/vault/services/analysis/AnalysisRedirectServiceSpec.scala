@@ -10,8 +10,6 @@ import spray.httpx.SprayJsonSupport._
 
 class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectService with AnalysisIngestService with AnalysisUpdateService {
 
-  override val routes = analysisRedirectRoute
-
   def actorRefFactory = system
   val openAmResponse = getOpenAmToken.get
   var testingId = "invalid_UUID"

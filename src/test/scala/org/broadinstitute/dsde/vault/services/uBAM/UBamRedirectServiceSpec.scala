@@ -10,8 +10,6 @@ import spray.httpx.SprayJsonSupport._
 
 class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService {
 
-  override val routes = uBamRedirectRoute
-
   def actorRefFactory = system
   val openAmResponse = getOpenAmToken.get
   var testingId = "invalid_UUID"

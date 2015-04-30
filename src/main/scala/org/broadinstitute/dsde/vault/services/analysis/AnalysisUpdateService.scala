@@ -14,7 +14,7 @@ import spray.routing._
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 1)
 trait AnalysisUpdateService extends HttpService {
 
-  val routes = analysisUpdateRoute
+  val auRoute = analysisUpdateRoute
 
   @Path("/{id}/outputs")
   @ApiOperation(

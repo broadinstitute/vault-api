@@ -10,7 +10,7 @@ import spray.routing._
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait UBamDescribeService extends HttpService {
 
-  val routes = uBamDescribeRoute
+  val ubdRoute = uBamDescribeRoute
 
   @ApiOperation(value = "Describes a uBAM's metadata and associated files.  Does not generate presigned URLs.",
     nickname = "ubam_describe",

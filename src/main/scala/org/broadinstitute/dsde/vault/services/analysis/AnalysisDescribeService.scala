@@ -10,7 +10,7 @@ import spray.routing._
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait AnalysisDescribeService extends HttpService {
 
-  val routes = analysisDescribeRoute
+  val adRoute = analysisDescribeRoute
 
   @ApiOperation(value = "Describes an Analysis' metadata, inputs, and output files.  Does not generate presigned URLs.",
     nickname = "analysis_describe",

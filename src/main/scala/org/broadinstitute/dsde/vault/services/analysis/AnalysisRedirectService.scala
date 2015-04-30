@@ -7,7 +7,7 @@ import spray.routing._
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 0)
 trait AnalysisRedirectService extends HttpService {
 
-  val routes = analysisRedirectRoute
+  val arRoute = analysisRedirectRoute
 
   @ApiOperation(value = "Redirects to presigned GET URLs for analyses", nickname = "analysis_redirect", httpMethod = "GET",
     notes = "Returns an HTTP 307 redirect to a presigned GET URL for the specified analysis output file. If the caller would like presigned URLs to all files within an analysis, " +

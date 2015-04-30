@@ -11,8 +11,6 @@ import spray.httpx.unmarshalling._
 
 class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeService with AnalysisUpdateService with AnalysisIngestService {
 
-  override val routes = analysisDescribeRoute
-
   def actorRefFactory = system
 
   val openAmResponse = getOpenAmToken.get

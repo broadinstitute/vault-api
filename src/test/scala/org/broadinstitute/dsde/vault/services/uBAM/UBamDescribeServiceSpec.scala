@@ -10,8 +10,6 @@ import spray.httpx.SprayJsonSupport._
 
 class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService {
 
-  override val routes = uBamDescribeRoute
-
   def actorRefFactory = system
   val openAmResponse = getOpenAmToken.get
   var testingId = "invalid_UUID"

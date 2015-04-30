@@ -12,8 +12,6 @@ import spray.httpx.SprayJsonSupport._
 
 class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService with UBamIngestService {
 
-  override val routes = analysisUpdateRoute
-
   def actorRefFactory = system
 
   val openAmResponse = getOpenAmToken.get

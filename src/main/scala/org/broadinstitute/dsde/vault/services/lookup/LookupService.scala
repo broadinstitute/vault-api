@@ -10,7 +10,7 @@ import spray.routing._
 @Api(value = "/query", description = "Lookup Service", produces = "application/json", position = 0)
 trait LookupService extends HttpService {
 
-  val routes = lookupRoute
+  val lRoute = lookupRoute
 
   @ApiOperation(value = "Queries entities by type and attribute key/value pair",
     nickname = "lookup",
