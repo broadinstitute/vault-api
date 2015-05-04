@@ -5,10 +5,12 @@ import org.broadinstitute.dsde.vault.model.uBAMCollectionJsonProtocol._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
+import org.scalatest.{DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class UBamCollectionDescribeServiceSpec extends VaultFreeSpec with UBamCollectionDescribeService with UBamCollectionIngestService with UBamIngestService {
+@DoNotDiscover
+class UBamCollectionDescribeServiceSpec extends VaultFreeSpec with UBamCollectionDescribeService with UBamCollectionIngestService with UBamIngestService with Suite  {
 
   val routes = ubamCollectionDescribeRoute
 

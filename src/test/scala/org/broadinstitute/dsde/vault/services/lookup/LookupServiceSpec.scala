@@ -3,13 +3,14 @@ package org.broadinstitute.dsde.vault.services.lookup
 import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{EntitySearchResult, UBamIngest, UBamIngestResponse}
-import org.broadinstitute.dsde.vault.services.mock.MockServers
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
+import org.scalatest.{DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngestService with MockServers {
+@DoNotDiscover
+class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngestService with Suite  {
 
   def actorRefFactory = system
 

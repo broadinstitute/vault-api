@@ -90,6 +90,9 @@ javaOptions in Revolver.reStart ++= new scala.sys.SystemProperties()
 //   http://stackoverflow.com/a/12095245
 //   http://jira.qos.ch/browse/SLF4J-167
 //   http://jira.qos.ch/browse/SLF4J-97
+
+parallelExecution in Test := false
+
 testOptions in Test += Tests.Setup(classLoader =>
   classLoader
     .loadClass("org.slf4j.LoggerFactory")

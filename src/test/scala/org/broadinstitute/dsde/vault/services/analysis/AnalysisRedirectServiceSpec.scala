@@ -3,10 +3,12 @@ package org.broadinstitute.dsde.vault.services.analysis
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, AnalysisUpdate}
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
+import org.scalatest.{DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectService with AnalysisIngestService with AnalysisUpdateService {
+@DoNotDiscover
+class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectService with AnalysisIngestService with AnalysisUpdateService with Suite  {
 
   def actorRefFactory = system
   var testingId = "invalid_UUID"
@@ -51,7 +53,7 @@ class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectSer
         }
 
         "when calling GET to the Analysis Redirect path with a valid Vault ID and a valid file type" - {
-          "should return a redirect url to the file" in {
+            "should return a redirect url to the file" in {
             Get(VaultConfig.Vault.analysisRedirectPath(testingId, "bam").versioned(version)) ~> addOpenAmCookie ~> sealRoute(analysisRedirectRoute) ~> check {
               status should equal(TemporaryRedirect)
             }

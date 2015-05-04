@@ -3,11 +3,12 @@ package org.broadinstitute.dsde.vault.services.analysis
 import org.broadinstitute.dsde.vault.model.{AnalysisIngest, AnalysisIngestResponse, UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{BeforeAndAfter, DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpEntity, MediaTypes}
 
-class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService with UBamIngestService with BeforeAndAfterAll {
+@DoNotDiscover
+class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService with UBamIngestService with BeforeAndAfter with Suite  {
 
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.{impAnalysisIngest, impAnalysisIngestResponse}
   import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol.{impUBamIngest, impUBamIngestResponse}
@@ -16,7 +17,7 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
 
   var createdUBams: Seq[String] = Seq("bad", "ids")
 
-  override def beforeAll(): Unit = {
+  before{
 
     // test ubam for ingest
     val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
