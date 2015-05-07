@@ -2,6 +2,7 @@ package org.broadinstitute.dsde.vault.services.analysis
 
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
+import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.VaultDirectives
@@ -11,6 +12,8 @@ import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait AnalysisIngestService extends HttpService with VaultDirectives {
+
+  private final val ApiVersions = "v1"
 
   val aiRoute = analysisIngestRoute
 
@@ -25,6 +28,7 @@ trait AnalysisIngestService extends HttpService with VaultDirectives {
       Returns the Vault ID of the created object. The values of the 'input' array must be valid Vault IDs for the ubams used as input to this analysis.
       If an invalid id is specified inside the input array, this API will fail with a 404 response code.""")
   @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "version", required = true, dataType = "string", paramType = "path", value = "API version", allowableValues = ApiVersions),
     new ApiImplicitParam(name = "body", required = true, dataType = "org.broadinstitute.dsde.vault.model.AnalysisIngest", paramType = "body", value = "Analysis to create")
   ))
   @ApiResponses(Array(
@@ -34,12 +38,13 @@ trait AnalysisIngestService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def analysisIngestRoute =
-    path("analyses") {
+    pathVersion("analyses") { versionOpt =>
       post {
         respondWithJSON {
           entity(as[AnalysisIngest]) { ingest => requestContext =>
+            val version = versionOpt.getOrElse(1)
             val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-            val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, dmService))
+            val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, version, dmService))
             ingestActor ! IngestServiceHandler.IngestMessage(ingest)
           }
         }

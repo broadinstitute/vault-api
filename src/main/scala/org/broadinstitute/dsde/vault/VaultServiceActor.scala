@@ -3,7 +3,7 @@ package org.broadinstitute.dsde.vault
 import akka.actor.ActorLogging
 import com.gettyimages.spray.swagger.SwaggerHttpService
 import com.wordnik.swagger.model.ApiInfo
-import org.broadinstitute.dsde.vault.common.openam.OpenAMDirectives._
+import org.broadinstitute.dsde.vault.common.directives.OpenAMDirectives._
 import org.broadinstitute.dsde.vault.services._
 import spray.http.StatusCodes._
 import spray.routing.HttpServiceActor
@@ -32,10 +32,12 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
 
   val lookupService = new lookup.LookupService with ActorRefFactoryContext
 
+  private implicit val ec = context.dispatcher
+
   // this actor runs all routes
   def receive = runRoute(
     swaggerService.routes ~ swaggerUiService ~
-      logOpenAMRequest {
+      logOpenAMRequest() {
         uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~
           analysisIngest.aiRoute ~ analysisDescribe.adRoute ~ analysisUpdate.auRoute ~ analysisRedirect.arRoute ~
           lookupService.lRoute

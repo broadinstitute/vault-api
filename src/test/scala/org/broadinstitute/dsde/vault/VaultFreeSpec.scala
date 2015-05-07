@@ -10,17 +10,20 @@ import org.scalatest._
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
 import spray.http.HttpCookie
 import spray.http.HttpHeaders.Cookie
+import org.scalatest.prop.PropertyChecks
 import spray.testkit.ScalatestRouteTest
 
 import scala.concurrent.Await
 import scala.concurrent.duration.{FiniteDuration, Duration}
+import scala.language.implicitConversions
 import scala.util.Try
 
-abstract class VaultFreeSpec extends FreeSpec with Matchers with VaultCustomMatchers with OptionValues with Inside with Inspectors with ScalatestRouteTest {
+abstract class VaultFreeSpec extends FreeSpec with Matchers with VaultCustomMatchers with OptionValues with Inside with Inspectors with ScalatestRouteTest with PropertyChecks {
 
   implicit val timeout = Timeout(5, TimeUnit.SECONDS)
   val duration: Duration = new FiniteDuration(5, TimeUnit.SECONDS)
   implicit val routeTestTimeout = RouteTestTimeout(new FiniteDuration(10, TimeUnit.SECONDS))
+  protected def v(version: Option[Int]): String = version.map("/v" + _).getOrElse("")
 
   def getOpenAmToken: Option[OpenAmResponse] = {
     val actor = TestActorRef[OpenAmClientService]
@@ -31,6 +34,29 @@ abstract class VaultFreeSpec extends FreeSpec with Matchers with VaultCustomMatc
   lazy val openAmResponse = getOpenAmToken.get
   def addOpenAmCookie: RequestTransformer = {
     Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId))
+  }
+
+  implicit def toVersionOps(url: String): VersionOps = new VersionOps(url)
+}
+
+class VersionOps(val url: String) extends AnyVal {
+  def versioned(versionOpt: Option[Int]): String = {
+    versionOpt.map(versioned).getOrElse(url)
+  }
+
+  def versioned(version: Int): String = {
+    if (url == null) {
+      null
+    } else {
+      var newUrl: List[String] = url.split('/').toList match {
+        case "" :: head :: tail => "" :: head :: "v" + version :: tail
+        case head :: tail => head :: "v" + version :: tail
+        case Nil => "v" + version :: Nil
+      }
+      if (url.endsWith("/"))
+        newUrl :+= ""
+      newUrl.mkString("/")
+    }
   }
 
 }

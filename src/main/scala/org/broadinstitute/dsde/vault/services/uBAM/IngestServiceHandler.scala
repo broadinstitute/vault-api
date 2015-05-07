@@ -16,11 +16,11 @@ import uBAMJsonProtocol._
 object IngestServiceHandler {
   case class IngestMessage(ingest: UBamIngest, forceLocation: Option[String] = None)
 
-  def props(requestContext: RequestContext, bossService: ActorRef, dmService: ActorRef): Props =
-    Props(new IngestServiceHandler(requestContext, bossService, dmService))
+  def props(requestContext: RequestContext, version: Int, bossService: ActorRef, dmService: ActorRef): Props =
+    Props(new IngestServiceHandler(requestContext, version, bossService, dmService))
 }
 
-case class IngestServiceHandler(requestContext: RequestContext, bossService: ActorRef, dmService: ActorRef) extends Actor {
+case class IngestServiceHandler(requestContext: RequestContext, version: Int, bossService: ActorRef, dmService: ActorRef) extends Actor {
 
   implicit val system = context.system
   val log = Logging(system, getClass)

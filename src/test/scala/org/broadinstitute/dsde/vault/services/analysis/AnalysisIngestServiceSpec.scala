@@ -39,108 +39,121 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
   // TODO: clean up the ubams once that is possible
   // override def afterAll(): Unit = {}
 
+  val versions = Table(
+    "version",
+    None,
+    Some(1)
+  )
+
   "AnalysisIngestServiceSpec" - {
-    "when calling POST to the Analysis Ingest path with empty input and valid metadata" - {
-      "should return an ID" in {
-        val analysisIngest = new AnalysisIngest(
-          input = List(),
-          metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
-        )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
-          status should equal(OK)
-          // test response as raw string
-          entity.toString should include("id")
-          // test response as json, unmarshaled into an object
-          val respAnalysis = responseAs[AnalysisIngestResponse]
-          val createdId = java.util.UUID.fromString(respAnalysis.id)
-          entity.toString should include(createdId.toString)
-        }
-      }
-    }
+    forAll(versions) { (version: Option[Int]) =>
 
-    "when calling POST to the Analysis Ingest path with a single valid input and valid metadata" - {
-      "should return an ID" in {
-        val analysisIngest = new AnalysisIngest(
-          input = List(createdUBams.head),
-          metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
-        )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
-          status should equal(OK)
-          // test response as raw string
-          entity.toString should include("id")
-          // test response as json, unmarshaled into an object
-          val respAnalysis = responseAs[AnalysisIngestResponse]
-          val createdId = java.util.UUID.fromString(respAnalysis.id)
-          entity.toString should include(createdId.toString)
-        }
-      }
-    }
+      s"when accessing version = '${v(version)}'" - {
 
-    "when calling POST to the Analysis Ingest path with a single valid input, single invalid input, and valid metadata" - {
-      "should return  a Not Found error" in {
-        val analysisIngest = new AnalysisIngest(
-          input = List(createdUBams.head) :+ "intentionallyBadForeignKey",
-          metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
-        )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
-          status should equal(NotFound)
+        "when calling POST to the Analysis Ingest path with empty input and valid metadata" - {
+          "should return an ID" in {
+            val analysisIngest = new AnalysisIngest(
+              input = List(),
+              metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
+            )
+            Post(VaultConfig.Vault.analysisIngestPath.versioned(version), analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
+              status should equal(OK)
+              // test response as raw string
+              entity.toString should include("id")
+              // test response as json, unmarshaled into an object
+              val respAnalysis = responseAs[AnalysisIngestResponse]
+              val createdId = java.util.UUID.fromString(respAnalysis.id)
+              entity.toString should include(createdId.toString)
+            }
+          }
         }
-      }
-    }
 
-    "when calling POST to the Analysis Ingest path with multiple valid input and valid metadata" - {
-      "should return an ID" in {
-        val analysisIngest = new AnalysisIngest(
-          input = createdUBams.toList,
-          metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
-        )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
-          status should equal(OK)
-          // test response as raw string
-          entity.toString should include("id")
-          // test response as json, unmarshaled into an object
-          val respAnalysis = responseAs[AnalysisIngestResponse]
-          val createdId = java.util.UUID.fromString(respAnalysis.id)
-          entity.toString should include(createdId.toString)
+        "when calling POST to the Analysis Ingest path with a single valid input and valid metadata" - {
+          "should return an ID" in {
+            val analysisIngest = new AnalysisIngest(
+              input = List(createdUBams.head),
+              metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
+            )
+            Post(VaultConfig.Vault.analysisIngestPath.versioned(version), analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
+              status should equal(OK)
+              // test response as raw string
+              entity.toString should include("id")
+              // test response as json, unmarshaled into an object
+              val respAnalysis = responseAs[AnalysisIngestResponse]
+              val createdId = java.util.UUID.fromString(respAnalysis.id)
+              entity.toString should include(createdId.toString)
+            }
+          }
         }
-      }
-    }
 
-    "when calling POST to the Analysis Ingest path with multiple valid input, single invalid input, and valid metadata" - {
-      "should return a Not Found error" in {
-        val analysisIngest = new AnalysisIngest(
-          input = createdUBams.toList :+ "intentionallyBadForeignKey",
-          metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
-        )
-        Post(VaultConfig.Vault.analysisIngestPath, analysisIngest) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
-          status should equal(NotFound)
+        "when calling POST to the Analysis Ingest path with a single valid input, single invalid input, and valid metadata" - {
+          "should return  a Not Found error" in {
+            val analysisIngest = new AnalysisIngest(
+              input = List(createdUBams.head) :+ "intentionallyBadForeignKey",
+              metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
+            )
+            Post(VaultConfig.Vault.analysisIngestPath.versioned(version), analysisIngest) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
+              status should equal(NotFound)
+            }
+          }
         }
-      }
-    }
 
-    "when calling POST to the Analysis Ingest path with an invalid object" - {
-      "should return a Bad Request error" in {
-        val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
-        Post(VaultConfig.Vault.analysisIngestPath, malformedEntity) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
-          status should equal(BadRequest)
+        "when calling POST to the Analysis Ingest path with multiple valid input and valid metadata" - {
+          "should return an ID" in {
+            val analysisIngest = new AnalysisIngest(
+              input = createdUBams.toList,
+              metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
+            )
+            Post(VaultConfig.Vault.analysisIngestPath.versioned(version), analysisIngest) ~> addOpenAmCookie ~> analysisIngestRoute ~> check {
+              status should equal(OK)
+              // test response as raw string
+              entity.toString should include("id")
+              // test response as json, unmarshaled into an object
+              val respAnalysis = responseAs[AnalysisIngestResponse]
+              val createdId = java.util.UUID.fromString(respAnalysis.id)
+              entity.toString should include(createdId.toString)
+            }
+          }
         }
-      }
-    }
 
-    "when calling PUT to the Analysis Ingest path" - {
-      "should return a MethodNotAllowed error" in {
-        Put(VaultConfig.Vault.analysisIngestPath) ~> sealRoute(analysisIngestRoute) ~> check {
-          status should equal(MethodNotAllowed)
-          entity.toString should include("HTTP method not allowed, supported methods: POST")
+
+        "when calling POST to the Analysis Ingest path with multiple valid input, single invalid input, and valid metadata" - {
+          "should return a Not Found error" in {
+            val analysisIngest = new AnalysisIngest(
+              input = createdUBams.toList :+ "intentionallyBadForeignKey",
+              metadata = Map("testAttr" -> "testValue", "randomData" -> "7")
+            )
+            Post(VaultConfig.Vault.analysisIngestPath.versioned(version), analysisIngest) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
+              status should equal(NotFound)
+            }
+          }
         }
-      }
-    }
 
-    "when calling GET to the Analysis Ingest path" - {
-      "should return a MethodNotAllowed error" in {
-        Get(VaultConfig.Vault.analysisIngestPath) ~> sealRoute(analysisIngestRoute) ~> check {
-          status should equal(MethodNotAllowed)
-          entity.toString should include("HTTP method not allowed, supported methods: POST")
+        "when calling POST to the Analysis Ingest path with an invalid object" - {
+          "should return a Bad Request error" in {
+            val malformedEntity = HttpEntity(ContentType(MediaTypes.`application/json`), """{"random":"data"}""")
+            Post(VaultConfig.Vault.analysisIngestPath.versioned(version), malformedEntity) ~> addOpenAmCookie ~> sealRoute(analysisIngestRoute) ~> check {
+              status should equal(BadRequest)
+            }
+          }
+        }
+
+        "when calling PUT to the Analysis Ingest path" - {
+          "should return a MethodNotAllowed error" in {
+            Put(VaultConfig.Vault.analysisIngestPath.versioned(version)) ~> sealRoute(analysisIngestRoute) ~> check {
+              status should equal(MethodNotAllowed)
+              entity.toString should include("HTTP method not allowed, supported methods: POST")
+            }
+          }
+        }
+
+        "when calling GET to the Analysis Ingest path" - {
+          "should return a MethodNotAllowed error" in {
+            Get(VaultConfig.Vault.analysisIngestPath.versioned(version)) ~> sealRoute(analysisIngestRoute) ~> check {
+              status should equal(MethodNotAllowed)
+              entity.toString should include("HTTP method not allowed, supported methods: POST")
+            }
+          }
         }
       }
     }

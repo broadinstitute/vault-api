@@ -16,12 +16,12 @@ object UpdateServiceHandler {
 
   case class UpdateMessage(dmId: String, update: AnalysisUpdate, forceLocation: Option[String] = None)
 
-  def props(requestContext: RequestContext, dmService: ActorRef, bossService: ActorRef): Props =
-    Props(new UpdateServiceHandler(requestContext, dmService, bossService))
+  def props(requestContext: RequestContext, version: Int, dmService: ActorRef, bossService: ActorRef): Props =
+    Props(new UpdateServiceHandler(requestContext, version, dmService, bossService))
 
 }
 
-case class UpdateServiceHandler(requestContext: RequestContext, dmService: ActorRef, bossService: ActorRef) extends Actor {
+case class UpdateServiceHandler(requestContext: RequestContext, version: Int, dmService: ActorRef, bossService: ActorRef) extends Actor {
 
   implicit val system = context.system
   val log = Logging(system, getClass)

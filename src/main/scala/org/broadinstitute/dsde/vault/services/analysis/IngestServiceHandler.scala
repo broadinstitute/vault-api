@@ -15,12 +15,12 @@ object IngestServiceHandler {
 
   case class IngestMessage(ingest: AnalysisIngest)
 
-  def props(requestContext: RequestContext, dmService: ActorRef): Props =
-    Props(new IngestServiceHandler(requestContext, dmService))
+  def props(requestContext: RequestContext, version: Int, dmService: ActorRef): Props =
+    Props(new IngestServiceHandler(requestContext, version, dmService))
 
 }
 
-case class IngestServiceHandler(requestContext: RequestContext, dmService: ActorRef) extends Actor {
+case class IngestServiceHandler(requestContext: RequestContext, version: Int, dmService: ActorRef) extends Actor {
 
   implicit val system = context.system
   val log = Logging(system, getClass)
