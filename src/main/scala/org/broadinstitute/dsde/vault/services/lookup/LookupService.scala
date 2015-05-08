@@ -4,13 +4,14 @@ import akka.actor.Props
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.services.VaultDirectives
 import spray.http.MediaTypes._
 import spray.routing._
 
 @Api(value = "/query", description = "Lookup Service", produces = "application/json", position = 0)
-trait LookupService extends HttpService {
+trait LookupService extends HttpService with VaultDirectives {
 
-  val routes = lookupRoute
+  val lRoute = lookupRoute
 
   @ApiOperation(value = "Queries entities by type and attribute key/value pair",
     nickname = "lookup",
@@ -29,17 +30,14 @@ trait LookupService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def lookupRoute = {
-    path("query" / Segment / Segment / Segment) {
-      (entityType, attributeName, attributeValue) =>
-        get {
-          respondWithMediaType(`application/json`) {
-            requestContext => {
-              val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-              val describeActor = actorRefFactory.actorOf(LookupServiceHandler.props(requestContext, dmService))
-              describeActor ! LookupServiceHandler.LookupMessage(entityType, attributeName, attributeValue)
-            }
-          }
+    path("query" / Segment / Segment / Segment) { (entityType, attributeName, attributeValue) =>
+      get {
+        respondWithJSON { requestContext =>
+          val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
+          val describeActor = actorRefFactory.actorOf(LookupServiceHandler.props(requestContext, dmService))
+          describeActor ! LookupServiceHandler.LookupMessage(entityType, attributeName, attributeValue)
         }
+      }
     }
   }
 

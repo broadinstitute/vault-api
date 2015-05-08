@@ -7,7 +7,7 @@ import spray.routing._
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait UBamRedirectService extends HttpService {
 
-  val routes = uBamRedirectRoute
+  val ubrRoute = uBamRedirectRoute
 
   @ApiOperation(value = "Redirects to presigned GET URLs for uBAM files", nickname = "ubam_redirect", httpMethod = "GET",
     notes = "Returns an HTTP 307 redirect to a presigned GET URL for the specified uBAM file. If the caller would like presigned URLs to all files within an object, " +
@@ -23,15 +23,13 @@ trait UBamRedirectService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def uBamRedirectRoute =
-    path("ubams" / Segment / Segment) {
-      (id, filetype) =>
-        get {
-          requestContext =>
-            val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
-            val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-            val redirectActor = actorRefFactory.actorOf(RedirectServiceHandler.props(requestContext, bossService, dmService))
-            redirectActor ! RedirectServiceHandler.RedirectMessage(id, filetype)
-        }
+    path("ubams" / Segment / Segment) { (id, filetype) =>
+      get { requestContext =>
+        val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+        val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+        val redirectActor = actorRefFactory.actorOf(RedirectServiceHandler.props(requestContext, bossService, dmService))
+        redirectActor ! RedirectServiceHandler.RedirectMessage(id, filetype)
+      }
     }
 
 }

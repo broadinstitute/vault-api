@@ -12,11 +12,7 @@ import spray.httpx.SprayJsonSupport._
 
 class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngestService {
 
-  override val routes = lookupRoute
-
   def actorRefFactory = system
-
-  val openAmResponse = getOpenAmToken.get
 
   var testDataGuid: String = "not-a-uuid"
   val testValue = java.util.UUID.randomUUID().toString
@@ -27,7 +23,7 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngest
         val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
         val metadata = Map("testAttr" -> "testValue", "uniqueTest" -> testValue)
         val ubamIngest = new UBamIngest(files, metadata)
-        Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~> uBamIngestRoute ~> check {
+        Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> addOpenAmCookie ~> uBamIngestRoute ~> check {
           status should equal(OK)
           testDataGuid = responseAs[UBamIngestResponse].id
         }
@@ -36,7 +32,7 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngest
 
     "when accessing the Lookup path" - {
       "Lookup should return previously stored unmapped BAM" in {
-            Get(VaultConfig.Vault.lookupPath("ubam", "uniqueTest", testValue)) ~> Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId)) ~>  lookupRoute ~> check {
+            Get(VaultConfig.Vault.lookupPath("ubam", "uniqueTest", testValue)) ~> addOpenAmCookie ~>  lookupRoute ~> check {
               val entitySearchResult = responseAs[EntitySearchResult]
               entitySearchResult.guid should be(testDataGuid)
                entitySearchResult.`type` should be("ubam")

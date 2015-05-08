@@ -36,9 +36,9 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   def receive = runRoute(
     swaggerService.routes ~ swaggerUiService ~
       logOpenAMRequest {
-        uBAMIngest.routes ~ uBAMDescribe.routes ~ uBAMRedirect.routes ~
-          analysisIngest.routes ~ analysisDescribe.routes ~ analysisUpdate.routes ~
-          analysisRedirect.routes ~ lookupService.routes
+        uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~
+          analysisIngest.aiRoute ~ analysisDescribe.adRoute ~ analysisUpdate.auRoute ~ analysisRedirect.arRoute ~
+          lookupService.lRoute
       }
   )
 

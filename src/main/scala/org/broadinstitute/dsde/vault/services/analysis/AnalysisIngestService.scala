@@ -4,14 +4,15 @@ import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.services.VaultDirectives
 import spray.http.MediaTypes._
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
-trait AnalysisIngestService extends HttpService {
+trait AnalysisIngestService extends HttpService with VaultDirectives {
 
-  val routes = analysisIngestRoute
+  val aiRoute = analysisIngestRoute
 
   @ApiOperation(
     value = "Creates Analysis objects",
@@ -35,13 +36,11 @@ trait AnalysisIngestService extends HttpService {
   def analysisIngestRoute =
     path("analyses") {
       post {
-        respondWithMediaType(`application/json`) {
-          entity(as[AnalysisIngest]) {
-            ingest =>
-              requestContext =>
-                val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-                val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, dmService))
-                ingestActor ! IngestServiceHandler.IngestMessage(ingest)
+        respondWithJSON {
+          entity(as[AnalysisIngest]) { ingest => requestContext =>
+            val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+            val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, dmService))
+            ingestActor ! IngestServiceHandler.IngestMessage(ingest)
           }
         }
       }

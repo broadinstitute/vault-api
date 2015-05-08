@@ -8,6 +8,8 @@ import akka.pattern.ask
 import org.broadinstitute.dsde.vault.OpenAmClientService.{OpenAmResponse, OpenAmAuthRequest}
 import org.scalatest._
 import org.scalatest.matchers.{BePropertyMatchResult, BePropertyMatcher}
+import spray.http.HttpCookie
+import spray.http.HttpHeaders.Cookie
 import spray.testkit.ScalatestRouteTest
 
 import scala.concurrent.Await
@@ -25,6 +27,12 @@ abstract class VaultFreeSpec extends FreeSpec with Matchers with VaultCustomMatc
     val future = actor ? OpenAmAuthRequest(VaultConfig.OpenAm.testUser, VaultConfig.OpenAm.testUserPassword)
     Some(Await.result(future, duration).asInstanceOf[OpenAmResponse])
   }
+
+  lazy val openAmResponse = getOpenAmToken.get
+  def addOpenAmCookie: RequestTransformer = {
+    Cookie(HttpCookie("iPlanetDirectoryPro", openAmResponse.tokenId))
+  }
+
 }
 
 // enables tests for "should be a UUID" etc

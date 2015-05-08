@@ -1,6 +1,7 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
 import com.wordnik.swagger.annotations._
+import org.broadinstitute.dsde.vault.services.VaultDirectives
 import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.http.MediaTypes._
 import spray.routing._
@@ -10,9 +11,9 @@ import spray.httpx.SprayJsonSupport._
 import uBAMJsonProtocol._
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
-trait UBamIngestService extends HttpService {
+trait UBamIngestService extends HttpService with VaultDirectives {
 
-  val routes = uBamIngestRoute
+  val ubiRoute = uBamIngestRoute
 
   @ApiOperation(
     value = "Creates uBAM objects",
@@ -35,23 +36,16 @@ trait UBamIngestService extends HttpService {
   def uBamIngestRoute =
     path("ubams") {
       post {
-        optionalHeaderValueByName("X-Force-Location") {
-          forceLocation =>
-          respondWithMediaType(`application/json`) {
-            entity(as[UBamIngest]) {
-              ingest =>
-                requestContext =>
-                  val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
-                  val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-                  val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossService, dmService))
-                  ingestActor ! IngestServiceHandler.IngestMessage(ingest, forceLocation)
+        respondWithJSON {
+          forceLocationHeader { forceLocation =>
+            entity(as[UBamIngest]) { ingest => requestContext =>
+              val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+              val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+              val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, bossService, dmService))
+              ingestActor ! IngestServiceHandler.IngestMessage(ingest, forceLocation)
             }
           }
         }
       }
     }
 }
-
-
-
-

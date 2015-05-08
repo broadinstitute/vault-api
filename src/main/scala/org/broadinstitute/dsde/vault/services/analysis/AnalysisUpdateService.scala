@@ -4,6 +4,7 @@ import javax.ws.rs.Path
 
 import akka.actor.Props
 import com.wordnik.swagger.annotations._
+import org.broadinstitute.dsde.vault.services.VaultDirectives
 import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.impAnalysisUpdate
 import org.broadinstitute.dsde.vault.model._
@@ -12,9 +13,9 @@ import spray.httpx.SprayJsonSupport._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 1)
-trait AnalysisUpdateService extends HttpService {
+trait AnalysisUpdateService extends HttpService with VaultDirectives {
 
-  val routes = analysisUpdateRoute
+  val auRoute = analysisUpdateRoute
 
   @Path("/{id}/outputs")
   @ApiOperation(
@@ -37,21 +38,15 @@ trait AnalysisUpdateService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def analysisUpdateRoute =
-    path("analyses" / Segment / "outputs") {
-      id => {
-        post {
-          optionalHeaderValueByName("X-Force-Location") {
-            forceLocation =>
-            respondWithMediaType(`application/json`) {
-              entity(as[AnalysisUpdate]) {
-                update =>
-                  requestContext => {
-                    val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
-                    val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-                    val updateActor = actorRefFactory.actorOf(UpdateServiceHandler.props(requestContext, dmService, bossService))
-                    updateActor ! UpdateServiceHandler.UpdateMessage(id, update, forceLocation)
-                  }
-              }
+    path("analyses" / Segment / "outputs") { id =>
+      post {
+        forceLocationHeader { forceLocation =>
+          respondWithJSON {
+            entity(as[AnalysisUpdate]) { update => requestContext =>
+              val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+              val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
+              val updateActor = actorRefFactory.actorOf(UpdateServiceHandler.props(requestContext, dmService, bossService))
+              updateActor ! UpdateServiceHandler.UpdateMessage(id, update, forceLocation)
             }
           }
         }

@@ -7,7 +7,7 @@ import spray.routing._
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 0)
 trait AnalysisRedirectService extends HttpService {
 
-  val routes = analysisRedirectRoute
+  val arRoute = analysisRedirectRoute
 
   @ApiOperation(value = "Redirects to presigned GET URLs for analyses", nickname = "analysis_redirect", httpMethod = "GET",
     notes = "Returns an HTTP 307 redirect to a presigned GET URL for the specified analysis output file. If the caller would like presigned URLs to all files within an analysis, " +
@@ -23,15 +23,13 @@ trait AnalysisRedirectService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def analysisRedirectRoute =
-    path("analyses" / Segment / Segment) {
-      (id, filetype) =>
-        get {
-          requestContext =>
-            val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
-            val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
-            val redirectActor = actorRefFactory.actorOf(RedirectServiceHandler.props(requestContext, bossService, dmService))
-            redirectActor ! RedirectServiceHandler.RedirectMessage(id, filetype)
-        }
+    path("analyses" / Segment / Segment) { (id, filetype) =>
+      get { requestContext =>
+        val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+        val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
+        val redirectActor = actorRefFactory.actorOf(RedirectServiceHandler.props(requestContext, bossService, dmService))
+        redirectActor ! RedirectServiceHandler.RedirectMessage(id, filetype)
+      }
     }
 
 }
