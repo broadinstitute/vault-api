@@ -14,11 +14,11 @@ import spray.routing.RequestContext
 object DescribeServiceHandler {
   case class DescribeMessage(dmId: String)
 
-  def props(requestContext: RequestContext, dmService: ActorRef): Props =
-    Props(new DescribeServiceHandler(requestContext, dmService))
+  def props(requestContext: RequestContext, version: Int, dmService: ActorRef): Props =
+    Props(new DescribeServiceHandler(requestContext, version, dmService))
 }
 
-case class DescribeServiceHandler(requestContext: RequestContext, dmService: ActorRef) extends Actor {
+case class DescribeServiceHandler(requestContext: RequestContext, version: Int, dmService: ActorRef) extends Actor {
 
   implicit val system = context.system
   val log = Logging(system, getClass)

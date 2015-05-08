@@ -17,49 +17,64 @@ class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngest
   var testDataGuid: String = "not-a-uuid"
   val testValue = java.util.UUID.randomUUID().toString
 
-  "LookupServiceSpec" - {
-    "while preparing the ubam test data" - {
-      "should successfully store the data using the UBam Ingest path" in {
-        val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
-        val metadata = Map("testAttr" -> "testValue", "uniqueTest" -> testValue)
-        val ubamIngest = new UBamIngest(files, metadata)
-        Post(VaultConfig.Vault.ubamIngestPath, ubamIngest) ~> addOpenAmCookie ~> uBamIngestRoute ~> check {
-          status should equal(OK)
-          testDataGuid = responseAs[UBamIngestResponse].id
-        }
-      }
-    }
+  val versions = Table(
+    "version",
+    None,
+    Some(1)
+  )
 
-    "when accessing the Lookup path" - {
-      "Lookup should return previously stored unmapped BAM" in {
-            Get(VaultConfig.Vault.lookupPath("ubam", "uniqueTest", testValue)) ~> addOpenAmCookie ~>  lookupRoute ~> check {
+  "LookupServiceSpec" - {
+    forAll(versions) { (version: Option[Int]) =>
+
+      val testValue = java.util.UUID.randomUUID().toString
+      var testDataGuid: String = "not-a-uuid"
+
+      s"when accessing version = '${v(version)}'" - {
+
+        "while preparing the ubam test data" - {
+          "should successfully store the data using the UBam Ingest path" in {
+            val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
+            val metadata = Map("testAttr" -> "testValue", "uniqueTest" -> testValue)
+            val ubamIngest = new UBamIngest(files, metadata)
+            Post(VaultConfig.Vault.ubamIngestPath.versioned(version), ubamIngest) ~> addOpenAmCookie ~> uBamIngestRoute ~> check {
+              status should equal(OK)
+              testDataGuid = responseAs[UBamIngestResponse].id
+            }
+          }
+        }
+
+        "when accessing the Lookup path" - {
+          "Lookup should return previously stored unmapped BAM" in {
+            Get(VaultConfig.Vault.lookupPath("ubam", "uniqueTest", testValue).versioned(version)) ~> addOpenAmCookie ~> lookupRoute ~> check {
               val entitySearchResult = responseAs[EntitySearchResult]
               entitySearchResult.guid should be(testDataGuid)
-               entitySearchResult.`type` should be("ubam")
+              entitySearchResult.`type` should be("ubam")
             }
-      }
+          }
 
-      "Lookup of unknown entity type should return not found" in {
-        Get(VaultConfig.Vault.lookupPath("ubam_similar", "uniqueTest", testValue)) ~> sealRoute(lookupRoute) ~> check {
-          status === NotFound
-        }
-      }
+          "Lookup of unknown entity type should return not found" in {
+            Get(VaultConfig.Vault.lookupPath("ubam_similar", "uniqueTest", testValue).versioned(version)) ~> sealRoute(lookupRoute) ~> check {
+              status === NotFound
+            }
+          }
 
-      "Lookup of unknown attribute name return not found" in {
-        Get(VaultConfig.Vault.lookupPath("ubam", "uniqueTest_similar", testValue)) ~> sealRoute(lookupRoute) ~> check {
-          status === NotFound
-        }
-      }
+          "Lookup of unknown attribute name return not found" in {
+            Get(VaultConfig.Vault.lookupPath("ubam", "uniqueTest_similar", testValue).versioned(version)) ~> sealRoute(lookupRoute) ~> check {
+              status === NotFound
+            }
+          }
 
-      "Lookup of unknown attribute value should return not found" in {
-        Get(VaultConfig.Vault.lookupPath("ubam", "uniqueTest", "unknownValue")) ~> sealRoute(lookupRoute) ~> check {
-          status === NotFound
-        }
-      }
+          "Lookup of unknown attribute value should return not found" in {
+            Get(VaultConfig.Vault.lookupPath("ubam", "uniqueTest", "unknownValue").versioned(version)) ~> sealRoute(lookupRoute) ~> check {
+              status === NotFound
+            }
+          }
 
-      "Lookup of mismatched attribute name + value should return not found" in {
-        Get(VaultConfig.Vault.lookupPath("ubam", "testAttr", testValue)) ~> sealRoute(lookupRoute) ~> check {
-          status === NotFound
+          "Lookup of mismatched attribute name + value should return not found" in {
+            Get(VaultConfig.Vault.lookupPath("ubam", "testAttr", testValue).versioned(version)) ~> sealRoute(lookupRoute) ~> check {
+              status === NotFound
+            }
+          }
         }
       }
     }

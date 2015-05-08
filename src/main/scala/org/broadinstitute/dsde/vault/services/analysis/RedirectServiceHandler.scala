@@ -16,11 +16,11 @@ import scala.concurrent.duration._
 object RedirectServiceHandler {
   case class RedirectMessage(bossId: String, fileType: String)
 
-  def props(requestContext: RequestContext, bossService: ActorRef, dmService: ActorRef): Props =
-    Props(new RedirectServiceHandler(requestContext, bossService, dmService))
+  def props(requestContext: RequestContext, version: Int, bossService: ActorRef, dmService: ActorRef): Props =
+    Props(new RedirectServiceHandler(requestContext, version, bossService, dmService))
 }
 
-case class RedirectServiceHandler(requestContext: RequestContext, bossService: ActorRef, dmService: ActorRef) extends Actor {
+case class RedirectServiceHandler(requestContext: RequestContext, version: Int, bossService: ActorRef, dmService: ActorRef) extends Actor {
 
   implicit val timeout = Timeout(5.seconds)
   implicit val system = context.system

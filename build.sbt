@@ -31,15 +31,6 @@ version := versionRoot + "-" + versionSuffix.getOrElse((versionRevision + 1) + "
 
 val artifactory = "https://artifactory.broadinstitute.org/artifactory/"
 
-credentials += Credentials(Path.userHome / ".ivy2" / ".credentials")
-
-publishTo := {
-  if (isSnapshot.value)
-    None // NOTE: Use publish-local when working on snapshots
-  else
-    Option("artifactory-releases-publish" at artifactory + "libs-release-local")
-}
-
 resolvers += "artifactory-releases" at artifactory + "libs-release"
 
 scalaVersion := "2.11.2"
@@ -50,7 +41,7 @@ libraryDependencies ++= {
   val akkaV = "2.3.6"
   val sprayV = "1.3.2"
   Seq(
-    vaultOrg %% "vault-common" % "0.1-8-b3e439b"
+    vaultOrg %% "vault-common" % "0.1-13-85842f7"
     , "io.spray" %% "spray-can" % sprayV
     , "io.spray" %% "spray-routing" % sprayV
     , "io.spray" %% "spray-json" % "1.3.1"

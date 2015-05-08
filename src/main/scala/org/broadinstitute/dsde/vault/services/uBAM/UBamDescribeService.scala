@@ -5,11 +5,14 @@ import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.services.VaultDirectives
 import spray.http.MediaTypes._
 import org.broadinstitute.dsde.vault.DmClientService
+import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
 import org.broadinstitute.dsde.vault.model._
 import spray.routing._
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait UBamDescribeService extends HttpService with VaultDirectives {
+
+  private final val ApiVersions = "v1"
 
   val ubdRoute = uBamDescribeRoute
 
@@ -20,6 +23,7 @@ trait UBamDescribeService extends HttpService with VaultDirectives {
     response = classOf[UBam]
   )
   @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "version", required = true, dataType = "string", paramType = "path", value = "API version", allowableValues = ApiVersions),
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "uBAM Vault ID")
   ))
   @ApiResponses(Array(
@@ -28,11 +32,12 @@ trait UBamDescribeService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def uBamDescribeRoute = {
-    path("ubams" / Segment) { id =>
+    pathVersion("ubams", Segment) { (versionOpt, id) =>
       get {
         respondWithJSON { requestContext =>
+          val version = versionOpt.getOrElse(1)
           val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-          val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, dmService))
+          val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, dmService))
           describeActor ! DescribeServiceHandler.DescribeMessage(id)
         }
       }

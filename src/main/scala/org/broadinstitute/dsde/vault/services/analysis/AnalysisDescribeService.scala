@@ -3,6 +3,7 @@ package org.broadinstitute.dsde.vault.services.analysis
 import akka.actor.Props
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
+import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.VaultDirectives
 import spray.http.MediaTypes._
@@ -10,6 +11,8 @@ import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait AnalysisDescribeService extends HttpService with VaultDirectives {
+
+  private final val ApiVersions = "v1"
 
   val adRoute = analysisDescribeRoute
 
@@ -21,6 +24,7 @@ trait AnalysisDescribeService extends HttpService with VaultDirectives {
     notes = "The files key will be empty if the analysis is still running."
   )
   @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "version", required = true, dataType = "string", paramType = "path", value = "API version", allowableValues = ApiVersions),
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "Analysis Vault ID")
   ))
   @ApiResponses(Array(
@@ -29,11 +33,12 @@ trait AnalysisDescribeService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def analysisDescribeRoute = {
-    path("analyses" / Segment) { id =>
+    pathVersion("analyses", Segment) { (versionOpt, id) =>
       get {
         respondWithJSON { requestContext =>
+          val version = versionOpt.getOrElse(1)
           val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-          val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, dmService))
+          val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, dmService))
           describeActor ! DescribeServiceHandler.DescribeMessage(id)
         }
       }

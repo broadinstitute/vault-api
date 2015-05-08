@@ -14,11 +14,11 @@ import spray.routing.RequestContext
 object LookupServiceHandler {
   case class LookupMessage(entityType: String, attributeName: String, attributeValue: String)
 
-  def props(requestContext: RequestContext, dmService: ActorRef): Props =
-    Props(new LookupServiceHandler(requestContext, dmService))
+  def props(requestContext: RequestContext, version: Int, dmService: ActorRef): Props =
+    Props(new LookupServiceHandler(requestContext, version, dmService))
 }
 
-case class LookupServiceHandler(requestContext: RequestContext, dmService: ActorRef) extends Actor {
+case class LookupServiceHandler(requestContext: RequestContext, version: Int, dmService: ActorRef) extends Actor {
 
   implicit val system = context.system
   val log = Logging(system, getClass)
