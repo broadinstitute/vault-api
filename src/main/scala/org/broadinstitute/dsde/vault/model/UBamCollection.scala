@@ -6,9 +6,9 @@ import spray.json
 import scala.annotation.meta.field
 
 object uBAMCollectionJsonProtocol extends json.DefaultJsonProtocol {
-  implicit val impUBamCollection = jsonFormat3(UBamCollection)
+  implicit val impUBamCollection = jsonFormat4(UBamCollection)
   implicit val impUBamCollectionIngest = jsonFormat2(UBamCollectionIngest)
-  implicit val impUBamCollectionIngestResponse = jsonFormat3(UBamCollectionIngestResponse)
+  implicit val impUBamCollectionIngestResponse = jsonFormat4(UBamCollectionIngestResponse)
 }
 
 case class UBamCollection
@@ -18,7 +18,9 @@ case class UBamCollection
   @(ApiModelProperty@field)(value = "The Vault IDs of the uBAMs included in this collection.", required = true)
   members: Option[Seq[String]] = None,
   @(ApiModelProperty@field)(value = "The metadata key-value pairs associated with this uBAM collection.", required = true)
-  metadata: Map[String, String]
+  metadata: Map[String, String],
+  @(ApiModelProperty@field)(value = "The properties associated with this uBAM collection.", required = true)
+  properties: Map[String, String]
 )
 
 case class UBamCollectionIngest
@@ -36,5 +38,7 @@ case class UBamCollectionIngestResponse
   @(ApiModelProperty@field)(value = "The Vault IDs of the uBAMs included in this collection.", required = true)
   members: Option[Seq[String]] = None,
   @(ApiModelProperty@field)(value = "The metadata key-value pairs associated with this uBAM collection.", required = true)
-  metadata: Map[String, String]
+  metadata: Map[String, String],
+  @(ApiModelProperty@field)(value = "The properties associated with this uBAM collection.", required = true)
+  properties: Map[String, String]
 )

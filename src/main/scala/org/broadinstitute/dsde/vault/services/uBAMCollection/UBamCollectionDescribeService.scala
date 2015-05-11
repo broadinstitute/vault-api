@@ -4,11 +4,15 @@ import akka.actor.Props
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.services.VaultDirectives
+import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
 import spray.http.MediaTypes._
 import spray.routing._
 
-@Api(value = "/collections", description = "uBamCollection Service", produces = "application/json")
-trait UBamCollectionDescribeService extends HttpService {
+@Api(value = "/ubamcollections", description = "uBamCollection Service", produces = "application/json")
+trait UBamCollectionDescribeService extends HttpService with VaultDirectives {
+
+  private final val ApiVersions = "v1"
 
   val ubcdRoute = ubamCollectionDescribeRoute
 
@@ -19,6 +23,7 @@ trait UBamCollectionDescribeService extends HttpService {
     response = classOf[UBamCollection]
   )
   @ApiImplicitParams(Array(
+    new ApiImplicitParam(name = "version", required = true, dataType = "string", paramType = "path", value = "API version", allowableValues = ApiVersions),
     new ApiImplicitParam(name = "id", required = true, dataType = "string", paramType = "path", value = "uBamCollection Vault ID")
   ))
   @ApiResponses(Array(
@@ -27,20 +32,18 @@ trait UBamCollectionDescribeService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def ubamCollectionDescribeRoute = {
-    path("collections" / Segment) {
-      id => {
+    path("ubamcollections" / "v" ~ IntNumber / Segment) { (version, id) =>
         get {
-          respondWithMediaType(`application/json`) {
+          respondWithJSON{
             requestContext => {
               val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-              val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, dmService))
+              val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, dmService))
               describeActor ! DescribeServiceHandler.DescribeMessage(id)
             }
           }
         }
       }
     }
-  }
 
 }
 
