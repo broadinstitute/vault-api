@@ -23,6 +23,7 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
 
   val uBAMIngest = new uBAM.UBamIngestService with ActorRefFactoryContext
   val uBAMDescribe = new uBAM.UBamDescribeService with ActorRefFactoryContext
+  val uBAMDescribeList = new uBAM.UBamDescribeListService with ActorRefFactoryContext
   val uBAMRedirect = new uBAM.UBamRedirectService with ActorRefFactoryContext
 
   val analysisIngest = new analysis.AnalysisIngestService with ActorRefFactoryContext
@@ -38,7 +39,7 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   def receive = runRoute(
     swaggerService.routes ~ swaggerUiService ~
       logOpenAMRequest() {
-        uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~
+        uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~uBAMDescribeList.routes ~
           analysisIngest.aiRoute ~ analysisDescribe.adRoute ~ analysisUpdate.auRoute ~ analysisRedirect.arRoute ~
           lookupService.lRoute
       }
@@ -49,6 +50,7 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
     override def apiTypes = Seq(
       typeOf[uBAM.UBamIngestService],
       typeOf[uBAM.UBamDescribeService],
+      typeOf[uBAM.UBamDescribeListService],
       typeOf[uBAM.UBamRedirectService],
       typeOf[analysis.AnalysisIngestService],
       typeOf[analysis.AnalysisDescribeService],

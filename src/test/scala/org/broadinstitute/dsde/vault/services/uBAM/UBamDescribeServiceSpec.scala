@@ -8,7 +8,9 @@ import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService {
+class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService{
+
+  override val routes = uBamDescribeRoute ~  uBamDescribeListRoute
 
   def actorRefFactory = system
 
@@ -78,11 +80,21 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
             }
           }
         }
-
+        "when calling list UBam Describe path " - {
+          "should return a list or not be handled" in {
+            if (version.isDefined) {
+              Get(VaultConfig.Vault.ubamIngestPath+ v(version)) ~> addOpenAmCookie ~> uBamDescribeListRoute ~> check {
+                status should equal(OK)
+              }
+            }else{
+              Get(VaultConfig.Vault.ubamIngestPath+"/") ~> addOpenAmCookie ~> sealRoute(uBamDescribeListRoute) ~> check {
+                status should equal(NotFound)
+              }
+            }
+          }
+        }
       }
-
     }
-
   }
 
 }

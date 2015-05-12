@@ -5,7 +5,7 @@ import akka.event.Logging
 import org.broadinstitute.dsde.vault.DmClientService.DMUBamResolved
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.ClientFailure
-import org.broadinstitute.dsde.vault.services.uBAM.DescribeServiceHandler.DescribeMessage
+import org.broadinstitute.dsde.vault.services.uBAM.DescribeServiceHandler.{DescribeListMessage, DescribeMessage}
 import org.broadinstitute.dsde.vault.{VaultConfig, DmClientService}
 import spray.routing.RequestContext
 
@@ -14,9 +14,10 @@ import uBAMJsonProtocol._
 
 object DescribeServiceHandler {
   case class DescribeMessage(dmId: String)
-
   def props(requestContext: RequestContext, version: Int, dmService: ActorRef): Props =
     Props(new DescribeServiceHandler(requestContext, version, dmService))
+
+  case class DescribeListMessage(version: Int)
 }
 
 case class DescribeServiceHandler(requestContext: RequestContext, version: Int, dmService: ActorRef) extends Actor {
@@ -28,6 +29,9 @@ case class DescribeServiceHandler(requestContext: RequestContext, version: Int, 
     case DescribeMessage(dmId) =>
       log.debug("Received uBAM describe message")
       dmService ! DmClientService.DMResolveUBam(dmId)
+
+    case DescribeListMessage(version: Int) =>
+      dmService ! DmClientService.DMResolveUBamList(version)
 
     case DMUBamResolved(resolvedUBam: UBam) =>
       val redirects = resolvedUBam.files.map {

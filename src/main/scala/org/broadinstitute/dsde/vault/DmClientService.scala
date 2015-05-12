@@ -14,15 +14,19 @@ import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
 import spray.httpx.SprayJsonSupport._
+import spray.json.DefaultJsonProtocol
 import spray.routing.RequestContext
 
 import scala.util.{Failure, Success}
+
 
 object DmClientService {
   case class DMCreateUBam(ubam: UBamIngest)
   case class DMUBamCreated(createdUBam: UBam)
   case class DMResolveUBam(ubamId: String)
   case class DMUBamResolved(dmObject: UBam)
+  case class DMResolveUBamList(version: Int)
+
 
   case class DMCreateAnalysis(analysisIngest: AnalysisIngest)
   case class DMAnalysisCreated(analysis: Analysis)
@@ -34,12 +38,14 @@ object DmClientService {
   case class DMLookupEntity(entityType: String, attributeName: String, attributeValue: String)
   case class DMLookupResolved(result: EntitySearchResult)
 
+
   def props(requestContext: RequestContext): Props = Props(new DmClientService(requestContext))
 }
 
-case class DmClientService(requestContext: RequestContext) extends Actor {
+case class DmClientService(requestContext: RequestContext) extends Actor{
 
   import system.dispatcher
+  import DefaultJsonProtocol._
 
   implicit val timeout = Timeout(5, TimeUnit.SECONDS)
   implicit val system = context.system
@@ -51,6 +57,11 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
     case DMResolveUBam(ubamId) =>
       resolveUBam(sender(), ubamId)
+
+
+    case DMResolveUBamList(version:Int) =>
+      resolveUBamList(sender(),version)
+
 
     case DMCreateAnalysis(analysisIngest) =>
       createAnalysis(sender(), analysisIngest)
@@ -95,6 +106,26 @@ case class DmClientService(requestContext: RequestContext) extends Actor {
 
       case Failure(error) =>
         log.error(error, "Couldn't find uBAM with id: " + ubamId)
+        senderRef ! ClientFailure(error.getMessage)
+    }
+  }
+
+
+  def resolveUBamList(senderRef: ActorRef,version: Int): Unit = {
+    log.debug("Querying the DM API for a uBAM List")
+    val pipeline = {
+      addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[List[UBam]]
+    }
+    val responseFuture = pipeline {
+      Get(VaultConfig.DataManagement.ubamsUrl+"/v"+version)
+    }
+   responseFuture onComplete {
+
+      case Success(resolvedUBams) =>
+        requestContext.complete(resolvedUBams)
+
+      case Failure(error) =>
+        log.error(error, "Couldn't find uBAMs" )
         senderRef ! ClientFailure(error.getMessage)
     }
   }
