@@ -9,6 +9,8 @@ object VaultConfig {
     private val httpConfig = config.getConfig("http")
     lazy val interface = httpConfig.getString("interface")
     lazy val port = httpConfig.getInt("port")
+    lazy val timeout = httpConfig.getLong("timeout")
+
   }
 
   object SwaggerConfig {
