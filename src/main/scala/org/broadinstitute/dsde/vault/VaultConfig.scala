@@ -63,7 +63,6 @@ object VaultConfig {
 
     def uBamResolvePath(id: String) = dm.getString("ubamsResolvePath").format(id)
     def uBamResolveUrl(id: String) = server + uBamResolvePath(id)
-
     lazy val analysesPath = dm.getString("analysesPath")
     lazy val analysesUrl = server + analysesPath
 
