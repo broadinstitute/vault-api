@@ -17,7 +17,7 @@ object DescribeServiceHandler {
   def props(requestContext: RequestContext, version: Int, dmService: ActorRef): Props =
     Props(new DescribeServiceHandler(requestContext, version, dmService))
 
-  case class DescribeListMessage(version: Int)
+  case class DescribeListMessage(version: Int, pageLimit: Option[Int])
 }
 
 case class DescribeServiceHandler(requestContext: RequestContext, version: Int, dmService: ActorRef) extends Actor {
@@ -30,8 +30,8 @@ case class DescribeServiceHandler(requestContext: RequestContext, version: Int, 
       log.debug("Received uBAM describe message")
       dmService ! DmClientService.DMResolveUBam(dmId)
 
-    case DescribeListMessage(version: Int) =>
-      dmService ! DmClientService.DMResolveUBamList(version)
+    case DescribeListMessage(version: Int, pageLimit: Option[Int]) =>
+      dmService ! DmClientService.DMResolveUBamList(version, pageLimit)
 
     case DMUBamResolved(resolvedUBam: UBam) =>
       val redirects = resolvedUBam.files.map {

@@ -13,6 +13,7 @@ import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, EntitySear
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
+import spray.http.Uri
 import spray.httpx.SprayJsonSupport._
 import spray.json.DefaultJsonProtocol
 import spray.routing.RequestContext
@@ -25,9 +26,7 @@ object DmClientService {
   case class DMUBamCreated(createdUBam: UBam)
   case class DMResolveUBam(ubamId: String)
   case class DMUBamResolved(dmObject: UBam)
-  case class DMResolveUBamList(version: Int)
-
-
+  case class DMResolveUBamList(version: Int, pageLimit: Option[Int])
   case class DMCreateAnalysis(analysisIngest: AnalysisIngest)
   case class DMAnalysisCreated(analysis: Analysis)
   case class DMResolveAnalysis(analysisId: String)
@@ -58,10 +57,8 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
     case DMResolveUBam(ubamId) =>
       resolveUBam(sender(), ubamId)
 
-
-    case DMResolveUBamList(version:Int) =>
-      resolveUBamList(sender(),version)
-
+    case DMResolveUBamList(version: Int, pageLimit: Option[Int]) =>
+      resolveUBamList(sender(), version, pageLimit)
 
     case DMCreateAnalysis(analysisIngest) =>
       createAnalysis(sender(), analysisIngest)
@@ -110,14 +107,15 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
     }
   }
 
-
-  def resolveUBamList(senderRef: ActorRef,version: Int): Unit = {
+  def resolveUBamList(senderRef: ActorRef, version: Int, pageLimit: Option[Int]): Unit = {
     log.debug("Querying the DM API for a uBAM List")
     val pipeline = {
       addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[List[UBam]]
     }
     val responseFuture = pipeline {
-      Get(VaultConfig.DataManagement.ubamsUrl+"/v"+version)
+      var uri = Uri(VaultConfig.DataManagement.ubamsUrl + "/v" + version)
+      pageLimit.foreach(limit => uri = uri.withQuery("page[limit]" -> limit.toString))
+      Get(uri)
     }
    responseFuture onComplete {
 

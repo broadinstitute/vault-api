@@ -34,11 +34,13 @@ trait UBamDescribeListService extends HttpService {
   def uBamDescribeListRoute = {
     path("ubams" / "v" ~ IntNumber) { version =>
       get {
-        respondWithMediaType(`application/json`) {
-          requestContext => {
-            val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
-            val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, dmService))
-            describeActor ! DescribeServiceHandler.DescribeListMessage(version)
+        parameter("page[limit]".as[Int].?) { pageLimit =>
+          respondWithMediaType(`application/json`) {
+            requestContext => {
+              val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
+              val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, dmService))
+              describeActor ! DescribeServiceHandler.DescribeListMessage(version, pageLimit)
+            }
           }
         }
       }
@@ -46,6 +48,3 @@ trait UBamDescribeListService extends HttpService {
   }
 
 }
-
-
-

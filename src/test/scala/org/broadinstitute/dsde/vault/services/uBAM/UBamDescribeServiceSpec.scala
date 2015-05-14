@@ -8,7 +8,7 @@ import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService{
+class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService {
 
   override val routes = uBamDescribeRoute ~  uBamDescribeListRoute
 
@@ -23,6 +23,12 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
     "version",
     None,
     Some(1)
+  )
+
+  val pageLimits = Table(
+    "pageLimit",
+    0,
+    1
   )
 
   "UBamDescribeServiceSpec" - {
@@ -80,15 +86,31 @@ class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService wit
             }
           }
         }
+
         "when calling list UBam Describe path " - {
-          "should return a list or not be handled" in {
-            if (version.isDefined) {
-              Get(VaultConfig.Vault.ubamIngestPath+ v(version)) ~> addOpenAmCookie ~> uBamDescribeListRoute ~> check {
-                status should equal(OK)
-              }
-            }else{
-              Get(VaultConfig.Vault.ubamIngestPath+"/") ~> addOpenAmCookie ~> sealRoute(uBamDescribeListRoute) ~> check {
-                status should equal(NotFound)
+          forAll(pageLimits) { (pageLimit: Int) =>
+            s"should return a list of size $pageLimit with ?page[limit]=$pageLimit or not be handled" in {
+              if (version.isDefined) {
+                Get(s"${VaultConfig.Vault.ubamIngestPath + v(version)}?page[limit]=$pageLimit") ~> addOpenAmCookie ~> uBamDescribeListRoute ~> check {
+                  val responses = responseAs[List[UBam]]
+                  responses should have size pageLimit
+                  responses.foreach{ unmappedBAM =>
+                    unmappedBAM.id shouldNot be(empty)
+                    /* uncomment once properties are properly passed through when using v2 endpoints */
+                    /*
+                    version match {
+                      case Some(x) if x > 1 =>
+                        unmappedBAM.properties.get.get("createdBy") shouldNot be(empty)
+                        unmappedBAM.properties.get.get("createdDate") shouldNot be(empty)
+                      case _ => unmappedBAM.properties should be(empty)
+                    }
+                    */
+                  }
+                }
+              } else {
+                Get(s"${VaultConfig.Vault.ubamIngestPath + v(version)}?page[limit]=$pageLimit") ~> addOpenAmCookie ~> sealRoute(uBamDescribeListRoute) ~> check {
+                  status should be(NotFound)
+                }
               }
             }
           }
