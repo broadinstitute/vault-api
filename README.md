@@ -33,25 +33,24 @@ java -Dconfig.file=application.conf -jar Vault-Orchestration-assembly-0.1.jar
 
 ## Testing
 
-Replace the integration components of application.conf to reflect correct values.
-See DevOps or any Vault team member for details. Make sure sbt is run with the config file option.
+Create a local .sbtopts file with the following properties.
+See DevOps or any Vault team member for the correct values.
 
-    vault {
-      ubamsRedirectUrl="https://api-ci.vault.broadinstitute.org/api/ubams/%s/%s"
-    }
-    dm {
-      ubamsUrl="https://dm-ci.vault.broadinstitute.org/api/ubams"
-      ubamsResolveUrl="https://dm-ci.vault.broadinstitute.org/api/ubams/%s"
-    }
-    boss {
-      objectsUrl="... point to boss instance ..."
-      ...
-      bossUser="... real vault system user name for boss ..."
-      bossUserPassword="... real vault user password for boss ..."
-    }
-    openam {
-      testUser="... real openam testing user name ..."
-      testUserPassword="... openam testing user password ..."
-      tokenUrl="... point to open am instance ..."
-    }
+```
+-Dconfig.file=application.conf
+-Dopenam.deploymentUri=<replace_me>
+-Dopenam.username=<replace_me>
+-Dopenam.password=<replace_me>
+-Dopenam.commonName=<replace_me>
+-Dopenam.testUser=<replace_me>
+-Dopenam.testUserPassword=<replace_me>
+-Dopenam.tokenUrl=<replace_me>
+-Dboss.bossUser=<replace_me>
+-Dboss.bossUserPassword=<replace_me>
+```
 
+To test against local services, set the additional options:
+```
+-Ddm.server="http://localhost:8081"
+-Dboss.server="http://localhost:8180"
+```
