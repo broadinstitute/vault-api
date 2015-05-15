@@ -52,6 +52,13 @@ object VaultConfig {
 
     def ubamRedirectPath(id: String, fileType: String) = vault.getString("ubamsRedirectPath").format(id, fileType)
     def ubamRedirectUrl(id: String, fileType: String) = server + ubamRedirectPath(id, fileType)
+
+    def ubamCollectionDescribePath(id: String, version: Int) = vault.getString("ubamCollectionsDescribePath").format(version, id)
+    def ubamCollectionDescribeUrl(id: String, version: Int) = server + ubamCollectionDescribePath(id, version)
+
+    def ubamCollectionIngestPath(version: Int) = vault.getString("ubamCollectionsIngestPath").format(version)
+    def ubamCollectionIngestUrl(version: Int) = server + ubamIngestPath(version)
+
   }
 
   object DataManagement {
@@ -71,6 +78,12 @@ object VaultConfig {
 
     def analysesUpdatePath(id: String) = dm.getString("analysesUpdatePath").format(id)
     def analysesUpdateUrl(id: String) = server + analysesUpdatePath(id)
+
+    def uBamCollectionResolvePath(id: String, version: Int) = dm.getString("uBamCollectionsResolvePath").format(version, id)
+    def uBamCollectionResolveUrl(id: String, version: Int) = server + uBamCollectionResolvePath(id, version)
+
+    def collectionsPath(version: Int) = dm.getString("ubamCollectionsPath").format(version)
+    def collectionsUrl(version: Int) = server + collectionsPath(version)
 
     def queryLookupPath(entityType: String, attributeName: String, attributeValue: String) = dm.getString("queryLookupPath").format(entityType, attributeName, attributeValue)
     def queryLookupUrl(entityType: String, attributeName: String, attributeValue: String) = server + queryLookupPath(entityType, attributeName, attributeValue)

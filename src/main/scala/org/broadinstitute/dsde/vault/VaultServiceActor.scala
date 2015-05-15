@@ -1,6 +1,6 @@
 package org.broadinstitute.dsde.vault
 
-import akka.actor.ActorLogging
+import akka.actor.{ActorRefFactory, ActorLogging}
 import com.gettyimages.spray.swagger.SwaggerHttpService
 import com.wordnik.swagger.model.ApiInfo
 import org.broadinstitute.dsde.vault.common.directives.OpenAMDirectives._
@@ -31,6 +31,9 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
   val analysisUpdate = new analysis.AnalysisUpdateService with ActorRefFactoryContext
   val analysisRedirect = new analysis.AnalysisRedirectService with ActorRefFactoryContext
 
+  val uBamCollectionsIngest = new uBAMCollection.UBamCollectionIngestService with ActorRefFactoryContext
+  val uBamCollectionsDescribe = new uBAMCollection.UBamCollectionDescribeService with ActorRefFactoryContext
+
   val lookupService = new lookup.LookupService with ActorRefFactoryContext
 
   private implicit val ec = context.dispatcher
@@ -40,8 +43,9 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
     swaggerService.routes ~ swaggerUiService ~
       logOpenAMRequest() {
         uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~uBAMDescribeList.routes ~
+          uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~
           analysisIngest.aiRoute ~ analysisDescribe.adRoute ~ analysisUpdate.auRoute ~ analysisRedirect.arRoute ~
-          lookupService.lRoute
+          uBamCollectionsIngest.ubciRoute ~ uBamCollectionsDescribe.ubcdRoute ~ lookupService.lRoute
       }
   )
 
@@ -52,11 +56,14 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
       typeOf[uBAM.UBamDescribeService],
       typeOf[uBAM.UBamDescribeListService],
       typeOf[uBAM.UBamRedirectService],
+      typeOf[uBAMCollection.UBamCollectionIngestService],
+      typeOf[uBAMCollection.UBamCollectionDescribeService],
       typeOf[analysis.AnalysisIngestService],
       typeOf[analysis.AnalysisDescribeService],
       typeOf[analysis.AnalysisUpdateService],
       typeOf[analysis.AnalysisRedirectService],
       typeOf[lookup.LookupService])
+
 
     override def apiVersion = VaultConfig.SwaggerConfig.apiVersion
 
