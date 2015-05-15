@@ -29,7 +29,8 @@ trait UBamDescribeListService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   @ApiImplicitParams(Array(
-    new ApiImplicitParam(name = "version", required = true, dataType = "string", paramType = "path", value = "API version", allowableValues = ApiVersions)
+    new ApiImplicitParam(name = "version", required = true, dataType = "string", paramType = "path", value = "API version", allowableValues = ApiVersions),
+    new ApiImplicitParam(name = "page[limit]", required = false, dataType = "integer", paramType = "query", value = "uBAM limit", allowableValues = "range[0, 2147483647]")
   ))
   def uBamDescribeListRoute = {
     path("ubams" / "v" ~ IntNumber) { version =>
