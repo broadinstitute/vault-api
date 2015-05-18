@@ -93,3 +93,7 @@ testOptions in Test += Tests.Setup(classLoader =>
     .getMethod("getLogger", classLoader.loadClass("java.lang.String"))
     .invoke(null, "ROOT")
 )
+
+// Clean up test output by not logging dead letters
+// Note: if using the sbt shell, this will also apply to any actions subsequent to "test"
+testOptions in Test += Tests.Setup(() => sys.props += "akka.log-dead-letters" -> "0")
