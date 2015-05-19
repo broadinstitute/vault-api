@@ -97,3 +97,6 @@ testOptions in Test += Tests.Setup(classLoader =>
 // Clean up test output by not logging dead letters
 // Note: if using the sbt shell, this will also apply to any actions subsequent to "test"
 testOptions in Test += Tests.Setup(() => sys.props += "akka.log-dead-letters" -> "0")
+
+testOptions in Test += Tests.Setup(() => sys.props += "akka.loglevel" -> "OFF")
+
