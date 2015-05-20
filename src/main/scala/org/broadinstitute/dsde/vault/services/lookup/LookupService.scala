@@ -12,6 +12,7 @@ import spray.routing._
 @Api(value = "/query", description = "Lookup Service", produces = "application/json", position = 0)
 trait LookupService extends HttpService with VaultDirectives {
 
+  private final val ApiPrefix = "query"
   private final val ApiVersions = "v1"
 
   val lRoute = lookupRoute
@@ -34,10 +35,9 @@ trait LookupService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def lookupRoute = {
-    pathVersion("query", Segment / Segment / Segment) { (versionOpt, entityType, attributeName, attributeValue) =>
+    pathVersion( ApiPrefix , 1 , Segment / Segment / Segment) { (version, entityType, attributeName, attributeValue) =>
       get {
         respondWithJSON { requestContext =>
-          val version = versionOpt.getOrElse(1)
           val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
           val describeActor = actorRefFactory.actorOf(LookupServiceHandler.props(requestContext, version, dmService))
           describeActor ! LookupServiceHandler.LookupMessage(entityType, attributeName, attributeValue)
@@ -47,6 +47,8 @@ trait LookupService extends HttpService with VaultDirectives {
   }
 
 }
+
+
 
 
 

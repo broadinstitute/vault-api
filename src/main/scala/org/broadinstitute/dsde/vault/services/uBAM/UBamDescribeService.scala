@@ -2,16 +2,16 @@ package org.broadinstitute.dsde.vault.services.uBAM
 
 import akka.actor.Props
 import com.wordnik.swagger.annotations._
-import org.broadinstitute.dsde.vault.services.VaultDirectives
-import spray.http.MediaTypes._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
 import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.services.VaultDirectives
 import spray.routing._
 
 @Api(value = "/ubams", description = "uBAM Service", produces = "application/json", position = 0)
 trait UBamDescribeService extends HttpService with VaultDirectives {
 
+  private final val ApiPrefix = "ubams"
   private final val ApiVersions = "v1"
 
   val ubdRoute = uBamDescribeRoute
@@ -32,10 +32,9 @@ trait UBamDescribeService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def uBamDescribeRoute = {
-    pathVersion("ubams", Segment) { (versionOpt, id) =>
+    pathVersion( ApiPrefix , 1 , Segment) { (version, id) =>
       get {
         respondWithJSON { requestContext =>
-          val version = versionOpt.getOrElse(1)
           val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
           val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, dmService))
           describeActor ! DescribeServiceHandler.DescribeMessage(id)

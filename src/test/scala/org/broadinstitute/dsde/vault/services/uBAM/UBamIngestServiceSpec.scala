@@ -1,11 +1,10 @@
 package org.broadinstitute.dsde.vault.services.uBAM
 
-import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
-import org.broadinstitute.dsde.vault.model.{UBamIngestResponse, UBamIngest}
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
-import spray.http.HttpHeaders.Cookie
+import org.broadinstitute.dsde.vault.model.{UBamIngest, UBamIngestResponse}
+import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import spray.http.StatusCodes._
-import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
+import spray.http.{ContentType, HttpEntity, MediaTypes}
 import spray.httpx.SprayJsonSupport._
 
 class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService {

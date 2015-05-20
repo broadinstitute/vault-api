@@ -1,13 +1,12 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
-import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
-import spray.http.HttpHeaders.Cookie
+import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import spray.http.StatusCodes._
-import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
+import spray.http.{ContentType, HttpEntity, MediaTypes}
 import spray.httpx.SprayJsonSupport._
 
 class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService with UBamIngestService {

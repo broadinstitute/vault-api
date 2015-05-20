@@ -2,16 +2,16 @@ package org.broadinstitute.dsde.vault.services.uBAMCollection
 
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
-import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
-import spray.httpx.SprayJsonSupport._
 import org.broadinstitute.dsde.vault.model.uBAMCollectionJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{UBamCollectionIngest, UBamCollectionIngestResponse}
 import org.broadinstitute.dsde.vault.services.VaultDirectives
+import spray.httpx.SprayJsonSupport._
 import spray.routing.HttpService
 
 @Api(value = "/ubamcollections", description = "Collections Service", produces = "application/json")
 trait UBamCollectionIngestService extends HttpService with VaultDirectives {
 
+  private final val ApiPrefix = "ubamcollections"
   private final val ApiVersions = "v1"
 
   val ubciRoute = uBAMCollectionIngestRoute
@@ -35,7 +35,7 @@ trait UBamCollectionIngestService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def uBAMCollectionIngestRoute =
-    path("ubamcollections" / "v" ~ IntNumber) { version =>
+    path( ApiPrefix / "v" ~ IntNumber) { version =>
       post {
         respondWithJSON {
             entity(as[UBamCollectionIngest]) {

@@ -4,9 +4,8 @@ import org.broadinstitute.dsde.vault.model.{AnalysisIngest, AnalysisIngestRespon
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import org.scalatest.BeforeAndAfterAll
-import spray.http.HttpHeaders.Cookie
 import spray.http.StatusCodes._
-import spray.http.{ContentType, HttpCookie, HttpEntity, MediaTypes}
+import spray.http.{ContentType, HttpEntity, MediaTypes}
 
 class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService with UBamIngestService with BeforeAndAfterAll {
 

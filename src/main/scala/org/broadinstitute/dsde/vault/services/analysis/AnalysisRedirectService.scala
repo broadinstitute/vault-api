@@ -1,13 +1,14 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
 import com.wordnik.swagger.annotations._
-import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
+import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 0)
 trait AnalysisRedirectService extends HttpService {
 
+  private final val ApiPrefix = "analyses"
   private final val ApiVersions = "v1"
 
   val arRoute = analysisRedirectRoute
@@ -27,9 +28,8 @@ trait AnalysisRedirectService extends HttpService {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def analysisRedirectRoute =
-    pathVersion("analyses", Segment / Segment) { (versionOpt, id, filetype) =>
+    pathVersion( ApiPrefix , 1 , Segment / Segment) { (version, id, filetype) =>
       get { requestContext =>
-        val version = versionOpt.getOrElse(1)
         val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
         val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
         val redirectActor = actorRefFactory.actorOf(RedirectServiceHandler.props(requestContext, version, bossService, dmService))

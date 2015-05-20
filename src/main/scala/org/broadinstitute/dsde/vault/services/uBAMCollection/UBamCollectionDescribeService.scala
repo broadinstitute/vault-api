@@ -5,13 +5,12 @@ import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.VaultDirectives
-import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
-import spray.http.MediaTypes._
 import spray.routing._
 
 @Api(value = "/ubamcollections", description = "uBamCollection Service", produces = "application/json")
 trait UBamCollectionDescribeService extends HttpService with VaultDirectives {
 
+  private final val ApiPrefix = "ubamcollections"
   private final val ApiVersions = "v1"
 
   val ubcdRoute = ubamCollectionDescribeRoute
@@ -32,7 +31,7 @@ trait UBamCollectionDescribeService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def ubamCollectionDescribeRoute = {
-    path("ubamcollections" / "v" ~ IntNumber / Segment) { (version, id) =>
+    path( ApiPrefix / "v" ~ IntNumber / Segment) { (version, id) =>
         get {
           respondWithJSON{
             requestContext => {
