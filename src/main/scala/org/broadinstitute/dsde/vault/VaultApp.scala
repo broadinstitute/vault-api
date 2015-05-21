@@ -1,34 +1,21 @@
 package org.broadinstitute.dsde.vault
 
 import akka.actor.{ActorSystem, Props}
-import akka.io.IO
-import akka.pattern.ask
-import akka.util.Timeout
+import scala.concurrent.duration.{FiniteDuration,SECONDS}
+import org.broadinstitute.dsde.vault.common.util.ServerInitializer
 import org.slf4j.LoggerFactory
-import spray.can.Http
-
-import scala.concurrent.duration._
 
 object VaultApp {
 
   // we need an ActorSystem to host our application in
   implicit val system = ActorSystem("vault-api")
-
-  // create and start our service actor
-  val service = system.actorOf(Props[VaultServiceActor], "vault-api-service")
-
-  implicit val timeout = Timeout(5.seconds)
+  val timeoutDuration = FiniteDuration(VaultConfig.HttpConfig.timeoutSeconds,SECONDS)
 
   lazy val log = LoggerFactory.getLogger(getClass)
 
   def main(args: Array[String]) {
     log.info("Vault instance starting.")
-    start()
-  }
+    ServerInitializer.startWebServiceActors(Props[VaultServiceActor], VaultConfig.HttpConfig.interface, VaultConfig.HttpConfig.port, timeoutDuration, system)
 
-  def start(): Unit = {
-    // start a new HTTP server on configuration port with our service actor as the handler
-    IO(Http) ? Http.Bind(service, VaultConfig.HttpConfig.interface, VaultConfig.HttpConfig.port)
   }
-
 }

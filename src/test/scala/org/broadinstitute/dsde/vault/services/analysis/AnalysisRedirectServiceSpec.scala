@@ -1,10 +1,8 @@
 package org.broadinstitute.dsde.vault.services.analysis
 
-import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
-import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisUpdate, AnalysisIngest}
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
-import spray.http.HttpCookie
-import spray.http.HttpHeaders.Cookie
+import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, AnalysisUpdate}
+import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 

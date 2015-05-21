@@ -12,6 +12,7 @@ trait UBamDescribeListService extends HttpService {
 
   val routes = uBamDescribeListRoute
 
+  private final val ApiPrefix = "ubams"
   private final val ApiVersions = "v1"
 
 
@@ -33,7 +34,7 @@ trait UBamDescribeListService extends HttpService {
     new ApiImplicitParam(name = "page[limit]", required = false, dataType = "integer", paramType = "query", value = "uBAM limit", allowableValues = "range[0, 2147483647]")
   ))
   def uBamDescribeListRoute = {
-    path("ubams" / "v" ~ IntNumber) { version =>
+    path( ApiPrefix / "v" ~ IntNumber) { version =>
       get {
         parameter("page[limit]".as[Int].?) { pageLimit =>
           respondWithMediaType(`application/json`) {

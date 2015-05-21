@@ -41,7 +41,7 @@ libraryDependencies ++= {
   val akkaV = "2.3.6"
   val sprayV = "1.3.2"
   Seq(
-    vaultOrg %% "vault-common" % "0.1-13-85842f7"
+    vaultOrg %% "vault-common" % "0.1-17-0ee4ad5"
     , "io.spray" %% "spray-can" % sprayV
     , "io.spray" %% "spray-routing" % sprayV
     , "io.spray" %% "spray-json" % "1.3.1"

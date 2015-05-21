@@ -4,18 +4,18 @@ import javax.ws.rs.Path
 
 import akka.actor.Props
 import com.wordnik.swagger.annotations._
-import org.broadinstitute.dsde.vault.services.VaultDirectives
-import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.impAnalysisUpdate
 import org.broadinstitute.dsde.vault.model._
-import spray.http.MediaTypes._
+import org.broadinstitute.dsde.vault.services.VaultDirectives
+import org.broadinstitute.dsde.vault.{BossClientService, DmClientService}
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json", position = 1)
 trait AnalysisUpdateService extends HttpService with VaultDirectives {
 
+  private final val ApiPrefix = "analyses"
   private final val ApiVersions = "v1"
 
   val auRoute = analysisUpdateRoute
@@ -42,12 +42,11 @@ trait AnalysisUpdateService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def analysisUpdateRoute =
-    pathVersion("analyses", Segment / "outputs") { (versionOpt, id) =>
+    pathVersion( ApiPrefix , 1 , Segment / "outputs") { (version, id) =>
       post {
         forceLocationHeader { forceLocation =>
           respondWithJSON {
             entity(as[AnalysisUpdate]) { update => requestContext =>
-              val version = versionOpt.getOrElse(1)
               val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
               val dmService = actorRefFactory.actorOf(Props(new DmClientService(requestContext)))
               val updateActor = actorRefFactory.actorOf(UpdateServiceHandler.props(requestContext, version, dmService, bossService))

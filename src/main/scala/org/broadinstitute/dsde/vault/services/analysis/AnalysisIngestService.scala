@@ -6,13 +6,13 @@ import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model._
 import org.broadinstitute.dsde.vault.services.VaultDirectives
-import spray.http.MediaTypes._
 import spray.httpx.SprayJsonSupport._
 import spray.routing._
 
 @Api(value = "/analyses", description = "Analysis Service", produces = "application/json")
 trait AnalysisIngestService extends HttpService with VaultDirectives {
 
+  private final val ApiPrefix = "analyses"
   private final val ApiVersions = "v1"
 
   val aiRoute = analysisIngestRoute
@@ -38,11 +38,10 @@ trait AnalysisIngestService extends HttpService with VaultDirectives {
     new ApiResponse(code = 500, message = "Vault Internal Error")
   ))
   def analysisIngestRoute =
-    pathVersion("analyses") { versionOpt =>
+    pathVersion( ApiPrefix ,1 ) { version =>
       post {
         respondWithJSON {
           entity(as[AnalysisIngest]) { ingest => requestContext =>
-            val version = versionOpt.getOrElse(1)
             val dmService = actorRefFactory.actorOf(DmClientService.props(requestContext))
             val ingestActor = actorRefFactory.actorOf(IngestServiceHandler.props(requestContext, version, dmService))
             ingestActor ! IngestServiceHandler.IngestMessage(ingest)

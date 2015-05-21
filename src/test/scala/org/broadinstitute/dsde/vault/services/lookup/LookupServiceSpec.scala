@@ -1,12 +1,10 @@
 package org.broadinstitute.dsde.vault.services.lookup
 
-import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
-import org.broadinstitute.dsde.vault.model.{UBamIngestResponse, UBamIngest, EntitySearchResult}
 import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
+import org.broadinstitute.dsde.vault.model.{EntitySearchResult, UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
-import spray.http.HttpCookie
-import spray.http.HttpHeaders.Cookie
+import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
