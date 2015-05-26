@@ -2,18 +2,18 @@ package org.broadinstitute.dsde.vault.services.uBAMCollection
 
 import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
+import org.broadinstitute.dsde.vault.DmClientService
 import org.broadinstitute.dsde.vault.DmClientService.DMUBamCollectionResolved
-import org.broadinstitute.dsde.vault.model._
+import org.broadinstitute.dsde.vault.model.TermSearch
+import org.broadinstitute.dsde.vault.model.uBAMCollectionJsonProtocol._
 import org.broadinstitute.dsde.vault.services.ClientFailure
-import org.broadinstitute.dsde.vault.services.uBAMCollection.DescribeServiceHandler.DescribeMessage
-import org.broadinstitute.dsde.vault.{DmClientService, VaultConfig}
-import spray.routing.RequestContext
-
+import org.broadinstitute.dsde.vault.services.uBAMCollection.DescribeServiceHandler.{DescribeMessageFilterByTerm, DescribeMessage}
 import spray.json._
-import uBAMCollectionJsonProtocol._
+import spray.routing.RequestContext
 
 object DescribeServiceHandler {
   case class DescribeMessage(dmId: String)
+  case class DescribeMessageFilterByTerm(termSearch: List[TermSearch])
 
   def props(requestContext: RequestContext, version: Int, dmService: ActorRef): Props =
     Props(new DescribeServiceHandler(requestContext, version, dmService))
@@ -28,6 +28,10 @@ case class DescribeServiceHandler(requestContext: RequestContext, version: Int, 
     case DescribeMessage(dmId) =>
       log.debug("Received Collection describe message")
       dmService ! DmClientService.DMResolveUBamCollection(dmId, version)
+
+    case DescribeMessageFilterByTerm(termSearch) =>
+      log.debug("Received Collection describe message filter by term search")
+      dmService ! DmClientService.DMResolveUBamCollectionFilterByTermSearch(termSearch, version)
 
     case DMUBamCollectionResolved(resolveduBamCollection) =>
       log.debug("Received Collection resolved message")

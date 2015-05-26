@@ -36,6 +36,8 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
 
   val lookupService = new lookup.LookupService with ActorRefFactoryContext
 
+  val indexService = new index.IndexService with ActorRefFactoryContext
+
   private implicit val ec = context.dispatcher
 
   // this actor runs all routes
@@ -45,7 +47,7 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
         uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~uBAMDescribeList.routes ~
           uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~
           analysisIngest.aiRoute ~ analysisDescribe.adRoute ~ analysisUpdate.auRoute ~ analysisRedirect.arRoute ~
-          uBamCollectionsIngest.ubciRoute ~ uBamCollectionsDescribe.ubcdRoute ~ lookupService.lRoute
+          uBamCollectionsIngest.ubciRoute ~ uBamCollectionsDescribe.ubcdRoute ~ lookupService.lRoute ~ indexService.adminRoutes
       }
   )
 
@@ -62,7 +64,8 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
       typeOf[analysis.AnalysisDescribeService],
       typeOf[analysis.AnalysisUpdateService],
       typeOf[analysis.AnalysisRedirectService],
-      typeOf[lookup.LookupService])
+      typeOf[lookup.LookupService],
+      typeOf[index.IndexService])
 
 
     override def apiVersion = VaultConfig.SwaggerConfig.apiVersion

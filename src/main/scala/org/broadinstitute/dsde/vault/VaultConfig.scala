@@ -58,8 +58,14 @@ object VaultConfig {
     def ubamCollectionDescribePath(id: String, version: Int) = vault.getString("ubamCollectionsDescribePath").format(version, id)
     def ubamCollectionDescribeUrl(id: String, version: Int) = server + ubamCollectionDescribePath(id, version)
 
+
     def ubamCollectionIngestPath(version: Int) = vault.getString("ubamCollectionsIngestPath").format(version)
     def ubamCollectionIngestUrl(version: Int) = server + ubamIngestPath(version)
+    def collectionSearchPath(version: Int) = vault.getString("uBamCollectionsResolveSearchPath").format(version)
+    def collectionSearchUrl(version: Int) = server + collectionSearchPath(version)
+
+    def indexResolvePath(entityType: String, version: Int) = vault.getString("indexPath").format(version, entityType)
+    def indexUrl(entityType: String, version: Int) = server + indexResolvePath(entityType, version)
 
   }
 
@@ -86,9 +92,13 @@ object VaultConfig {
 
     def collectionsPath(version: Int) = dm.getString("ubamCollectionsPath").format(version)
     def collectionsUrl(version: Int) = server + collectionsPath(version)
+    def collectionSearchUrl(version: Int) = server + dm.getString("uBamCollectionsResolveSearchPath").format(version)
 
     def queryLookupPath(entityType: String, attributeName: String, attributeValue: String) = dm.getString("queryLookupPath").format(entityType, attributeName, attributeValue)
     def queryLookupUrl(entityType: String, attributeName: String, attributeValue: String) = server + queryLookupPath(entityType, attributeName, attributeValue)
+
+    def indexResolvePath(entityType: String, version: Int) = dm.getString("indexPath").format(version, entityType)
+    def indexUrl(entityType: String, version: Int) = server + indexResolvePath(entityType, version)
   }
 
   object BOSS {

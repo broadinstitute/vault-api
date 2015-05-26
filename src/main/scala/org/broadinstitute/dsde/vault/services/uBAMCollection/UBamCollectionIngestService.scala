@@ -12,6 +12,7 @@ import spray.routing.HttpService
 trait UBamCollectionIngestService extends HttpService with VaultDirectives {
 
   private final val ApiPrefix = "ubamcollections"
+
   private final val ApiVersions = "v1"
 
   val ubciRoute = uBAMCollectionIngestRoute

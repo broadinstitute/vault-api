@@ -16,7 +16,6 @@ import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
 import spray.http.Uri
 import spray.httpx.SprayJsonSupport._
-import spray.json.DefaultJsonProtocol
 import spray.routing.RequestContext
 
 import scala.util.{Failure, Success}
@@ -41,15 +40,16 @@ object DmClientService {
   case class DMUBamCollectionCreated(uBAMCollection: UBamCollection)
   case class DMResolveUBamCollection(uBamCollectionId: String, version: Int)
   case class DMUBamCollectionResolved(uBamCollection: UBamCollection)
+  case class DMResolveUBamCollectionFilterByTermSearch(termSearch: List[TermSearch], version: Int)
 
+  case class DMResolveIndex(entityType: String, version: Int)
 
   def props(requestContext: RequestContext): Props = Props(new DmClientService(requestContext))
 }
 
 case class DmClientService(requestContext: RequestContext) extends Actor{
-
+  import spray.json.DefaultJsonProtocol._
   import system.dispatcher
-  import DefaultJsonProtocol._
 
   implicit val timeout = Timeout(5, TimeUnit.SECONDS)
   implicit val system = context.system
@@ -71,6 +71,9 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
     case DMResolveUBamCollection(uBamCollectionId, version) =>
       resolveUBamCollection(sender(),uBamCollectionId, version)
 
+    case DMResolveUBamCollectionFilterByTermSearch(termSearch, version)=>
+      resolveUBamCollectionFilterByTermSearch(sender(),termSearch, version)
+
     case DMCreateAnalysis(analysisIngest) =>
       createAnalysis(sender(), analysisIngest)
 
@@ -82,6 +85,9 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
 
     case DMLookupEntity(entityType, attributeName, attributeValue) =>
       lookup(sender(), entityType, attributeName, attributeValue)
+
+    case DMResolveIndex(entityType,version) =>
+      resolveIndex(sender(), entityType,version)
   }
 
   def createUBam(senderRef: ActorRef, ubam: UBamIngest): Unit = {
@@ -135,6 +141,23 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
 
       case Failure(error) =>
         log.error(error, "Couldn't find uBAMs")
+    }
+  }
+
+  def resolveUBamCollectionFilterByTermSearch(senderRef: ActorRef,termSearch: List[TermSearch], version: Int): Unit = {
+    import TermSearchJsonProtocol._
+    log.debug("Querying the DM API for a uBAM List")
+    val pipeline = {
+      addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[List[UBamCollection]]
+    }
+    val responseFuture = pipeline {
+      Post(VaultConfig.DataManagement.collectionSearchUrl(version),termSearch)
+    }
+    responseFuture onComplete {
+     case Success(resolvedCollections) =>
+       requestContext.complete(resolvedCollections)
+     case Failure(error) =>
+       log.error(error, "Couldn't find uBAMsCollections")
     }
   }
 
@@ -237,6 +260,21 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
 
       case Failure(error) =>
         log.error(error, "Couldn't find entity matching %s/%s/%s".format(entityType, attributeName, attributeValue))
+        senderRef ! ClientFailure(error.getMessage)
+    }
+  }
+
+  def resolveIndex(senderRef: ActorRef, entityType: String, version: Int): Unit = {
+    import IndexResponseJsonProtocol._
+    log.debug("Index entity type: " + entityType)
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[IndexResponse]
+    val responseFuture = pipeline {
+      Post(VaultConfig.DataManagement.indexUrl(entityType, version))
+    }
+    responseFuture onComplete {
+      case Success(indexResponse) =>
+        requestContext.complete(indexResponse)
+      case Failure(error) =>
         senderRef ! ClientFailure(error.getMessage)
     }
   }
