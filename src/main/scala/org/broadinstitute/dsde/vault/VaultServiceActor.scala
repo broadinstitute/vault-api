@@ -36,6 +36,10 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
 
   val lookupService = new lookup.LookupService with ActorRefFactoryContext
 
+  val genericIngest = new generic.GenericIngestService with ActorRefFactoryContext
+  val genericDescribe = new generic.GenericDescribeService with ActorRefFactoryContext
+  val genericSearch = new generic.GenericSearchService with ActorRefFactoryContext
+
   private implicit val ec = context.dispatcher
 
   // this actor runs all routes
@@ -45,7 +49,8 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
         uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~uBAMDescribeList.routes ~
           uBAMIngest.ubiRoute ~ uBAMDescribe.ubdRoute ~ uBAMRedirect.ubrRoute ~
           analysisIngest.aiRoute ~ analysisDescribe.adRoute ~ analysisUpdate.auRoute ~ analysisRedirect.arRoute ~
-          uBamCollectionsIngest.ubciRoute ~ uBamCollectionsDescribe.ubcdRoute ~ lookupService.lRoute
+          uBamCollectionsIngest.ubciRoute ~ uBamCollectionsDescribe.ubcdRoute ~ lookupService.lRoute ~
+          genericIngest.giRoute ~ genericDescribe.gdRoutes ~ genericSearch.gsRoute
       }
   )
 
@@ -62,7 +67,11 @@ class VaultServiceActor extends HttpServiceActor with ActorLogging {
       typeOf[analysis.AnalysisDescribeService],
       typeOf[analysis.AnalysisUpdateService],
       typeOf[analysis.AnalysisRedirectService],
-      typeOf[lookup.LookupService])
+      typeOf[lookup.LookupService],
+      typeOf[generic.GenericIngestService],
+      typeOf[generic.GenericDescribeService],
+      typeOf[generic.GenericSearchService]
+    )
 
 
     override def apiVersion = VaultConfig.SwaggerConfig.apiVersion
