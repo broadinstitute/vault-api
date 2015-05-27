@@ -8,7 +8,7 @@ import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
 @DoNotDiscover
-class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectService with AnalysisIngestService with AnalysisUpdateService with Suite  {
+class AnalysisRedirectServiceSpec extends VaultFreeSpec with AnalysisRedirectService with AnalysisIngestService with AnalysisUpdateService{
 
   def actorRefFactory = system
   var testingId = "invalid_UUID"

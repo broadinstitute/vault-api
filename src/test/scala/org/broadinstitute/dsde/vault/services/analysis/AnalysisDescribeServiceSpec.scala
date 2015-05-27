@@ -9,7 +9,7 @@ import spray.httpx.SprayJsonSupport._
 import spray.httpx.unmarshalling._
 
 @DoNotDiscover
-class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeService with AnalysisUpdateService with AnalysisIngestService with Suite {
+class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeService with AnalysisUpdateService with AnalysisIngestService{
 
   def actorRefFactory = system
 

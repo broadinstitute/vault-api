@@ -11,7 +11,6 @@ import spray.json._
 class AnalysisUpdateSwitchCallback extends ExpectationCallback {
 
   def createResponse(analysis: Analysis): HttpResponse = {
-    println("\nRESPONSE : " + analysis.toJson.prettyPrint)
     response()
       .withStatusCode(HttpStatusCode.OK_200.code())
       .withHeaders(
@@ -21,23 +20,17 @@ class AnalysisUpdateSwitchCallback extends ExpectationCallback {
   }
 
   override def handle(httpRequest: HttpRequest): HttpResponse = {
-
-    println("\n" + httpRequest.getMethod + " : " + httpRequest.getPath)
-
-    if(httpRequest.getPath.endsWith("/analyses")){
-      AnalysesResponseContainer.setEmptyResponse()
-      return createResponse(AnalysesResponseContainer.emptyAnalysis)
+    httpRequest match {
+      case request if request.getPath.endsWith("/analyses") =>
+        AnalysesResponseContainer.setEmptyResponse()
+        createResponse(AnalysesResponseContainer.emptyAnalysis)
+      case request if request.getPath.endsWith("/analyses/9b66665c-f41a-11e4-b9b2-1697f925ec7b") =>
+        createResponse(AnalysesResponseContainer.responseAnalysis)
+      case request if request.getPath.endsWith("9b66665c-f41a-11e4-b9b2-1697f925ec7b/outputs") =>
+        AnalysesResponseContainer.setUpdatedResponse()
+        createResponse(AnalysesResponseContainer.responseAnalysis)
+      case _ => notFoundResponse()
     }
-
-    if(httpRequest.getPath.endsWith("/analyses/9b66665c-f41a-11e4-b9b2-1697f925ec7b")) {
-      return createResponse(AnalysesResponseContainer.responseAnalysis)
-    } else if(httpRequest.getPath.endsWith("9b66665c-f41a-11e4-b9b2-1697f925ec7b/outputs")) {
-      AnalysesResponseContainer.setUpdatedResponse()
-      return createResponse(AnalysesResponseContainer.responseAnalysis)
-    } else {
-      return notFoundResponse()
-    }
-
   }
 }
 

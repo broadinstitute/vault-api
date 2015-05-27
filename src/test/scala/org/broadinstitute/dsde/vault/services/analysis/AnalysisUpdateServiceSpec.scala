@@ -11,7 +11,7 @@ import spray.http.{ContentType, HttpEntity, MediaTypes}
 import spray.httpx.SprayJsonSupport._
 
 @DoNotDiscover
-class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService with UBamIngestService with Suite {
+class AnalysisUpdateServiceSpec extends VaultFreeSpec with AnalysisUpdateService with UBamIngestService{
 
   def actorRefFactory = system
 

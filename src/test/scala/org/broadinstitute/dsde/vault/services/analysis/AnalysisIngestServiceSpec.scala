@@ -8,7 +8,7 @@ import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpEntity, MediaTypes}
 
 @DoNotDiscover
-class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService with UBamIngestService with BeforeAndAfter with Suite  {
+class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService with UBamIngestService with BeforeAndAfter{
 
   import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol.{impAnalysisIngest, impAnalysisIngestResponse}
   import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol.{impUBamIngest, impUBamIngestResponse}

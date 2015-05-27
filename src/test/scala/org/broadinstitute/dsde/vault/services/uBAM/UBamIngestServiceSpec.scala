@@ -9,7 +9,7 @@ import spray.http.{ContentType, HttpEntity, MediaTypes}
 import spray.httpx.SprayJsonSupport._
 
 @DoNotDiscover
-class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService with Suite {
+class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService{
 
   def actorRefFactory = system
 

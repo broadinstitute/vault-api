@@ -10,7 +10,7 @@ import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
 @DoNotDiscover
-class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngestService with Suite  {
+class LookupServiceSpec extends VaultFreeSpec with LookupService with UBamIngestService{
 
   def actorRefFactory = system
 

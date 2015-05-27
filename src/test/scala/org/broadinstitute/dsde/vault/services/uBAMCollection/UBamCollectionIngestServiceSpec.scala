@@ -9,7 +9,7 @@ import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
 @DoNotDiscover
-class UBamCollectionIngestServiceSpec extends VaultFreeSpec with UBamCollectionIngestService with UBamIngestService with BeforeAndAfter with Suite  {
+class UBamCollectionIngestServiceSpec extends VaultFreeSpec with UBamCollectionIngestService with UBamIngestService with BeforeAndAfter{
 
   def actorRefFactory = system
 

@@ -8,7 +8,7 @@ import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
 @DoNotDiscover
-class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService with Suite {
+class UBamDescribeServiceSpec extends VaultFreeSpec with UBamDescribeService with UBamIngestService with UBamDescribeListService{
 
   override val routes = uBamDescribeRoute ~  uBamDescribeListRoute
 

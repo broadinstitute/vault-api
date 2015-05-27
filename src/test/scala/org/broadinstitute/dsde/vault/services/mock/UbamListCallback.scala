@@ -32,14 +32,12 @@ class UbamListCallback extends ExpectationCallback {
   }
 
   override def handle(httpRequest: HttpRequest): HttpResponse = {
-    if(httpRequest.hasQueryStringParameter("page[limit]", "0")){
-      return createResponse(emptyUbamList)
-    } else {
-      if(httpRequest.hasQueryStringParameter("page[limit]", "1")){
-        return createResponse(ubamList)
-      } else {
-        notFoundResponse()
-      }
+    httpRequest match {
+      case request if request.hasQueryStringParameter("page[limit]", "0") =>
+        createResponse(emptyUbamList)
+      case request if request.hasQueryStringParameter("page[limit]", "1") =>
+        createResponse(ubamList)
+      case _ => notFoundResponse()
     }
   }
 }

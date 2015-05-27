@@ -10,7 +10,7 @@ import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
 @DoNotDiscover
-class UBamCollectionDescribeServiceSpec extends VaultFreeSpec with UBamCollectionDescribeService with UBamCollectionIngestService with UBamIngestService with Suite  {
+class UBamCollectionDescribeServiceSpec extends VaultFreeSpec with UBamCollectionDescribeService with UBamCollectionIngestService with UBamIngestService{
 
   val routes = ubamCollectionDescribeRoute
 

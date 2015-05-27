@@ -35,8 +35,7 @@ object Servers{
 
   def startUpDM(): Unit = {
 
-    /* ----------------- UBams ----------------------
-    ------------------------------------------------- */
+    /* ----------------- UBams ----------------------*/
     val ubam = new UBam(
       "testing_id",
       Map(("bam", "http://localhost:8080/path/to/bam"), ("bai", "pathToBai")),
@@ -123,8 +122,7 @@ object Servers{
           .withStatusCode(200)
       )
 
-    /* ----------- UBam Collections -----------------
-    ------------------------------------------------- */
+    /* ----------- UBam Collections ----------------- */
     val members = Some(List("testing_id"))
 
     val ubamCollectionResponse = new UBamCollectionIngestResponse(
@@ -156,8 +154,7 @@ object Servers{
           .withStatusCode(200)
       )
 
-    /* ----------------- Analyses ----------------------
-    ------------------------------------------------- */
+    /* ----------------- Analyses ----------------------*/
     val metadataMap = Map("testAttr" -> "testValue", "randomData" -> "7")
     val analysisIngest = new AnalysisIngest(List(), Map("testAttr" -> "testValue"))
 

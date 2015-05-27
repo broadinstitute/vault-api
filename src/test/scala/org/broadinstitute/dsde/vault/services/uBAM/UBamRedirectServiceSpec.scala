@@ -8,7 +8,7 @@ import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
 @DoNotDiscover
-class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService with Suite  {
+class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService{
 
   def actorRefFactory = system
 
