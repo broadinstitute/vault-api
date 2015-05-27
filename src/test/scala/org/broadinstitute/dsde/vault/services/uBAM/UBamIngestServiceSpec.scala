@@ -3,11 +3,13 @@ package org.broadinstitute.dsde.vault.services.uBAM
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
+import org.scalatest.{DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpEntity, MediaTypes}
 import spray.httpx.SprayJsonSupport._
 
-class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService {
+@DoNotDiscover
+class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService{
 
   def actorRefFactory = system
 
@@ -17,16 +19,16 @@ class UBamIngestServiceSpec extends VaultFreeSpec with UBamIngestService {
     Some(1)
   )
 
+  val ubamIngest = new UBamIngest(
+    files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai")),
+    metadata = Map(("testAttr", "testValue"), ("randomData", "7"))
+  )
+
   "UBamIngestServiceSpec" - {
 
     forAll(versions) { (version: Option[Int]) =>
 
       s"when accessing version = '${v(version)}'" - {
-
-        val ubamIngest = new UBamIngest(
-          files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai")),
-          metadata = Map(("testAttr", "testValue"), ("randomData", "7"))
-        )
 
         "when calling POST to the UBam Ingest path with a UBamIngest object" - {
           "should return a valid response" in {

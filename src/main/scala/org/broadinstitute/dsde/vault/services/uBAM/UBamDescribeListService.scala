@@ -15,9 +15,6 @@ trait UBamDescribeListService extends HttpService {
   private final val ApiPrefix = "ubams"
   private final val ApiVersions = "v1"
 
-
-
-
   @ApiOperation(value = "Describes a list of uBAM's metadata and associated files.  Does not generate presigned URLs.",
     nickname = "ubam_describe_list",
     httpMethod = "GET",

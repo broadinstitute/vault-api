@@ -3,10 +3,12 @@ package org.broadinstitute.dsde.vault.services.uBAM
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
+import org.scalatest.{DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService {
+@DoNotDiscover
+class UBamRedirectServiceSpec extends VaultFreeSpec with UBamRedirectService with UBamIngestService{
 
   def actorRefFactory = system
 

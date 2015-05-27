@@ -3,11 +3,13 @@ package org.broadinstitute.dsde.vault.services.analysis
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
 import org.broadinstitute.dsde.vault.model.{Analysis, AnalysisIngest, AnalysisIngestResponse, AnalysisUpdate}
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
+import org.scalatest.{DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.unmarshalling._
 
-class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeService with AnalysisUpdateService with AnalysisIngestService {
+@DoNotDiscover
+class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeService with AnalysisUpdateService with AnalysisIngestService{
 
   def actorRefFactory = system
 
@@ -58,7 +60,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
 
         "when calling POST to the Analysis Update path in order to add completed files" - {
           "should return as OK" in {
-            val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "vault/test/test.vcf", "bai" -> "vault/test/test.bai", "bam" -> "vault/test/test.bam"))
+            val analysisUpdate = new AnalysisUpdate(files = Map("vcf" -> "pathToVcf", "bai" -> "pathToBai", "bam" -> "pathToBam"))
             Post(VaultConfig.Vault.analysisUpdatePath(testId).versioned(version), analysisUpdate) ~> addOpenAmCookie ~> analysisUpdateRoute ~> check {
               status should equal(OK)
               val analysisResponse = responseAs[Analysis]

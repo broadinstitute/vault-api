@@ -1,14 +1,15 @@
 package org.broadinstitute.dsde.vault.services.uBAMCollection
 
 import org.broadinstitute.dsde.vault.model.uBAMCollectionJsonProtocol._
-import org.broadinstitute.dsde.vault.model.{UBamCollectionIngest, UBamCollectionIngestResponse, UBamIngest, UBamIngestResponse}
+import org.broadinstitute.dsde.vault.model.{UBamCollectionIngest, UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
-import org.scalatest.BeforeAndAfterAll
+import org.scalatest.{BeforeAndAfter, DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 
-class UBamCollectionIngestServiceSpec extends VaultFreeSpec with UBamCollectionIngestService with UBamIngestService with BeforeAndAfterAll {
+@DoNotDiscover
+class UBamCollectionIngestServiceSpec extends VaultFreeSpec with UBamCollectionIngestService with UBamIngestService with BeforeAndAfter{
 
   def actorRefFactory = system
 
@@ -22,7 +23,7 @@ class UBamCollectionIngestServiceSpec extends VaultFreeSpec with UBamCollectionI
   val routes = uBAMCollectionIngestRoute
   import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
 
-  override def beforeAll(): Unit = {
+  before{
 
     // test ubam for ingest
     val files = Map(("bam", "vault/test/test.bam"), ("bai", "vault/test/test.bai"))
@@ -56,9 +57,9 @@ class UBamCollectionIngestServiceSpec extends VaultFreeSpec with UBamCollectionI
             Post(VaultConfig.Vault.ubamCollectionIngestPath(version), ubamCollectionIngest) ~> addOpenAmCookie ~> uBAMCollectionIngestRoute ~> check {
               status should equal(OK)
               entity.toString should include("id")
-              val respCollection = responseAs[UBamCollectionIngestResponse]
-              val createdId = java.util.UUID.fromString(respCollection.id)
-              entity.toString should include(createdId.toString)
+              entity.toString should include("members")
+              entity.toString should include("metadata")
+              entity.toString should include("properties")
             }
           }
         }

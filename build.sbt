@@ -53,7 +53,10 @@ libraryDependencies ++= {
     , "com.gettyimages" %% "spray-swagger" % "0.5.0"
     , "org.webjars" % "swagger-ui" % "2.1.8-M1"
     // -- Logging --
-    , "ch.qos.logback" % "logback-classic" % "1.1.2"
+    ,"ch.qos.logback" % "logback-classic" % "1.1.2"
+    ,"com.typesafe.scala-logging" %% "scala-logging-slf4j" % "2.1.2"
+    // -- Testing --
+    ,"org.mock-server" % "mockserver-netty" % "3.9.2" % "test"
   )
 }
 
@@ -87,6 +90,9 @@ javaOptions in Revolver.reStart ++= new scala.sys.SystemProperties()
 //   http://stackoverflow.com/a/12095245
 //   http://jira.qos.ch/browse/SLF4J-167
 //   http://jira.qos.ch/browse/SLF4J-97
+
+parallelExecution in Test := false
+
 testOptions in Test += Tests.Setup(classLoader =>
   classLoader
     .loadClass("org.slf4j.LoggerFactory")
