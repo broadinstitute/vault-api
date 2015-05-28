@@ -3,6 +3,7 @@ package org.broadinstitute.dsde.vault.services.analysis
 import org.broadinstitute.dsde.vault.model.{AnalysisIngest, AnalysisIngestResponse, UBamIngest, UBamIngestResponse}
 import org.broadinstitute.dsde.vault.services.uBAM.UBamIngestService
 import org.broadinstitute.dsde.vault.{VaultConfig, VaultFreeSpec}
+import org.broadinstitute.dsde.vault.model.Properties._
 import org.scalatest.{BeforeAndAfter, DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.http.{ContentType, HttpEntity, MediaTypes}
@@ -64,6 +65,17 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
               val respAnalysis = responseAs[AnalysisIngestResponse]
               val createdId = java.util.UUID.fromString(respAnalysis.id)
               entity.toString should include(createdId.toString)
+
+              version match {
+                case Some(x) if x > 1 =>
+                  respAnalysis.properties shouldNot be(empty)
+                  respAnalysis.properties.get.get(CreatedBy) shouldNot be(empty)
+                  respAnalysis.properties.get.get(CreatedDate) shouldNot be(empty)
+                  respAnalysis.properties.get.get(ModifiedBy) should be(empty)
+                  respAnalysis.properties.get.get(ModifiedDate) should be(empty)
+                case _ =>
+                  respAnalysis.properties shouldBe empty
+              }
             }
           }
         }
@@ -82,6 +94,17 @@ class AnalysisIngestServiceSpec extends VaultFreeSpec with AnalysisIngestService
               val respAnalysis = responseAs[AnalysisIngestResponse]
               val createdId = java.util.UUID.fromString(respAnalysis.id)
               entity.toString should include(createdId.toString)
+
+              version match {
+                case Some(x) if x > 1 =>
+                  respAnalysis.properties shouldNot be(empty)
+                  respAnalysis.properties.get.get(CreatedBy) shouldNot be(empty)
+                  respAnalysis.properties.get.get(CreatedDate) shouldNot be(empty)
+                  respAnalysis.properties.get.get(ModifiedBy) should be(empty)
+                  respAnalysis.properties.get.get(ModifiedDate) should be(empty)
+                case _ =>
+                  respAnalysis.properties shouldBe empty
+              }
             }
           }
         }

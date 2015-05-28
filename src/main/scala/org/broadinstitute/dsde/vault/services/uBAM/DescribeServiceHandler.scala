@@ -37,7 +37,7 @@ case class DescribeServiceHandler(requestContext: RequestContext, version: Int, 
       val redirects = resolvedUBam.files.map {
         case (fileType, _) => (fileType, VaultConfig.Vault.ubamRedirectUrl(resolvedUBam.id, fileType))
       }
-      requestContext.complete(UBam(resolvedUBam.id, redirects, resolvedUBam.metadata).toJson.prettyPrint)
+      requestContext.complete(resolvedUBam.copy(files = redirects).toJson.prettyPrint)
       context.stop(self)
 
     case ClientFailure(message: String) =>

@@ -7,6 +7,7 @@ import org.scalatest.{DoNotDiscover, Suite}
 import spray.http.StatusCodes._
 import spray.httpx.SprayJsonSupport._
 import spray.httpx.unmarshalling._
+import org.broadinstitute.dsde.vault.model.Properties._
 
 @DoNotDiscover
 class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeService with AnalysisUpdateService with AnalysisIngestService{
@@ -14,6 +15,7 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
   def actorRefFactory = system
 
   var testId = "invalid_UUID"
+  var testProperties: Map[String, String] = Map.empty 
 
   val versions = Table(
     "version",
@@ -36,6 +38,18 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
               status should equal(OK)
               val respAnalysis = responseAs[AnalysisIngestResponse]
               testId = respAnalysis.id
+
+              version match {
+                case Some(x) if x > 1 =>
+                  respAnalysis.properties shouldNot be(empty)
+                  testProperties = respAnalysis.properties.get
+                  testProperties.get(CreatedBy) shouldNot be(empty)
+                  testProperties.get(CreatedDate) shouldNot be(empty)
+                  testProperties.get(ModifiedBy) shouldBe empty
+                  testProperties.get(ModifiedDate) shouldBe empty
+                case _ =>
+                  respAnalysis.properties shouldBe empty
+              }
             }
           }
         }
@@ -54,6 +68,15 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
               respAnalysis.input shouldBe empty
               respAnalysis.files.get shouldBe empty
               respAnalysis.metadata should equal(Map("testAttr" -> "testValue", "randomData" -> "7"))
+
+              version match {
+                case Some(x) if x > 1 =>
+                  respAnalysis.properties shouldNot be(empty)
+                  respAnalysis.properties.get should equal(testProperties)
+                case _ =>
+                  respAnalysis.properties shouldBe empty
+              }
+
             }
           }
         }
@@ -69,6 +92,18 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
               files.get isDefinedAt "bam"
               files.get isDefinedAt "bai"
               files.get isDefinedAt "vcf"
+
+              version match {
+                case Some(x) if x > 1 =>
+                  analysisResponse.properties shouldNot be(empty)
+                  testProperties = analysisResponse.properties.get
+                  testProperties.get(CreatedBy) shouldNot be(empty)
+                  testProperties.get(CreatedDate) shouldNot be(empty)
+                  testProperties.get(ModifiedBy) shouldNot be(empty)
+                  testProperties.get(ModifiedDate) shouldNot be(empty)
+                case _ =>
+                  analysisResponse.properties shouldBe empty
+              }
             }
           }
         }
@@ -86,6 +121,14 @@ class AnalysisDescribeServiceSpec extends VaultFreeSpec with AnalysisDescribeSer
               respAnalysis.files.get.getOrElse("bam", "error") shouldNot include("ingest")
               respAnalysis.files.get.getOrElse("bai", "error") shouldNot include("ingest")
               respAnalysis.files.get.getOrElse("vcf", "error") shouldNot include("ingest")
+
+              version match {
+                case Some(x) if x > 1 =>
+                  respAnalysis.properties shouldNot be(empty)
+                  respAnalysis.properties.get should equal(testProperties)
+                case _ =>
+                  respAnalysis.properties shouldBe empty
+              }
             }
           }
         }

@@ -6,9 +6,9 @@ import spray.json.DefaultJsonProtocol
 import scala.annotation.meta.field
 
 object AnalysisJsonProtocol extends DefaultJsonProtocol {
-  implicit val impAnalysisIngestResponse = jsonFormat1(AnalysisIngestResponse)
+  implicit val impAnalysisIngestResponse = jsonFormat2(AnalysisIngestResponse)
   implicit val impAnalysisIngest = jsonFormat2(AnalysisIngest)
-  implicit val impAnalysis = jsonFormat4(Analysis)
+  implicit val impAnalysis = jsonFormat5(Analysis)
   implicit val impAnalysisUpdate = jsonFormat1(AnalysisUpdate)
   implicit val impAnalysisDMUpdate = jsonFormat2(AnalysisDMUpdate)
 }
@@ -21,6 +21,8 @@ case class Analysis(
   input: List[String],
   @(ApiModelProperty@field)(required = true, value = "The metadata key-value pairs associated with this Analysis.")
   metadata: Map[String, String],
+  @(ApiModelProperty@field)(required = true, value = "The properties of this Analysis")
+  properties: Option[Map[String, String]] = None,
   @(ApiModelProperty@field)(required = true, value = "The output files associated with this Analysis, each with a unique user-supplied string key.")
   files: Option[Map[String, String]] = None)
 
@@ -32,14 +34,16 @@ case class AnalysisIngest(
 
 case class AnalysisIngestResponse(
   @(ApiModelProperty@field)(required = true, value = "The Vault ID of this Analysis")
-  id: String)
+  id: String,
+  @(ApiModelProperty@field)(required = true, value = "The properties of this Analysis")
+  properties: Option[Map[String, String]] = None)
 
 case class AnalysisUpdate(
   @(ApiModelProperty@field)(required = true, value = "The files associated with this Analysis, each with a unique user-supplied string key.")
   files: Map[String, String])
 
 case class AnalysisDMUpdate(
-   @(ApiModelProperty@field)(required = true, value = "The files associated with this Analysis, each with a unique user-supplied string key.")
-   files: Map[String, String],
-   @(ApiModelProperty@field)(required = true, value = "The metadata key-value pairs associated with this Analysis.")
-   metadata: Map[String, String])
+  @(ApiModelProperty@field)(required = true, value = "The files associated with this Analysis, each with a unique user-supplied string key.")
+  files: Map[String, String],
+  @(ApiModelProperty@field)(required = true, value = "The metadata key-value pairs associated with this Analysis.")
+  metadata: Map[String, String])

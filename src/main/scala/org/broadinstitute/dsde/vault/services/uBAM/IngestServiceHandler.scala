@@ -47,6 +47,8 @@ case class IngestServiceHandler(requestContext: RequestContext, version: Int, bo
   // set by DMUBamCreated
   // consumed by UBamIngestResponse after this has been set and [fileCount] bossURLs have been added
   var dmId: Option[String] = None
+  
+  var dmProperties: Option[Map[String, String]] = None
 
   // Capture the update files in the case of "X-Force-Location" header.
   var providedFiles: Map[String, String] = Map.empty
@@ -86,6 +88,7 @@ case class IngestServiceHandler(requestContext: RequestContext, version: Int, bo
 
     case DMUBamCreated(createdUBam: UBam) =>
       this.dmId = Option(createdUBam.id)
+      this.dmProperties = createdUBam.properties
       completeIfDone
 
     case ClientFailure(message: String) =>
@@ -100,12 +103,12 @@ case class IngestServiceHandler(requestContext: RequestContext, version: Int, bo
         forceLocationHeader match {
           case true =>
             log.debug("'X-Force-Location' uBAM ingest complete")
-            requestContext.complete(UBamIngestResponse(id, providedFiles).toJson.prettyPrint)
+            requestContext.complete(UBamIngestResponse(id, providedFiles, dmProperties).toJson.prettyPrint)
             context.stop(self)
           case false =>
             if (fileCount == bossURLs.size) {
               log.debug("uBAM ingest complete")
-              requestContext.complete(UBamIngestResponse(id, bossURLs).toJson.prettyPrint)
+              requestContext.complete(UBamIngestResponse(id, bossURLs, dmProperties).toJson.prettyPrint)
               context.stop(self)
             }
         }
