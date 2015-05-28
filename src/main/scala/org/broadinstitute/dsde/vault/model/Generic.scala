@@ -9,7 +9,7 @@ object GenericJsonProtocol extends DefaultJsonProtocol {
   implicit val impGenericEntity = jsonFormat6(GenericEntity)
   implicit val impGenericRelationship = jsonFormat2(GenericRelationship)
   implicit val impGenericRelEnt = jsonFormat2(GenericRelEnt)
-  implicit val impBlobSpecification = jsonFormat2(BlobSpecification)
+  implicit val impDataObjectSpecification = jsonFormat2(DataObjectSpecification)
   implicit val impGenericEntityIngest = jsonFormat4(GenericEntityIngest)
   implicit val impGenericRelationshipIngest = jsonFormat4(GenericRelationshipIngest)
   implicit val impGenericIngest = jsonFormat2(GenericIngest)
@@ -59,10 +59,10 @@ case class GenericRelEnt(
   @(ApiModelProperty@field)("the entity so-related")
   entity: GenericEntity )
 
-@ApiModel("how to resolve a BLOB in BOSS")
-case class BlobSpecification(
+@ApiModel("how to resolve a Data Object in BOSS")
+case class DataObjectSpecification(
   @(ApiModelProperty@field)("how to perform ingest (TODO, beginning with new = 'create new object')")
-  ingest: String,
+  ingestMethod: String,
   @(ApiModelProperty@field)("source of file for ingest (TODO)")
   source: Option[String] )
 
@@ -72,8 +72,8 @@ case class GenericEntityIngest(
   entityType: String,
   @(ApiModelProperty@field)("optional BOSS ID")
   bossID: Option[String],
-  @(ApiModelProperty@field)("optional BLOB specification")
-  blob: Option[BlobSpecification],
+  @(ApiModelProperty@field)("optional Data Object specification")
+  dataObject: Option[DataObjectSpecification],
   @(ApiModelProperty@field)("an open set of metadata attributes of the entity")
   attrs: Map[String,String] )
 
