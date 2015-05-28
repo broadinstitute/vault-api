@@ -8,19 +8,22 @@ import spray.http.MediaTypes._
 import spray.json._
 import spray.routing.HttpService
 import spray.httpx.SprayJsonSupport._
+import javax.ws.rs.Path
 
 @Api(value="/entities", description="generic entity service", produces="application/json")
 trait GenericSearchService extends HttpService {
   private final val ApiPrefix = "entities"
   private final val ApiVersions = "v1"
   private final val DefaultVersion = 1
+  private final val ApiSuffix = "search"
 
   val gsRoute = searchRoute
 
+  @Path("/{version}/search")
   @ApiOperation(
     value = "find IDs of entities of a specified type having a specified metadata attribute value",
     nickname = "findEntitiesByTypeAndAttr",
-    httpMethod = "GET",
+    httpMethod = "POST",
     response = classOf[GenericEntity],
     responseContainer = "List")
   @ApiImplicitParams(Array(
@@ -32,8 +35,8 @@ trait GenericSearchService extends HttpService {
     new ApiResponse(code = 404, message = "Not Found"),
     new ApiResponse(code = 500, message = "Internal Error")))
   def searchRoute = {
-    pathVersion(ApiPrefix, DefaultVersion) { version =>
-      get {
+    pathVersion(ApiPrefix, DefaultVersion, ApiSuffix) { version =>
+      post {
         entity(as[GenericEntityQuery]) { query =>
           respondWithMediaType(`application/json`) {
             complete {
