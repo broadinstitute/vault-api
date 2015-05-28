@@ -1,5 +1,7 @@
 package org.broadinstitute.dsde.vault.services.generic
 
+import javax.ws.rs.Path
+
 import com.wordnik.swagger.annotations._
 import org.broadinstitute.dsde.vault.common.directives.VersioningDirectives._
 import org.broadinstitute.dsde.vault.model.GenericJsonProtocol._
@@ -36,17 +38,18 @@ trait GenericDescribeService extends HttpService {
           complete {
             //STUB
 
-            // interact with BOSS, receive getUrl
-            // remove entity.sysAttrs.bossId, add entity.getUrl
+            // interact with BOSS, receive signedGetUrl
+            // remove entity.sysAttrs.bossId, add entity.signedGetUrl
 
             val sysAttrs = GenericSysAttrs(bossID = None, 12345, "stub user", None, None)
-            GenericEntity("entity 3 guid", None, Option("entity 3 getUrl"), "stub", sysAttrs, None).toJson.prettyPrint
+            GenericEntity("entity 3 guid", None, Option("entity 3 signedGetUrl"), "stub", sysAttrs, None).toJson.prettyPrint
           }
         }
       }
     }
   }
 
+  @Path("/{version}/{id}?up")
   @ApiOperation(
     value="get entities upstream of a specified entity",
     nickname="findUpstream",
@@ -55,8 +58,7 @@ trait GenericDescribeService extends HttpService {
     responseContainer="List")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name="version", required=true, dataType="string", paramType="path", value="API version", allowableValues=ApiVersions),
-    new ApiImplicitParam(name="id", required=true, dataType="string", paramType="path", value="vault ID"),
-    new ApiImplicitParam(name="up", required=true, dataType="string", defaultValue="up", paramType="query", value="marker for upstream query")))
+    new ApiImplicitParam(name="id", required=true, dataType="string", paramType="path", value="vault ID")))
   @ApiResponses(Array(
     new ApiResponse(code=200, message="Successful"),
     new ApiResponse(code=404, message="Not Found"),
@@ -70,12 +72,12 @@ trait GenericDescribeService extends HttpService {
               //STUB
 
               // foreach entity upstream
-              // interact with BOSS, receive getUrl
-              // remove entity.sysAttrs.bossId, add entity.getUrl
+              // interact with BOSS, receive signedGetUrl
+              // remove entity.sysAttrs.bossId, add entity.signedGetUrl
 
               val rel = GenericRelationship("stub upward relation type", None)
               val sysAttrs = GenericSysAttrs(bossID = None, 12345, "stub user", None, None)
-              val ent = GenericEntity("entity 4 guid", None, Option("entity 4 getUrl"), "stub", sysAttrs, None)
+              val ent = GenericEntity("entity 4 guid", None, Option("entity 4 signedGetUrl"), "stub", sysAttrs, None)
               GenericRelEnt(rel, ent).toJson.prettyPrint
             }
           }
@@ -84,6 +86,7 @@ trait GenericDescribeService extends HttpService {
     }
   }
 
+  @Path("/{version}/{id}?down")
   @ApiOperation(
     value="get entities downstream of a specified entity",
     nickname="findDownstream",
@@ -92,8 +95,7 @@ trait GenericDescribeService extends HttpService {
     responseContainer="List")
   @ApiImplicitParams(Array(
     new ApiImplicitParam(name="version", required=true, dataType="string", paramType="path", value="API version", allowableValues=ApiVersions),
-    new ApiImplicitParam(name="id", required=true, dataType="string", paramType="path", value="vault ID"),
-    new ApiImplicitParam(name="down", required=true, dataType="string", defaultValue="down", paramType="query", value="marker for downstream query")))
+    new ApiImplicitParam(name="id", required=true, dataType="string", paramType="path", value="vault ID")))
   @ApiResponses(Array(
     new ApiResponse(code=200, message="Successful"),
     new ApiResponse(code=404, message="Not Found"),
@@ -107,12 +109,12 @@ trait GenericDescribeService extends HttpService {
               //STUB
 
               // foreach entity downstream
-              // interact with BOSS, receive getUrl
-              // remove entity.sysAttrs.bossId, add entity.getUrl
+              // interact with BOSS, receive signedGetUrl
+              // remove entity.sysAttrs.bossId, add entity.signedGetUrl
 
               val rel = GenericRelationship("stub downward relation type", None)
               val sysAttrs = GenericSysAttrs(bossID = None, 12345, "stub user", None, None)
-              val ent = GenericEntity("entity 5 guid", None, Option("entity 5 getUrl"), "stub", sysAttrs, None)
+              val ent = GenericEntity("entity 5 guid", None, Option("entity 5 signedGetUrl"), "stub", sysAttrs, None)
               GenericRelEnt(rel, ent).toJson.prettyPrint
             }
           }

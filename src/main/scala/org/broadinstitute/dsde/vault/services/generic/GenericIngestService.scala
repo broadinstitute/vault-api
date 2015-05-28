@@ -40,14 +40,14 @@ trait GenericIngestService extends HttpService {
               //STUB
 
               // for entity <- ingest.entities
-              // use entity.blob to interact with BOSS, receive bossId and putUrl
+              // use entity.blob to interact with BOSS, receive bossId and signedPutUrl
               // remove entity.blob, add entity.sysAttrs.bossId
               // register entity in DM, receive vault guid
-              // remove entity.sysAttrs.bossId, add entity.guid and entity.putUrl
+              // remove entity.sysAttrs.bossId, add entity.guid and entity.signedPutUrl
 
               val sysAttrs = GenericSysAttrs(bossID = None, 12345, "stub user", None, None)
-              List(GenericEntity("entity 1 guid", Option("entity 1 putUrl"), None, "stub", sysAttrs, None),
-                GenericEntity("entity 2 guid", Option("entity 2 putUrl"), None, "stub", sysAttrs, None) ).toJson.prettyPrint
+              List(GenericEntity("entity 1 guid", Option("entity 1 signedPutUrl"), None, "stub", sysAttrs, None),
+                GenericEntity("entity 2 guid", Option("entity 2 signedPutUrl"), None, "stub", sysAttrs, None) ).toJson.prettyPrint
             }
           }
         }

@@ -43,12 +43,12 @@ trait GenericSearchService extends HttpService {
               //STUB
 
               // for entity <- search results
-              // use entity.sysAttrs.bossId to interact with BOSS, receive getUrl
-              // remove entity.sysAttrs.bossId, add entity.getUrl
+              // use entity.sysAttrs.bossId to interact with BOSS, receive signedGetUrl
+              // remove entity.sysAttrs.bossId, add entity.signedGetUrl
 
               val sysAttrs = GenericSysAttrs(bossID = None, 12345, "stub user", None, None)
-              List(GenericEntity("entity 6 guid", None, Option("entity 6 getUrl"), "stub", sysAttrs, None),
-                GenericEntity("entity 7 guid", None, Option("entity 7 getUrl"), "stub", sysAttrs, None) ).toJson.prettyPrint
+              List(GenericEntity("entity 6 guid", None, Option("entity 6 signedGetUrl"), "stub", sysAttrs, None),
+                GenericEntity("entity 7 guid", None, Option("entity 7 signedGetUrl"), "stub", sysAttrs, None) ).toJson.prettyPrint
             }
           }
         }

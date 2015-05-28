@@ -35,9 +35,9 @@ case class GenericEntity(
   @(ApiModelProperty@field)("the globally unique vault ID for the entity")
   guid: String,
   @(ApiModelProperty@field)("a signed PUT URL for time-limited ingest of BOSS objects")
-  putUrl: Option[String],
+  signedPutUrl: Option[String],
   @(ApiModelProperty@field)("a signed GET URL for time-limited retrieval of BOSS objects")
-  getUrl: Option[String],
+  signedGetUrl: Option[String],
   @(ApiModelProperty@field)("the entity type (open vocabulary - not enumerated)")
   entityType: String,
   @(ApiModelProperty@field)("some system-generated 'when's and 'who's")
