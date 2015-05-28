@@ -118,7 +118,7 @@ object VaultConfig {
 
     def genericSearchPath(version: Int) = dm.getString("genericSearchPath").format(version)
     def genericSearchUrl(version: Int) = server + genericSearchPath(version)
-  }
+}
 
   object BOSS {
     private val boss = config.getConfig("boss")

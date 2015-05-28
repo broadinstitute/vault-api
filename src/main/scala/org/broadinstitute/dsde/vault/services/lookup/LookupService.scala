@@ -17,6 +17,7 @@ trait LookupService extends HttpService with VaultDirectives {
 
   val lRoute = lookupRoute
 
+  @Deprecated
   @ApiOperation(value = "Queries entities by type and attribute key/value pair",
     nickname = "lookup",
     httpMethod = "GET",
