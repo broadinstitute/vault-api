@@ -61,6 +61,20 @@ object VaultConfig {
     def ubamCollectionIngestPath(version: Int) = vault.getString("ubamCollectionsIngestPath").format(version)
     def ubamCollectionIngestUrl(version: Int) = server + ubamIngestPath(version)
 
+    def genericIngestPath(version: Int) = vault.getString("genericIngestPath").format(version)
+    def genericIngestUrl(version: Int) = server + genericIngestPath(version)
+
+    def genericDescribePath(version: Int, id: String) = vault.getString("genericDescribePath").format(version, id)
+    def genericDescribeUrl(version: Int, id: String) = server + genericDescribePath(version, id)
+
+    def genericDescribeUpPath(version: Int, id: String) = vault.getString("genericDescribeUpPath").format(version, id)
+    def genericDescribeUpUrl(version: Int, id: String) = server + genericDescribeUpPath(version, id)
+
+    def genericDescribeDownPath(version: Int, id: String) = vault.getString("genericDescribeDownPath").format(version, id)
+    def genericDescribeDownUrl(version: Int, id: String) = server + genericDescribeDownPath(version, id)
+
+    def genericSearchPath(version: Int) = vault.getString("genericSearchPath").format(version)
+    def genericSearchUrl(version: Int) = server + genericSearchPath(version)
   }
 
   object DataManagement {
@@ -89,6 +103,21 @@ object VaultConfig {
 
     def queryLookupPath(entityType: String, attributeName: String, attributeValue: String) = dm.getString("queryLookupPath").format(entityType, attributeName, attributeValue)
     def queryLookupUrl(entityType: String, attributeName: String, attributeValue: String) = server + queryLookupPath(entityType, attributeName, attributeValue)
+
+    def genericIngestPath(version: Int) = dm.getString("genericIngestPath").format(version)
+    def genericIngestUrl(version: Int) = server + genericIngestPath(version)
+
+    def genericDescribePath(version: Int, id: String) = dm.getString("genericDescribePath").format(version, id)
+    def genericDescribeUrl(version: Int, id: String) = server + genericDescribePath(version, id)
+
+    def genericDescribeUpPath(version: Int, id: String) = dm.getString("genericDescribeUpPath").format(version, id)
+    def genericDescribeUpUrl(version: Int, id: String) = server + genericDescribeUpPath(version, id)
+
+    def genericDescribeDownPath(version: Int, id: String) = dm.getString("genericDescribeDownPath").format(version, id)
+    def genericDescribeDownUrl(version: Int, id: String) = server + genericDescribeDownPath(version, id)
+
+    def genericSearchPath(version: Int) = dm.getString("genericSearchPath").format(version)
+    def genericSearchUrl(version: Int) = server + genericSearchPath(version)
   }
 
   object BOSS {
