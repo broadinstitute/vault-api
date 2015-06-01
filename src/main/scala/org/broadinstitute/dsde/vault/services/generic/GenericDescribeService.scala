@@ -3,14 +3,16 @@ package org.broadinstitute.dsde.vault.services.generic
 import javax.ws.rs.Path
 
 import com.wordnik.swagger.annotations._
+import org.broadinstitute.dsde.vault.services.VaultDirectives
+import org.broadinstitute.dsde.vault.{GenericDmClientService, BossClientService}
 import org.broadinstitute.dsde.vault.model.GenericJsonProtocol._
-import org.broadinstitute.dsde.vault.model.{GenericRelationship, GenericRelEnt, GenericEntity, GenericSysAttrs}
+import org.broadinstitute.dsde.vault.model._
 import spray.http.MediaTypes._
 import spray.json._
 import spray.routing.HttpService
 
 @Api(value="/entities", description="generic entity service", produces="application/json")
-trait GenericDescribeService extends HttpService {
+trait GenericDescribeService extends HttpService with VaultDirectives {
   private final val ApiPrefix = "entities"
 
   private final val SwaggerApiVersions = "v1"
@@ -33,16 +35,11 @@ trait GenericDescribeService extends HttpService {
   def describeRoute = {
     path(ApiPrefix / "v" ~ IntNumber / Segment) { (version, guid) =>
       get {
-        respondWithMediaType(`application/json`) {
-          complete {
-            //STUB
-
-            // interact with BOSS, receive signedGetUrl
-            // remove entity.sysAttrs.bossId, add entity.signedGetUrl
-
-            val sysAttrs = GenericSysAttrs(bossID = None, 12345, "stub user", None, None)
-            GenericEntity("entity 3 guid", None, Option("entity 3 signedGetUrl"), "stub", sysAttrs, None).toJson.prettyPrint
-          }
+        respondWithJSON { requestContext =>
+          val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+          val dmService = actorRefFactory.actorOf(GenericDmClientService.props(requestContext))
+          val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, bossService, dmService))
+          describeActor ! DescribeServiceHandler.DescribeMessage(guid)
         }
       }
     }
@@ -66,19 +63,11 @@ trait GenericDescribeService extends HttpService {
     path(ApiPrefix / "v" ~ IntNumber / Segment) { (version, guid) =>
       get {
         parameters('up) { up =>
-          respondWithMediaType(`application/json`) {
-            complete {
-              //STUB
-
-              // foreach entity upstream
-              // interact with BOSS, receive signedGetUrl
-              // remove entity.sysAttrs.bossId, add entity.signedGetUrl
-
-              val rel = GenericRelationship("stub upward relation type", None)
-              val sysAttrs = GenericSysAttrs(bossID = None, 12345, "stub user", None, None)
-              val ent = GenericEntity("entity 4 guid", None, Option("entity 4 signedGetUrl"), "stub", sysAttrs, None)
-              GenericRelEnt(rel, ent).toJson.prettyPrint
-            }
+          respondWithJSON { requestContext =>
+            val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+            val dmService = actorRefFactory.actorOf(GenericDmClientService.props(requestContext))
+            val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, bossService, dmService))
+            describeActor ! DescribeServiceHandler.DescribeUpMessage(guid)
           }
         }
       }
@@ -103,19 +92,11 @@ trait GenericDescribeService extends HttpService {
     path(ApiPrefix / "v" ~ IntNumber / Segment) { (version, guid) =>
       get {
         parameters('down) { down =>
-          respondWithMediaType(`application/json`) {
-            complete {
-              //STUB
-
-              // foreach entity downstream
-              // interact with BOSS, receive signedGetUrl
-              // remove entity.sysAttrs.bossId, add entity.signedGetUrl
-
-              val rel = GenericRelationship("stub downward relation type", None)
-              val sysAttrs = GenericSysAttrs(bossID = None, 12345, "stub user", None, None)
-              val ent = GenericEntity("entity 5 guid", None, Option("entity 5 signedGetUrl"), "stub", sysAttrs, None)
-              GenericRelEnt(rel, ent).toJson.prettyPrint
-            }
+          respondWithJSON { requestContext =>
+            val bossService = actorRefFactory.actorOf(BossClientService.props(requestContext))
+            val dmService = actorRefFactory.actorOf(GenericDmClientService.props(requestContext))
+            val describeActor = actorRefFactory.actorOf(DescribeServiceHandler.props(requestContext, version, bossService, dmService))
+            describeActor ! DescribeServiceHandler.DescribeDownMessage(guid)
           }
         }
       }

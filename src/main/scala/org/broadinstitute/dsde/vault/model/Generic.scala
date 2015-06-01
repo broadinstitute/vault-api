@@ -43,7 +43,18 @@ case class GenericEntity(
   @(ApiModelProperty@field)("some system-generated 'when's and 'who's")
   sysAttrs: GenericSysAttrs,
   @(ApiModelProperty@field)("an open set of metadata attributes of the entity")
-  attrs: Option[Map[String,String]] )
+  attrs: Option[Map[String,String]] ) {
+
+  // add PUT URL, remove BOSS ID
+  def withPutUrl(url: String): GenericEntity = {
+    this.copy(signedPutUrl = Option(url), sysAttrs = this.sysAttrs.copy(bossID = None))
+  }
+
+  // add GET URL, remove BOSS ID
+  def withGetUrl(url: String): GenericEntity = {
+    this.copy(signedGetUrl = Option(url), sysAttrs = this.sysAttrs.copy(bossID = None))
+  }
+}
 
 @ApiModel("a directed relationship between two entities")
 case class GenericRelationship(

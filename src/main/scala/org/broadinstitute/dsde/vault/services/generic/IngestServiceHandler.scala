@@ -223,7 +223,7 @@ case class IngestServiceHandler(requestContext: RequestContext, dmGenericIngestV
 
       // set signedPutUrl and clear sysAttrs.bossID
       val oldEntity = entities(entityIndex)
-      val newEntity = oldEntity.copy(signedPutUrl = Option(bossObject.objectUrl), sysAttrs = oldEntity.sysAttrs.copy(bossID = None))
+      val newEntity = oldEntity.withPutUrl(bossObject.objectUrl)
       val newEntities = entities + (entityIndex -> newEntity)
 
       bossResolutionCheck(newEntities, newNeedsResolution)

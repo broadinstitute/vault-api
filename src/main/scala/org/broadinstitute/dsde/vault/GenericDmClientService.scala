@@ -6,7 +6,7 @@ import akka.actor.{Actor, ActorRef, Props}
 import akka.event.Logging
 import akka.util.Timeout
 import org.broadinstitute.dsde.vault.GenericDmClientService._
-import org.broadinstitute.dsde.vault.model.{GenericIngest, GenericEntity}
+import org.broadinstitute.dsde.vault.model.{GenericRelEnt, GenericIngest, GenericEntity}
 import org.broadinstitute.dsde.vault.services.ClientFailure
 import spray.client.pipelining._
 import spray.http.HttpHeaders.Cookie
@@ -21,7 +21,10 @@ object GenericDmClientService {
   case class DMGenericIngestResponse(guids: List[String])
 
   case class DMGenericDescribe(guid: String, version: Int, describeKey: Int)
+  case class DMGenericDescribeUp(guid: String, version: Int, describeKey: Int)
+  case class DMGenericDescribeDown(guid: String, version: Int, describeKey: Int)
   case class DMGenericDescribeResponse(entity: GenericEntity, describeKey: Int)
+  case class DMGenericDescribeMultipleResponse(entities: List[GenericRelEnt], describeKey: Int)   // up or down
 
   def props(requestContext: RequestContext): Props = Props(new GenericDmClientService(requestContext))
 }
@@ -40,6 +43,12 @@ case class GenericDmClientService(requestContext: RequestContext) extends Actor{
 
     case DMGenericDescribe(guid, version, key) =>
       genericDescribe(sender(), guid, version, key)
+
+    case DMGenericDescribeUp(guid, version, key) =>
+      genericDescribeUp(sender(), guid, version, key)
+
+    case DMGenericDescribeDown(guid, version, key) =>
+      genericDescribeDown(sender(), guid, version, key)
   }
 
  def genericIngest(senderRef: ActorRef, ingest: GenericIngest, version: Int): Unit = {
@@ -72,6 +81,40 @@ case class GenericDmClientService(requestContext: RequestContext) extends Actor{
 
       case Failure(error) =>
         log.error(error, "DM Generic Describe for %s Failed".format(guid))
+        senderRef ! ClientFailure(error.getMessage)
+    }
+  }
+
+  def genericDescribeUp(senderRef: ActorRef, guid: String, version: Int, describeKey: Int): Unit = {
+    log.debug("DM Generic Describe Up for " + guid)
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[List[GenericRelEnt]]
+    val responseFuture = pipeline {
+      Get(VaultConfig.DataManagement.genericDescribeUpUrl(version, guid))
+    }
+    responseFuture onComplete {
+      case Success(entities) =>
+        log.debug("DM Generic Describe Up for %s Successful".format(guid))
+        senderRef ! DMGenericDescribeMultipleResponse(entities, describeKey)
+
+      case Failure(error) =>
+        log.error(error, "DM Generic Describe Up for %s Failed".format(guid))
+        senderRef ! ClientFailure(error.getMessage)
+    }
+  }
+
+  def genericDescribeDown(senderRef: ActorRef, guid: String, version: Int, describeKey: Int): Unit = {
+    log.debug("DM Generic Describe Down for " + guid)
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[List[GenericRelEnt]]
+    val responseFuture = pipeline {
+      Get(VaultConfig.DataManagement.genericDescribeDownUrl(version, guid))
+    }
+    responseFuture onComplete {
+      case Success(entities) =>
+        log.debug("DM Generic Describe Down for %s Successful".format(guid))
+        senderRef ! DMGenericDescribeMultipleResponse(entities, describeKey)
+
+      case Failure(error) =>
+        log.error(error, "DM Generic Describe Down for %s Failed".format(guid))
         senderRef ! ClientFailure(error.getMessage)
     }
   }
