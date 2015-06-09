@@ -26,7 +26,7 @@ case class LookupServiceHandler(requestContext: RequestContext, version: Int, dm
   def receive = {
     case LookupMessage(entityType, attributeName, attributeValue) =>
       log.debug("Received lookup message")
-      dmService ! DmClientService.DMLookupEntity(entityType, attributeName, attributeValue)
+      dmService ! DmClientService.DMLookupEntity(entityType, attributeName, attributeValue, version)
 
     case DMLookupResolved(result: EntitySearchResult) =>
       requestContext.complete(result.toJson.prettyPrint)

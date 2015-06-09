@@ -35,16 +35,30 @@ object Servers{
 
   def startUpDM(): Unit = {
 
+    /* ----------------- Generic API ----------------------*/
+
+    val lookupResponse = new EntitySearchResult(
+      "testing_id",
+      "ubam"
+    )
+
+    Servers.mockDMServer.when(
+      request()
+        .withMethod("GET")
+        .withPath("/entities/search/ubam")
+    ).respond(
+        response()
+          .withHeader(header)
+          .withBody(lookupResponse.toJson.prettyPrint)
+          .withStatusCode(200)
+      )
+
+
     /* ----------------- UBams ----------------------*/
     val ubam = new UBam(
       "testing_id",
       Map(("bam", "http://localhost:8080/path/to/bam"), ("bai", "pathToBai")),
       Map("testAttr" -> "testValue")
-    )
-
-    val lookupResponse = new EntitySearchResult(
-      "testing_id",
-      "ubam"
     )
 
     Servers.mockDMServer
@@ -109,17 +123,6 @@ object Servers{
         response()
           .withBody("HTTP method not allowed, supported methods: GET")
           .withStatusCode(405)
-      )
-
-    Servers.mockDMServer.when(
-      request()
-        .withMethod("GET")
-        .withPath("/query/ubam/uniqueTest/.*")
-    ).respond(
-        response()
-          .withHeader(header)
-          .withBody(lookupResponse.toJson.prettyPrint)
-          .withStatusCode(200)
       )
 
     /* ----------- UBam Collections ----------------- */

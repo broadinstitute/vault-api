@@ -7,6 +7,7 @@ import akka.event.Logging
 import akka.util.Timeout
 import org.broadinstitute.dsde.vault.DmClientService._
 import org.broadinstitute.dsde.vault.model.AnalysisJsonProtocol._
+import org.broadinstitute.dsde.vault.model.GenericJsonProtocol._
 import org.broadinstitute.dsde.vault.model.LookupJsonProtocol._
 import org.broadinstitute.dsde.vault.model.uBAMCollectionJsonProtocol._
 import org.broadinstitute.dsde.vault.model.uBAMJsonProtocol._
@@ -35,7 +36,7 @@ object DmClientService {
   case class DMUpdateAnalysis(analysisId: String, update: AnalysisUpdate)
   case class DMAnalysisUpdated(analysis: Analysis)
 
-  case class DMLookupEntity(entityType: String, attributeName: String, attributeValue: String)
+  case class DMLookupEntity(entityType: String, attributeName: String, attributeValue: String, version: Int)
   case class DMLookupResolved(result: EntitySearchResult)
   case class DMCreateUBamCollection(ubamCollectionIngest: UBamCollectionIngest, version: Int)
   case class DMUBamCollectionCreated(uBAMCollection: UBamCollection)
@@ -80,8 +81,8 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
     case DMUpdateAnalysis(analysisId, update) =>
       updateAnalysis(sender(), analysisId, update)
 
-    case DMLookupEntity(entityType, attributeName, attributeValue) =>
-      lookup(sender(), entityType, attributeName, attributeValue)
+    case DMLookupEntity(entityType, attributeName, attributeValue, version) =>
+      lookup(sender(), entityType, attributeName, attributeValue, version)
   }
 
   def createUBam(senderRef: ActorRef, ubam: UBamIngest): Unit = {
@@ -224,20 +225,58 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
     }
   }
 
-  def lookup(senderRef: ActorRef, entityType: String, attributeName: String, attributeValue: String): Unit = {
+  def lookup(senderRef: ActorRef, entityType: String, attributeName: String, attributeValue: String, version: Int): Unit = {
     log.debug("Querying the DM API for a lookup on %s/%s/%s. ".format(entityType, attributeName, attributeValue))
-    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[EntitySearchResult]
+
+    /*
+      The old Lookup Service in DM performed a mapping between the physical entity type we store in the DB (e.g.
+      "unmappedBAM") and the endpoint name (e.g. "ubam"). The new generic service does not perform this mapping,
+      and I don't think we want the mapping. For backwards compatibility, we therefore need to perform the
+      translation here, inside this deprecated API, and leave the new DM generic service alone.
+     */
+    val legacyMappedEntityType = EntityType.TYPES.find(_.endpoint == entityType) match {
+      case Some(endpointType) => endpointType.databaseKey
+      case None => entityType
+    }
+
+    val pipeline = addHeader(Cookie(requestContext.request.cookies)) ~> sendReceive ~> unmarshal[List[GenericEntity]]
     val responseFuture = pipeline {
-      Get(VaultConfig.DataManagement.queryLookupUrl(entityType, attributeName, attributeValue))
+
+      val spec = GenericAttributeSpec(attributeName, attributeValue)
+      val entityQuery = GenericEntityQuery(legacyMappedEntityType, Seq(spec), false)
+
+      Post(VaultConfig.DataManagement.genericSearchUrl(version), entityQuery)
     }
     responseFuture onComplete {
       case Success(queryResult) =>
-        log.debug("Found entity matching %s/%s/%s: ID %s".format(entityType, attributeName, attributeValue, queryResult.guid))
-        senderRef ! DMLookupResolved(queryResult)
-
+        // reshape/parse response for compatibility
+        val firstResultEntity = queryResult.headOption match {
+          case Some(ent) => {
+            // I don't like that this uses the type passed in by the user instead of the type from the result.
+            // But, that's the way DM worked, and this API is deprecated, so it's not worth changing
+            val result = EntitySearchResult(ent.guid, entityType)
+            log.debug("Found entity matching %s/%s/%s: ID %s".format(entityType, attributeName, attributeValue, ent.guid))
+            senderRef ! DMLookupResolved(result)
+          }
+          case None => {
+            // query succeeded, but no results found
+            val msg = "No entities found for %s/%s/%s".format(entityType, attributeName, attributeValue)
+            log.debug(msg)
+            senderRef ! ClientFailure(msg)
+          }
+        }
       case Failure(error) =>
-        log.error(error, "Couldn't find entity matching %s/%s/%s".format(entityType, attributeName, attributeValue))
+        log.error(error, "Failure finding entity matching %s/%s/%s".format(entityType, attributeName, attributeValue))
         senderRef ! ClientFailure(error.getMessage)
     }
   }
+}
+
+case class EntityType(databaseKey: String, endpoint: String)
+
+object EntityType {
+  val UNMAPPED_BAM = EntityType("unmappedBAM", "ubam")
+  val ANALYSIS = EntityType("analysis", "analyses")
+  val UBAM_COLLECTION = EntityType("uBAMCollection", "ubamcollection")
+  val TYPES = Seq(UNMAPPED_BAM, ANALYSIS, UBAM_COLLECTION)
 }
