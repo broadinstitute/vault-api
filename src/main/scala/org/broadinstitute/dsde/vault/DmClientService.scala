@@ -245,7 +245,7 @@ case class DmClientService(requestContext: RequestContext) extends Actor{
       val spec = GenericAttributeSpec(attributeName, attributeValue)
       val entityQuery = GenericEntityQuery(legacyMappedEntityType, Seq(spec), false)
 
-      Post(VaultConfig.DataManagement.queryLookupUrl(version), entityQuery)
+      Post(VaultConfig.DataManagement.genericSearchUrl(version), entityQuery)
     }
     responseFuture onComplete {
       case Success(queryResult) =>
